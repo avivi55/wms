@@ -17,6 +17,8 @@
     "cw_kk_ins2_doi_spring",
     "cw_kk_ins2_doi_bar",
     "cw_kk_ins2_doi_browning",
+    "cw_kk_ins2_doi_m1a1",
+    "cw_kk_ins2_doi_m1",
 
 
     "cw_kk_ins2_doi_east_svt40",
@@ -59,15 +61,28 @@
     "cw_kk_ins2_doi_east_ppsh41",
     "cw_kk_ins2_doi_east_ppsh41_drum",
     "cw_kk_ins2_doi_east_tt33",
-    "cw_kk_ins2_doi_ppk"
+    "cw_kk_ins2_doi_ppk",
+
+    "cw_kk_ins2_doi_m1912",
+    "cw_kk_ins2_doi_ithaca"
 ],
 
 "blanche" : [
     "cw_kk_ins2_doi_mel_shovel_de",
+    "cw_kk_ins2_doi_mel_k98k",
 
     "tfa_ww2_ussr_flag",
     "cw_kk_ins2_doi_east_mel_shovel_sov",
     "cw_kk_ins2_doi_east_mel_svt40bayonet",
 
-    "cw_kk_ins2_doi_mel_kabar2"
+    "cw_kk_ins2_doi_mel_kabar",
+    "cw_kk_ins2_doi_mel_kabar2",
+    "cw_kk_ins2_doi_mel_kabar3",
+    "cw_kk_ins2_doi_mel_kabar4",
+    "cw_kk_ins2_doi_mel_kabar5",
+    "cw_kk_ins2_doi_mel_shovel_gb",
+    "cw_kk_ins2_doi_mel_shovel_us",
+    "cw_kk_ins2_doi_mel_garand",
+    "cw_kk_ins2_doi_mel_enfield",
+    "cw_kk_ins2_doi_mel_brass"
 ]}
