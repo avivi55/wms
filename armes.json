@@ -1,5 +1,5 @@
 {
-"fusil" : [
+"fusils" : [
     "cw_kk_ins2_doi_stg44",
     "cw_kk_ins2_doi_mg34",
     "cw_kk_ins2_doi_mg42",
@@ -31,7 +31,7 @@
     "cw_kk_ins2_doi_east_mp43",
     "cw_kk_ins2_doi_east_m44"
 ],
-"poing" : [
+"poings" : [
     "cw_kk_ins2_doi_luger",
     "cw_kk_ins2_doi_mp40",
     "cw_kk_ins2_doi_p38",
@@ -67,7 +67,7 @@
     "cw_kk_ins2_doi_ithaca"
 ],
 
-"blanche" : [
+"blanches" : [
     "cw_kk_ins2_doi_mel_shovel_de",
     "cw_kk_ins2_doi_mel_k98k",
 

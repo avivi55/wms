@@ -1,7 +1,7 @@
 include("prettyPrint.lua")
 local armes = util.JSONToTable(file.Read("armes.json", "GAME"))
 --Print(armes) 
-local sons = util.JSONToTable(file.Read("sons.json", "GAME"))
+--local sons = util.JSONToTable(file.Read("sons.json", "GAME"))
 -- print("\27[24m")
 -- MsgC([[
 -- ██╗    ██╗██╗███╗   ██╗███╗   ██╗██╗███████╗███████╗
@@ -34,6 +34,7 @@ local sons = util.JSONToTable(file.Read("sons.json", "GAME"))
 -- ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚═════╝   ╚═╝
 -- ]], Color(0, 255, 0))
 
+print("updated")
 WMS = WMS or {}
 
 WMS.tblContains = function(tbl, val)
@@ -44,7 +45,9 @@ WMS.tblContains = function(tbl, val)
 end
 
 WMS.Init = function(ply, trans)
-    PrintC("Player Damage table initialized !", 8, "112")
+    PrintC("[WMS] Player Damage table initialized !", 8, "112")
+    ply.pulse = math.random(70, 90)
+    player.hemorrhage = false
     ply.wms_dmg_tbl = {}
 end
 
@@ -55,7 +58,7 @@ WMS.ClearDmgDataTbl = function()
 end
 
 WMS.DeathHook = function(victim, inflictor, attacker)
-    PrintC("Player Damage table Deleted !", 8, "1")
+    PrintC("[WMS] Player Damage table Deleted !", 8, "1")
     WMS.Init(victim, false)
 end
 
@@ -63,7 +66,7 @@ end
 WMS.DamageHook = function(target, dmginfo)
     if (not target:IsPlayer()) then return end
     WMS.RegisterDamage(target, dmginfo)
-    dmginfo = WMS.DamageHandler(target, dmginfo)
+    dmginfo = WMS.HitgroupHandler(target, dmginfo)
     --return true
 end
 
@@ -73,7 +76,7 @@ WMS.RegisterDamage = function(ply, dmgi)
     dmg.victim = ply
     dmg.attacker = dmgi:GetAttacker()
     dmg.inflictor = dmgi:GetInflictor()
-    dmg.ht_grp = ply:LastHitGroup()
+    dmg.hit_grp = ply:LastHitGroup()
     dmg.damage = dmgi:GetDamage()
     dmg.type = dmgi:GetDamageType()
     dmg.wep = dmg.attacker:IsPlayer() and dmg.attacker:GetActiveWeapon() or
@@ -81,33 +84,80 @@ WMS.RegisterDamage = function(ply, dmgi)
     table.insert(dmg.victim.wms_dmg_tbl, dmg)
 end
 
-WMS.DamageHandler = function(ply, dmginfo)
+WMS.HeadDamage = function(dmg)
+    -- son casque
+    local total_death = math.random(100) <= 3 -- 3%
+    print(total_death)
+    -- Mort pertielle ou total
+    -- fonction de mort 
+end
+
+WMS.TorsoDamage = function(dmg)
+    local wep = dmg.wep:GetClass()
+    local total_death = false
+    local partial_death = false
+    local hemorrhage = false
+
+    print(wep, WMS.tblContains(armes.blanches, wep))
+
+    if (WMS.tblContains(armes.fusils, wep)) then
+        -- son torse
+        total_death = math.random(100) <= 14 -- 14%
+        partial_death = math.random(100) <= 25 -- 25%
+    elseif (WMS.tblContains(armes.poings, wep)) then
+        total_death = math.random(100) <= 10 -- 10%
+        partial_death = math.random(100) <= 15 -- 15%
+        hemorrhage = math.random(100) <= 35 -- 35%
+    end
+
+    print(total_death, partial_death, hemorrhage)
+end
+
+WMS.MeleeDamage = function(dmg)
+    if (not WMS.tblContains(armes.blanches, wep)) then return end
+    local total_death = math.random(100) <= 5 -- 10%
+    local partial_death = math.random(100) <= 7 -- 15%
+    local hemorrhage = math.random(100) <= 90 -- 90%
+
+    print(total_death, partial_death, hemorrhage)
+end
+
+WMS.HitgroupHandler = function(ply, dmginfo)
     dmg = ply.wms_dmg_tbl[#ply.wms_dmg_tbl]
     PrintC(dmg, 8, "27")
+
     if (not dmg.inflictor:IsPlayer()) then -- Cas specifiques (feu, explostion, melée ...)
         local name = dmg.inflictor:GetClass()
 
         if (dmginfo:IsExplosionDamage()) then
             PrintC("BOOM !!", 8, 202)
             --TODO
-            return
+            -- return
         end
 
         if (string.find(name, "mel")) then
             PrintC("SPLOUTCH !!", 8, 52)
             --TODO
-            return
+            -- return
         end
 
         if (not WMS.tblContains(armes, name)) then
             table.remove(ply.wms_dmg_tbl)
-            PrintC("/!\\ ARME/SOURCE DE DÉGATS NON RECONNU /!\\\n\t->Nous annulons donc les dégats", 8, 196)
+            PrintC("[WMS] /!\\ ARME/SOURCE DE DÉGATS NON RECONNU /!\\\n\t->Nous annulons donc les dégats", 8, 196)
             return dmginfo:SetDamage(0)
         end
     end
 
+    if (dmg.hit_grp == HITGROUP_HEAD) then
+        WMS.HeadDamage(dmg)
+    elseif (dmg.hit_grp == HITGROUP_CHEST) then
+        WMS.TorsoDamage(dmg)
+    elseif (dmg.hit_grp == HITGROUP_GENERIC) then
+        PrintC("SPLOUTCH !!", 8, 52)
+        WMS.MeleeDamage(dmg)
+    end
 
-    return dmginfo
+    return dmginfo:SetDamage(0)
 end
 
 hook.Add("EntityTakeDamage", "wms_damage_hook", WMS.DamageHook)
