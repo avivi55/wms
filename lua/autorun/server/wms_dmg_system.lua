@@ -1,5 +1,8 @@
 include("prettyPrint.lua")
-
+local armes = util.JSONToTable(file.Read("armes.json", "GAME"))
+--Print(armes) 
+local sons = util.JSONToTable(file.Read("sons.json", "GAME"))
+-- print("\27[24m")
 -- MsgC([[
 -- ██╗    ██╗██╗███╗   ██╗███╗   ██╗██╗███████╗███████╗
 -- ██║    ██║██║████╗  ██║████╗  ██║██║██╔════╝██╔════╝
@@ -33,9 +36,15 @@ include("prettyPrint.lua")
 
 WMS = WMS or {}
 
+WMS.tblContains = function(tbl, val)
+    for k, v in pairs(tbl) do
+        if v == val or (type(v) == "table" and WMS.tblContains(v, val)) then return true end
+    end
+    return false
+end
 
 WMS.Init = function(ply, trans)
-    print("INIT")
+    PrintC("Player Damage table initialized !", 8, "112")
     ply.wms_dmg_tbl = {}
 end
 
@@ -46,6 +55,7 @@ WMS.ClearDmgDataTbl = function()
 end
 
 WMS.DeathHook = function(victim, inflictor, attacker)
+    PrintC("Player Damage table Deleted !", 8, "1")
     WMS.Init(victim, false)
 end
 
@@ -73,10 +83,31 @@ end
 
 WMS.DamageHandler = function(ply, dmginfo)
     dmg = ply.wms_dmg_tbl[#ply.wms_dmg_tbl]
-    ply:EmitSound("vo/npc/male01/pain01.wav")
     PrintC(dmg, 8, "27")
+    if (not dmg.inflictor:IsPlayer()) then -- Cas specifiques (feu, explostion, melée ...)
+        local name = dmg.inflictor:GetClass()
 
-    return dmginfo--:SetDamage(0)
+        if (dmginfo:IsExplosionDamage()) then
+            PrintC("BOOM !!", 8, 202)
+            --TODO
+            return
+        end
+
+        if (string.find(name, "mel")) then
+            PrintC("SPLOUTCH !!", 8, 52)
+            --TODO
+            return
+        end
+
+        if (not WMS.tblContains(armes, name)) then
+            table.remove(ply.wms_dmg_tbl)
+            PrintC("/!\\ ARME/SOURCE DE DÉGATS NON RECONNU /!\\\n\t->Nous annulons donc les dégats", 8, 196)
+            return dmginfo:SetDamage(0)
+        end
+    end
+
+
+    return dmginfo
 end
 
 hook.Add("EntityTakeDamage", "wms_damage_hook", WMS.DamageHook)

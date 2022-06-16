@@ -84,5 +84,8 @@
     "cw_kk_ins2_doi_mel_shovel_us",
     "cw_kk_ins2_doi_mel_garand",
     "cw_kk_ins2_doi_mel_enfield",
-    "cw_kk_ins2_doi_mel_brass"
-]}
+    "cw_kk_ins2_doi_mel_brass",
+    "cw_kk_ins2_damage_melee"
+],
+
+"feu" : "codww2_molotov"}
