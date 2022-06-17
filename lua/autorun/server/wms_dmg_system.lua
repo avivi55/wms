@@ -69,6 +69,7 @@ WMS.DamageHook = function(target, dmginfo)
     dmginfo = WMS.HitgroupHandler(target, dmginfo)
     --return true
 end
+
 local HIT = {[0] = "melee", "head", "chest", "stomack", "left_arm", "right_arm", "left_leg", "right_leg"}
 
 WMS.RegisterDamage = function(ply, dmgi)
@@ -86,21 +87,12 @@ WMS.RegisterDamage = function(ply, dmgi)
     table.insert(dmg.victim.wms_dmg_tbl, dmg)
 end
 
-WMS.HeadDamage = function(dmg)
-    -- son casque
-    local total_death = math.random(100) <= 3 -- 3%
-    print(total_death)
-    -- Mort pertielle ou total
-    -- fonction de mort 
-end
-
-WMS.GenericDamage = function(dmg, rifle, pistol)
+WMS.GenericDamage = function(dmg, rifle, pistol, cut)
+    cut = cut or {}
     local wep = dmg.wep:GetClass()
     local total_death = false
     local partial_death = false
     local hemorrhage = false
-
-    print(wep, WMS.tblContains(armes.blanches, wep))
 
     if (WMS.tblContains(armes.fusils, wep)) then
         -- son torse
@@ -111,45 +103,70 @@ WMS.GenericDamage = function(dmg, rifle, pistol)
         total_death = math.random(100) <= pistol.total
         partial_death = math.random(100) <= pistol.partial
         hemorrhage = math.random(100) <= pistol.hemo
+    elseif (cut and (WMS.tblContains(armes.blanches, wep) or WMS.tblContains(armes.blanches, dmg.inflictor:GetClass()))) then
+        total_death = math.random(100) <= cut.total
+        partial_death = math.random(100) <= cut.partial
+        hemorrhage = math.random(100) <= cut.hemo
+    end
+
+    PrintC(dmg.h_hit_grp .. ":", 8, 15)
+    if (total_death) then
+        PrintC("FINITO PIPO", 8, 1)
+        dmg.victim:Kill()
+    elseif (partial_death) then
+        PrintC("FINITO", 8, 202)
+        dmg.victim:Kill()
+    else
+        PrintC("Abatar t viven", 8, 14)
+        if (hemorrhage) then
+            PrintC("\tOOF Sègne", 8, 9)
+        end
+        prone.Handle(dmg.victim)
     end
 
     return total_death, partial_death, hemorrhage
 end
 
-WMS.TorsoDamage = function(dmg)
-    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 14, partial = 25, hemo = 37}, {total = 10, partial = 15, hemo = 35})
+WMS.HeadDamage = function(dmg)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg,
+    {total = 97, partial = 99, hemo = 0},
+    {total = 96, partial = 98, hemo = 0})
+    -- son casque
+    -- Mort pertielle ou total
+    -- fonction de mort 
+end
 
-    print("finito pipo", total_death, partial_death, hemorrhage)
+WMS.TorsoDamage = function(dmg)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg,
+    {total = 14, partial = 25, hemo = 37},
+    {total = 12, partial = 19, hemo = 35})
 end
 
 WMS.StomachDamage = function(dmg)
-    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 10, partial = 20, hemo = 42}, {total = 7, partial = 10, hemo = 40})
-
-    print(total_death, partial_death, hemorrhage)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, 
+    {total = 10, partial = 20, hemo = 42},
+    {total = 7, partial = 10, hemo = 40})
 end
 
 WMS.ArmDamage = function(dmg)
-    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 5, partial = 7, hemo = 15}, {total = 3, partial = 5, hemo = 10})
-
-    print(total_death, partial_death, hemorrhage)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, 
+    {total = 5, partial = 7, hemo = 15},
+    {total = 3, partial = 5, hemo = 10})
 end
-
 
 WMS.LegDamage = function(dmg)
-    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 5, partial = 7, hemo = 15}, {total = 3, partial = 5, hemo = 10})
-
-    print(total_death, partial_death, hemorrhage)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg,
+    {total = 5, partial = 7, hemo = 34},
+    {total = 3, partial = 5, hemo = 30})
 end
 
-
 WMS.MeleeDamage = function(dmg)
-    local wep = dmg.wep:GetClass()
+    local wep = dmg.inflictor:GetClass()
     if (not WMS.tblContains(armes.blanches, wep)) then return end
-    local total_death = math.random(100) <= 5 -- 10%
-    local partial_death = math.random(100) <= 7 -- 15%
-    local hemorrhage = math.random(100) <= 90 -- 90%
-
-    print(total_death, partial_death, hemorrhage)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg,
+    {total = 0, partial = 0, hemo = 0},
+    {total = 0, partial = 0, hemo = 0},
+    {total = 5, partial = 7, hemo = 90})
 end
 
 WMS.HitgroupHandler = function(ply, dmginfo)
@@ -165,12 +182,6 @@ WMS.HitgroupHandler = function(ply, dmginfo)
             return dmginfo:SetDamage(0)
         end
 
-        -- if (string.find(name, "mel")) then
-        --     PrintC("SPLOUTCH !!", 8, 52)
-        --     --TODO
-        --     -- return
-        -- end
-
         if (not WMS.tblContains(armes, name)) then
             table.remove(ply.wms_dmg_tbl)
             PrintC("[WMS] /!\\ ARME/SOURCE DE DÉGATS NON RECONNU /!\\\n\t->Nous annulons donc les dégats", 8, 196)
@@ -178,7 +189,7 @@ WMS.HitgroupHandler = function(ply, dmginfo)
         end
     end
 
-    if (dmg.hit_grp == HITGROUP_GENERIC or WMS.tblContains(armes.blanches, dmg.wep:GetClass())) then
+    if (dmg.hit_grp == HITGROUP_GENERIC or WMS.tblContains(armes.blanches, dmg.inflictor:GetClass())) then
         PrintC("SPLOUTCH !!", 8, 52)
         WMS.MeleeDamage(dmg)
     elseif (dmg.hit_grp == HITGROUP_HEAD) then
