@@ -69,6 +69,7 @@ WMS.DamageHook = function(target, dmginfo)
     dmginfo = WMS.HitgroupHandler(target, dmginfo)
     --return true
 end
+local HIT = {[0] = "melee", "head", "chest", "stomack", "left_arm", "right_arm", "left_leg", "right_leg"}
 
 WMS.RegisterDamage = function(ply, dmgi)
     local dmg = {}
@@ -77,6 +78,7 @@ WMS.RegisterDamage = function(ply, dmgi)
     dmg.attacker = dmgi:GetAttacker()
     dmg.inflictor = dmgi:GetInflictor()
     dmg.hit_grp = ply:LastHitGroup()
+    dmg.h_hit_grp = HIT[dmg.hit_grp]
     dmg.damage = dmgi:GetDamage()
     dmg.type = dmgi:GetDamageType()
     dmg.wep = dmg.attacker:IsPlayer() and dmg.attacker:GetActiveWeapon() or
@@ -92,7 +94,7 @@ WMS.HeadDamage = function(dmg)
     -- fonction de mort 
 end
 
-WMS.TorsoDamage = function(dmg)
+WMS.GenericDamage = function(dmg, rifle, pistol)
     local wep = dmg.wep:GetClass()
     local total_death = false
     local partial_death = false
@@ -102,18 +104,46 @@ WMS.TorsoDamage = function(dmg)
 
     if (WMS.tblContains(armes.fusils, wep)) then
         -- son torse
-        total_death = math.random(100) <= 14 -- 14%
-        partial_death = math.random(100) <= 25 -- 25%
+        total_death = math.random(100) <= rifle.total
+        partial_death = math.random(100) <= rifle.partial
+        hemorrhage = math.random(100) <= rifle.hemo
     elseif (WMS.tblContains(armes.poings, wep)) then
-        total_death = math.random(100) <= 10 -- 10%
-        partial_death = math.random(100) <= 15 -- 15%
-        hemorrhage = math.random(100) <= 35 -- 35%
+        total_death = math.random(100) <= pistol.total
+        partial_death = math.random(100) <= pistol.partial
+        hemorrhage = math.random(100) <= pistol.hemo
     end
+
+    return total_death, partial_death, hemorrhage
+end
+
+WMS.TorsoDamage = function(dmg)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 14, partial = 25, hemo = 37}, {total = 10, partial = 15, hemo = 35})
+
+    print("finito pipo", total_death, partial_death, hemorrhage)
+end
+
+WMS.StomachDamage = function(dmg)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 10, partial = 20, hemo = 42}, {total = 7, partial = 10, hemo = 40})
 
     print(total_death, partial_death, hemorrhage)
 end
 
+WMS.ArmDamage = function(dmg)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 5, partial = 7, hemo = 15}, {total = 3, partial = 5, hemo = 10})
+
+    print(total_death, partial_death, hemorrhage)
+end
+
+
+WMS.LegDamage = function(dmg)
+    local total_death, partial_death, hemorrhage = WMS.GenericDamage(dmg, {total = 5, partial = 7, hemo = 15}, {total = 3, partial = 5, hemo = 10})
+
+    print(total_death, partial_death, hemorrhage)
+end
+
+
 WMS.MeleeDamage = function(dmg)
+    local wep = dmg.wep:GetClass()
     if (not WMS.tblContains(armes.blanches, wep)) then return end
     local total_death = math.random(100) <= 5 -- 10%
     local partial_death = math.random(100) <= 7 -- 15%
@@ -132,14 +162,14 @@ WMS.HitgroupHandler = function(ply, dmginfo)
         if (dmginfo:IsExplosionDamage()) then
             PrintC("BOOM !!", 8, 202)
             --TODO
-            -- return
+            return dmginfo:SetDamage(0)
         end
 
-        if (string.find(name, "mel")) then
-            PrintC("SPLOUTCH !!", 8, 52)
-            --TODO
-            -- return
-        end
+        -- if (string.find(name, "mel")) then
+        --     PrintC("SPLOUTCH !!", 8, 52)
+        --     --TODO
+        --     -- return
+        -- end
 
         if (not WMS.tblContains(armes, name)) then
             table.remove(ply.wms_dmg_tbl)
@@ -148,13 +178,19 @@ WMS.HitgroupHandler = function(ply, dmginfo)
         end
     end
 
-    if (dmg.hit_grp == HITGROUP_HEAD) then
+    if (dmg.hit_grp == HITGROUP_GENERIC or WMS.tblContains(armes.blanches, dmg.wep:GetClass())) then
+        PrintC("SPLOUTCH !!", 8, 52)
+        WMS.MeleeDamage(dmg)
+    elseif (dmg.hit_grp == HITGROUP_HEAD) then
         WMS.HeadDamage(dmg)
     elseif (dmg.hit_grp == HITGROUP_CHEST) then
         WMS.TorsoDamage(dmg)
-    elseif (dmg.hit_grp == HITGROUP_GENERIC) then
-        PrintC("SPLOUTCH !!", 8, 52)
-        WMS.MeleeDamage(dmg)
+    elseif (dmg.hit_grp == HITGROUP_STOMACH) then
+        WMS.StomachDamage(dmg)
+    elseif (dmg.hit_grp == HITGROUP_LEFTLEG or dmg.hit_grp == HITGROUP_RIGHTLEG) then
+        WMS.LegDamage(dmg)
+    elseif (dmg.hit_grp == HITGROUP_LEFTARM or dmg.hit_grp == HITGROUP_RIGHTARM) then
+        WMS.ArmDamage(dmg)
     end
 
     return dmginfo:SetDamage(0)
