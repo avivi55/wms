@@ -29,7 +29,9 @@
     "cw_kk_ins2_doi_east_mn9130",
     "cw_kk_ins2_doi_east_mn9130_sniper",
     "cw_kk_ins2_doi_east_mp43",
-    "cw_kk_ins2_doi_east_m44"
+    "cw_kk_ins2_doi_east_m44",
+    "gmod_sent_vehicle_fphysics_base",
+    "prop_vehicle_prisoner_pod"
 ],
 "poings" : [
     "cw_kk_ins2_doi_luger",
