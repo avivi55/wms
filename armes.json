@@ -90,4 +90,8 @@
     "cw_kk_ins2_damage_melee"
 ],
 
-"feu" : "codww2_molotov"}
+"feu" : "codww2_molotov",
+"no_damage" : [
+    "prop_physics",
+    "gmod_balloon"
+]}
