@@ -63,39 +63,38 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
     local partial_death = false
     local hemorrhage = false
 
+    print(WMS.Utils.tblContains(armes.fusils, wep), IsValid(dmg.wep), wep)
+
     if (IsValid(dmg.inflictor) and cut and (WMS.Utils.tblContains(armes.blanches, wep) or WMS.Utils.tblContains(armes.blanches, dmg.inflictor:GetClass()))) then
-        print("oui")
         total_death = math.random(100) <= cut.total
         partial_death = math.random(100) <= cut.partial
         hemorrhage = math.random(100) <= cut.hemo
     elseif (WMS.Utils.tblContains(armes.poings, wep)) then
-        print("non")
         total_death = math.random(100) <= pistol.total
         partial_death = math.random(100) <= pistol.partial
         hemorrhage = math.random(100) <= pistol.hemo
-    else
-        -- son torse
+    elseif (WMS.Utils.tblContains(armes.fusils, wep) or not IsValid(dmg.wep)) then
         total_death = math.random(100) <= rifle.total
         partial_death = math.random(100) <= rifle.partial
         hemorrhage = math.random(100) <= rifle.hemo
     end
 
-    -- --PrintC(dmg.h_hit_grp .. ":", 8, 15)
-    -- if (total_death) then
-    --     PrintC("FINITO PIPO", 8, 1)
-    --     --dmg.victim:Kill()
-    -- elseif (partial_death) then
-    --     PrintC("FINITO", 8, 202)
-    --     --dmg.victim:Kill()
-    -- else
-    --     PrintC("Abatar t viven", 8, 14)
-    --     if (hemorrhage) then
-    --         PrintC("\tOOF Sègne", 8, 9)
-    --     end
-    --     if (not dmg.victim:IsProne()) then
-    --         prone.Enter(dmg.victim)
-    --     end
-    -- end
+    --PrintC(dmg.h_hit_grp .. ":", 8, 15)
+    if (total_death) then
+        PrintC("FINITO PIPO", 8, 1)
+        --dmg.victim:Kill()
+    elseif (partial_death) then
+        PrintC("FINITO", 8, 202)
+        --dmg.victim:Kill()
+    else
+        PrintC("Abatar t viven", 8, 14)
+        if (hemorrhage) then
+            PrintC("\tOOF Sègne", 8, 9)
+        end
+        if (not dmg.victim:IsProne()) then
+            prone.Enter(dmg.victim)
+        end
+    end
 
     return total_death, partial_death, hemorrhage
 end
@@ -144,11 +143,14 @@ end
 
 WMS.DamageSystem.HitgroupHandler = function(ply, dmginfo)
     dmg = ply.wms_dmg_tbl[#ply.wms_dmg_tbl]
-    -- PrintC(dmg, 8, "27")
+    --PrintC(dmg, 8, "27")
 
     if (dmginfo:IsFallDamage() or dmg.inflictor:GetClass() == "worldspawn") then
         PrintC("AÏE !!", 8, 81)
         --TODO
+        return dmginfo:SetDamage(0)
+    elseif (IsValid(dmg.wep) and not WMS.Utils.tblContains(armes.fusils, dmg.wep)) then
+        PrintC("ARME NON RECONNU -> DÉGATS ANNULÉS\nSi vous voulez qu'elle fonctionne, pensez à la rajouter dans 'armes.json'", 8, 184)
         return dmginfo:SetDamage(0)
     elseif (not dmg.inflictor:IsPlayer() and IsValid(dmg.inflictor)) then -- Cas specifiques (feu, explostion, melée ...)
         local name = dmg.inflictor:GetClass()
@@ -174,7 +176,7 @@ WMS.DamageSystem.HitgroupHandler = function(ply, dmginfo)
         if (not WMS.Utils.tblContains(armes, name)) then
             table.remove(ply.wms_dmg_tbl)
             Msg("\27[6;1m")
-            PrintC("[WMS] /!\\ ARME/SOURCE DE DÉGATS NON RECONNU /!\\\n\t->Nous annulons donc les dégats", 8, 196)
+            PrintC("[WMS] /!\\ SOURCE DE DÉGATS NON RECONNU /!\\\n\t->Nous annulons donc les dégats", 8, 196)
             Msg("\27[0mVoici des detailles:")
             PrintC(dmg, 8, "27")
             return dmginfo:SetDamage(0)
