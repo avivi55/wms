@@ -1,6 +1,4 @@
 include("prettyPrint.lua")
-local armes = util.JSONToTable(file.Read("armes.json", "GAME"))
---local sons = util.JSONToTable(file.Read("sons.json", "GAME"))
 
 print("updated") 
 WMS = WMS or {}
@@ -63,23 +61,27 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
     local partial_death = false
     local hemorrhage = false
 
-    print(WMS.Utils.tblContains(armes.fusils, wep), IsValid(dmg.wep), wep)
-
-    if (IsValid(dmg.inflictor) and cut and (WMS.Utils.tblContains(armes.blanches, wep) or WMS.Utils.tblContains(armes.blanches, dmg.inflictor:GetClass()))) then
+    if (IsValid(dmg.inflictor) and cut and (WMS.Utils.tblContains(WMS.weapons.cut, wep) or WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass()))) then
+        print("coutal")
         total_death = math.random(100) <= cut.total
         partial_death = math.random(100) <= cut.partial
         hemorrhage = math.random(100) <= cut.hemo
-    elseif (WMS.Utils.tblContains(armes.poings, wep)) then
+    elseif (WMS.Utils.tblContains(WMS.weapons.pistol, wep)) then
+        print("pistolè")
         total_death = math.random(100) <= pistol.total
         partial_death = math.random(100) <= pistol.partial
         hemorrhage = math.random(100) <= pistol.hemo
-    elseif (WMS.Utils.tblContains(armes.fusils, wep) or not IsValid(dmg.wep)) then
+    elseif (WMS.Utils.tblContains(WMS.weapons.rifle, wep) or not IsValid(dmg.wep)) then
+        print("fuzy")
         total_death = math.random(100) <= rifle.total
         partial_death = math.random(100) <= rifle.partial
         hemorrhage = math.random(100) <= rifle.hemo
     end
 
     --PrintC(dmg.h_hit_grp .. ":", 8, 15)
+    local snd = WMS.Utils.getRandomDeathSound("ger")
+    print(snd)
+    dmg.victim:EmitSound(snd, 180)
     if (total_death) then
         PrintC("FINITO PIPO", 8, 1)
         --dmg.victim:Kill()
@@ -110,8 +112,8 @@ end
 
 WMS.DamageSystem.TorsoDamage = function(dmg)
     local total_death, partial_death, hemorrhage = WMS.DamageSystem.GenericDamage(dmg,
-    {total = 14, partial = 25, hemo = 37},
-    {total = 12, partial = 19, hemo = 35})
+    {total = 25, partial = 40, hemo = 37},
+    {total = 15, partial = 20, hemo = 35})
 end
 
 WMS.DamageSystem.StomachDamage = function(dmg)
@@ -134,7 +136,7 @@ end
 
 WMS.DamageSystem.MeleeDamage = function(dmg)
     local wep = dmg.inflictor:GetClass()
-    if (not WMS.Utils.tblContains(armes.blanches, wep)) then return end
+    if (not WMS.Utils.tblContains(WMS.weapons.cut, wep)) then return end
     local total_death, partial_death, hemorrhage = WMS.DamageSystem.GenericDamage(dmg,
     {total = 0, partial = 0, hemo = 0},
     {total = 0, partial = 0, hemo = 0},
@@ -149,8 +151,8 @@ WMS.DamageSystem.HitgroupHandler = function(ply, dmginfo)
         PrintC("AÏE !!", 8, 81)
         --TODO
         return dmginfo:SetDamage(0)
-    elseif (IsValid(dmg.wep) and not WMS.Utils.tblContains(armes.fusils, dmg.wep)) then
-        PrintC("ARME NON RECONNU -> DÉGATS ANNULÉS\nSi vous voulez qu'elle fonctionne, pensez à la rajouter dans 'armes.json'", 8, 184)
+    elseif (IsValid(dmg.wep) and not WMS.Utils.tblContains(WMS.weapons, dmg.wep:GetClass())) then
+        PrintC("ARME NON RECONNU -> DÉGATS ANNULÉS\nSi vous voulez qu'elle fonctionne, pensez à la rajouter dans 'WMS.weapons.json'", 8, 184)
         return dmginfo:SetDamage(0)
     elseif (not dmg.inflictor:IsPlayer() and IsValid(dmg.inflictor)) then -- Cas specifiques (feu, explostion, melée ...)
         local name = dmg.inflictor:GetClass()
@@ -168,12 +170,12 @@ WMS.DamageSystem.HitgroupHandler = function(ply, dmginfo)
             return dmginfo:SetDamage(0)
         end
 
-        if (WMS.Utils.tblContains(armes.no_damage, name)) then
+        if (WMS.Utils.tblContains(WMS.weapons.no_damage, name)) then
             PrintC("[WMS] DÉGATS ANNULÉS : PROP", 8, 6)
             return dmginfo:SetDamage(0)
         end
 
-        if (not WMS.Utils.tblContains(armes, name)) then
+        if (not WMS.Utils.tblContains(WMS.weapons, name)) then
             table.remove(ply.wms_dmg_tbl)
             Msg("\27[6;1m")
             PrintC("[WMS] /!\\ SOURCE DE DÉGATS NON RECONNU /!\\\n\t->Nous annulons donc les dégats", 8, 196)
@@ -185,7 +187,7 @@ WMS.DamageSystem.HitgroupHandler = function(ply, dmginfo)
 
     if (dmg.hit_grp == HITGROUP_CHEST or dmg.wep == "vehicle" or not IsValid(dmg.wep)) then
         WMS.DamageSystem.TorsoDamage(dmg)
-    elseif (dmg.hit_grp == HITGROUP_GENERIC or WMS.Utils.tblContains(armes.blanches, dmg.inflictor:GetClass())) then
+    elseif (dmg.hit_grp == HITGROUP_GENERIC or WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass())) then
         PrintC("SPLOUTCH !!", 8, 52)
         WMS.DamageSystem.MeleeDamage(dmg)
     elseif (dmg.hit_grp == HITGROUP_HEAD) then

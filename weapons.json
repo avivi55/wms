@@ -1,12 +1,11 @@
 {
-"fusils" : [
+"rifle" : [
     "cw_kk_ins2_doi_stg44",
     "cw_kk_ins2_doi_mg34",
     "cw_kk_ins2_doi_mg42",
     "cw_kk_ins2_doi_k98k",
     "cw_kk_ins2_doi_fg42",
     "cw_kk_ins2_doi_g43",
-
     
     "cw_kk_ins2_doi_wicked",
     "cw_kk_ins2_doi_enfield",
@@ -33,7 +32,7 @@
     "gmod_sent_vehicle_fphysics_base",
     "prop_vehicle_prisoner_pod"
 ],
-"poings" : [
+"pistol" : [
     "cw_kk_ins2_doi_luger",
     "cw_kk_ins2_doi_mp40",
     "cw_kk_ins2_doi_p38",
@@ -69,7 +68,7 @@
     "cw_kk_ins2_doi_ithaca"
 ],
 
-"blanches" : [
+"cut" : [
     "cw_kk_ins2_doi_mel_shovel_de",
     "cw_kk_ins2_doi_mel_k98k",
 
@@ -90,7 +89,7 @@
     "cw_kk_ins2_damage_melee"
 ],
 
-"feu" : "codww2_molotov",
+"fire" : "codww2_molotov",
 "no_damage" : [
     "prop_physics",
     "gmod_balloon"
