@@ -79,7 +79,7 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
     end
 
     --PrintC(dmg.h_hit_grp .. ":", 8, 15)
-    local snd = "mortar_strike_close_01.wav" --WMS.Utils.getRandomDeathSound("ger")
+    local snd = WMS.Utils.getRandomDeathSound("ger")
     print(snd)
     dmg.attacker:EmitSound(snd)
     if (total_death) then
@@ -145,7 +145,7 @@ end
 
 WMS.DamageSystem.HitgroupHandler = function(ply, dmginfo)
     dmg = ply.wms_dmg_tbl[#ply.wms_dmg_tbl]
-    PrintC(dmg, 8, "27")
+    --PrintC(dmg, 8, "27")
 
     if (dmginfo:IsFallDamage() or dmg.inflictor:GetClass() == "worldspawn") then
         PrintC("AÏE !!", 8, 81)
