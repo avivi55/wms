@@ -1,1 +1,0 @@
-WMS = WMS or {}

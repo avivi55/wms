@@ -1,9 +1,8 @@
 include("prettyPrint.lua")
-include("autorun/sh_wms_utils.lua")
 local armes = util.JSONToTable(file.Read("armes.json", "GAME"))
 --local sons = util.JSONToTable(file.Read("sons.json", "GAME"))
 
-print("updated")
+print("updated") 
 WMS = WMS or {}
 WMS.DamageSystem = WMS.DamageSystem or {}
 
