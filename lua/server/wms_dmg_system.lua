@@ -1,5 +1,3 @@
-include("prettyPrint.lua")
-
 print("updated")
 WMS = WMS or {}
 WMS.DamageSystem = WMS.DamageSystem or {}
@@ -79,7 +77,7 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
     end
 
     --PrintC(dmg.h_hit_grp .. ":", 8, 15)
-    local snd = WMS.Utils.getRandomDeathSound("ger")
+    local snd = WMS.Utils.getRandomDeathSound("sov")
     print(snd)
     dmg.attacker:EmitSound(snd)
     if (total_death) then

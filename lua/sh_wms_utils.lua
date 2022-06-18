@@ -52,3 +52,11 @@ WMS.Utils.getRandomDeathSound = function(team)
         print("la team n'est pas bonne")
     end
 end
+
+WMS.Utils.addFileToClient = function()
+    for k, len in pairs(WMS.sounds.sound_folder_len) do
+        for i = 1, len do
+            resource.AddFile("sound/aie/" .. tostring(k) .. "/" .. tostring(k) .. "_death_voice" .. tostring(i) .. ".wav")
+        end
+    end
+end
