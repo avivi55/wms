@@ -51,7 +51,7 @@ WMS.Utils.getRandomDeathSound = function(team)
         local folder = team .. "_" .. man
         local file_rand = tostring(math.random(WMS.sounds.sound_folder_len[folder]))
 
-        return "aie/" .. folder .. "/" .. team .. "_death_voice" .. file_rand .. ".ogg"
+        return "aie/" .. folder .. "/" .. team .. "_death_voice" .. file_rand .. ".wav"
     else
         print("la team n'est pas bonne")
     end

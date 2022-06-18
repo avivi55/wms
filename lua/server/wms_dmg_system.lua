@@ -81,7 +81,7 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
     --PrintC(dmg.h_hit_grp .. ":", 8, 15)
     local snd = WMS.Utils.getRandomDeathSound("ger")
     print(snd)
-    dmg.victim:EmitSound(snd, 180)
+    dmg.victim:EmitSound(snd)
     if (total_death) then
         PrintC("FINITO PIPO", 8, 1)
         --dmg.victim:Kill()
