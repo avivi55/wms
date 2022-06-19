@@ -1,5 +1,5 @@
 AddCSLuaFile()
-AddCSLuaFile("client/test.lua")
+AddCSLuaFile("client/wms_death_screen.lua")
 WMS = WMS or {}
 --PrintTable(WMS.sounds)
 
@@ -9,12 +9,9 @@ include("config/weapons.lua")
 include("sh_wms_utils.lua")
 
 if (SERVER) then
+    include("prettyPrint.lua")
     include("server/wms_init.lua")
 end
-
--- if (CLIENT) then
---     include("client/test.lua")
--- end
 
 WMS.Utils.loadPrint()
 
