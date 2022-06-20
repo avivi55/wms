@@ -2,38 +2,6 @@ print("updated")
 WMS = WMS or {}
 WMS.DamageSystem = WMS.DamageSystem or {}
 
-
-WMS.DamageSystem.Init = function(ply, trans)
-    PrintC("[WMS] Player Damage table initialized !", 8, "112")
-    ply:SetNWInt("Pulse", math.random(70, 90))
-    ply:SetBleeding(false)
-    ply.wms_dmg_tbl = {}
-end
-
-WMS.DamageSystem.ClearAllDmgDataTbl = function()
-    for _, ply in pairs(player.GetAll()) do
-        ply.wms_dmg_tbl = {}
-    end
-end
-
-WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
-    if (victim:GetNWBool("hemo")) then
-        timer.Remove("Hemo_" .. victim:EntIndex())
-        --victim:SetNWBool("hemo", false )
-    end
-    PrintC("[WMS] Player Damage table Deleted !", 8, "1")
-    WMS.DamageSystem.Init(victim, false)
-end
-
-WMS.DamageSystem.DamageHook = function(target, dmginfo)
-    if (not target:IsPlayer()) then return end
-    print(dmginfo:GetDamage())
-    WMS.DamageSystem.RegisterDamage(target, dmginfo)
-    dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmginfo))
-    print(dmginfo:GetDamage())
-    --return true
-end
-
 local HIT = {[0] = "melee", "head", "chest", "stomack", "left_arm", "right_arm", "left_leg", "right_leg"}
 
 WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
@@ -52,7 +20,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     if (not IsValid(dmg.inflictor) and dmg.attacker:IsPlayer() and dmg.attacker:InVehicle()) then
         dmg.inflictor = dmg.attacker
-        dmg.wep = "vehicle"-- dmg.attacker:GetVehicle()
+        dmg.wep = "vehicle"
     end
 
     table.insert(dmg.victim.wms_dmg_tbl, dmg)
@@ -82,36 +50,15 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
         hemorrhage = math.random(100) <= rifle.hemo
     end
 
-    --"weapons/crossbow/hitbod1.wav"
-    local snd = "physics/metal/metal_box_impact_bullet3.wav"
-    --print(snd)
-    dmg.attacker:EmitSound(snd)
-    timer.Simple(SoundDuration(snd), function() dmg.attacker:EmitSound("weapons/crossbow/hitbod1.wav") end)
-    if (total_death) then
-        PrintC("FINITO PIPO", 8, 1)
-        --dmg.victim:Kill()
-    elseif (partial_death) then
-        PrintC("FINITO", 8, 202)
-        --dmg.victim:Kill()
-    else
-        PrintC("Abatar t viven", 8, 14)
-        if (hemorrhage) then
-            PrintC("\tOOF Sègne", 8, 9)
-        end
-        if (not dmg.victim:IsProne()) then
-            prone.Enter(dmg.victim)
-        end
-    end
-
     return total_death, partial_death, hemorrhage
 end
 
 WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
     local dmg = ply.wms_dmg_tbl[#ply.wms_dmg_tbl]
 
-    no_dmg = dmg
+    no_dmg = table.Copy(dmg)
     no_dmg.damage = 0
-    PrintC(dmg, 8, "27")
+    --PrintC(dmg, 8, "27")
 
     if (dmg.type == DMG_BLEEDING / 2) then
         table.remove(ply.wms_dmg_tbl)
@@ -123,7 +70,7 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
         PrintC("[WMS] DÉGATS ANNULÉS : PROP", 8, 6)
         return no_dmg
 
-    elseif (IsEntity(dmg.inflictor) and (dmginfo:IsFallDamage() or dmg.inflictor:EntIndex() == 0)) then
+    elseif (dmginfo:IsFallDamage()) then
         PrintC("AÏE !!", 8, 81)
         --TODO
         return no_dmg
@@ -132,7 +79,7 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
         PrintC("ARME NON RECONNU -> DÉGATS ANNULÉS\nSi vous voulez qu'elle fonctionne, pensez à la rajouter dans 'WMS.weapons.json'", 8, 184)
         return no_dmg
 
-    elseif (not dmg.inflictor:IsPlayer() and IsValid(dmg.inflictor)) then -- Cas specifiques (feu, explostion, melée ...)
+    elseif (not dmg.inflictor:IsPlayer() and IsValid(dmg.inflictor)) then
         local name = dmg.inflictor:GetClass()
 
         if (dmginfo:IsExplosionDamage() or name == "base_shell") then
@@ -178,13 +125,11 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
             {total = 5, partial = 7, hemo = 90})
 
     elseif (dmg.hit_grp == HITGROUP_HEAD) then
-
         total_death, partial_death, hemorrhage = WMS.DamageSystem.GenericDamage(dmg,
             {total = 97, partial = 99, hemo = 0},
             {total = 96, partial = 98, hemo = 0})
 
     elseif (dmg.hit_grp == HITGROUP_STOMACH) then
-
         total_death, partial_death, hemorrhage = WMS.DamageSystem.GenericDamage(dmg,
             {total = 10, partial = 20, hemo = 42},
             {total = 7, partial = 10, hemo = 40})
@@ -209,28 +154,36 @@ end
 
 
 WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
-    local dmg_ = WMS.DamageSystem.DamageHandler(ply, dmginfo)
+    local dmg = WMS.DamageSystem.DamageHandler(ply, dmginfo)
 
-    if (dmg_.total_death) then
+    print("prout", dmg.damage)
+    if (dmg.total_death) then
+        PrintC("FINITO PIPO", 8, 1)
         ply:Kill()
-
-    elseif (dmg_.partial_death) then
+    elseif (dmg.partial_death) then
+        PrintC("FINITO", 8, 202)
         ply:Kill()
+    elseif (dmg.damage != 0) then
+        PrintC("Abatar t viven", 8, 14)
+        if (dmg.hemorrhage and not ply:GetNWBool("hemo")) then
+            ply:SetBleeding(true, 5, 1)
+            PrintC("\tOOF Sègne", 8, 9)
+        end
+        dmg.damage = 70
 
-    elseif (dmg_.hemorrhage and not ply:GetNWBool("hemo")) then
-        ply:SetBleeding(true, 5, 1)
+        if (ply:Health() - dmg.damage <= 0) then
+            ply:Kill()
+        end
+
+        if (not dmg.victim:IsProne()) then
+            prone.Enter(dmg.victim)
+        end
     end
-
-    print(dmg_.damage, dmg_.type, dmg_.victim:GetNWBool("hemo"))
-    return dmg_.damage
+    return dmg.damage
 end
 
-
 --BLEEDING
-
-
 local meta = FindMetaTable("Player")
-
 
 function meta:SetBleeding(bool, ...)
     self:SetNWBool("hemo", bool)
@@ -242,7 +195,6 @@ function meta:SetBleeding(bool, ...)
         timer.Remove("Hemo_" .. self:EntIndex())
     end
 end
-
 
 WMS.DamageSystem.StartHemorrhage = function(ply, speed, importance)
     if (not ply:GetNWBool("hemo")) then return end
@@ -277,7 +229,31 @@ WMS.DamageSystem.StartHemorrhage = function(ply, speed, importance)
     end)
 end
 
+WMS.DamageSystem.Init = function(ply, trans)
+    PrintC("[WMS] Player Damage table initialized !", 8, "112")
+    ply:SetNWInt("Pulse", math.random(70, 90))
+    ply.wms_dmg_tbl = {}
+end
+
+WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
+    if (victim:GetNWBool("hemo")) then
+        timer.Remove("Hemo_" .. victim:EntIndex())
+        victim:SetBleeding(false)
+    end
+    PrintC("[WMS] Player Damage table Deleted !", 8, "1")
+    WMS.DamageSystem.Init(victim, false)
+end
+
+WMS.DamageSystem.DamageHook = function(target, dmginfo)
+    if (not target:IsPlayer()) then return end
+    WMS.DamageSystem.RegisterDamage(target, dmginfo)
+    dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmginfo))
+    print(dmginfo:GetDamage())
+    --return true
+end
+
+
 hook.Add("EntityTakeDamage", "wms_damage_hook", WMS.DamageSystem.DamageHook)
 hook.Add("PlayerInitialSpawn", "wms_init", WMS.DamageSystem.Init)
 hook.Add("PlayerDeath", "wms_death_hook", WMS.DamageSystem.DeathHook)
-hook.Add("PlayerDeathSound", "wms_death_hook", function(ply) return true end)
+hook.Add("PlayerDeathSound", "wms_death_sound_hook", function(ply) return true end)
