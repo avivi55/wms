@@ -3,6 +3,7 @@ AddCSLuaFile("client/wms_death_screen.lua")
 WMS = WMS or {}
 --PrintTable(WMS.sounds)
 
+include("autorun/properties/wms_properties.lua")
 include("config/sounds.lua")
 include("config/weapons.lua")
 

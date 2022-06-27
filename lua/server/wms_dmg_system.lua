@@ -2,7 +2,7 @@ print("updated")
 WMS = WMS or {}
 WMS.DamageSystem = WMS.DamageSystem or {}
 
-local HIT = {[0] = "melee", "head", "chest", "stomack", "left_arm", "right_arm", "left_leg", "right_leg"}
+WMS.HIT = {[0] = "Melée", "Tête", "Buste", "Estomac", "Bras gauche", "Bras droit", "Jambe gauche", "Jambe droite"}
 
 WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     local dmg = {}
@@ -11,7 +11,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     dmg.attacker = dmgi:GetAttacker()
     dmg.inflictor = dmgi:GetInflictor()
     dmg.hit_grp = ply:LastHitGroup()
-    dmg.h_hit_grp = HIT[dmg.hit_grp]
+    dmg.h_hit_grp = WMS.HIT[dmg.hit_grp]
     dmg.damage = dmgi:GetDamage()
     dmg.type = dmgi:GetDamageType()
     dmg.wep = dmg.attacker:IsPlayer() and dmg.attacker:GetActiveWeapon() or
@@ -35,16 +35,19 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
 
     if (IsValid(dmg.inflictor) and cut and (WMS.Utils.tblContains(WMS.weapons.cut, wep) or WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass()))) then
         print("coutal")
+        dmg.h_wep = "Lame"
         total_death = math.random(100) <= cut.total
         partial_death = math.random(100) <= cut.partial
         hemorrhage = math.random(100) <= cut.hemo
     elseif (WMS.Utils.tblContains(WMS.weapons.pistol, wep)) then
         print("pistolè")
+        dmg.h_wep = "Pistolet"
         total_death = math.random(100) <= pistol.total
         partial_death = math.random(100) <= pistol.partial
         hemorrhage = math.random(100) <= pistol.hemo
     elseif (WMS.Utils.tblContains(WMS.weapons.rifle, wep) or not IsValid(dmg.wep)) then
         print("fuzy")
+        dmg.h_wep = "Fusil"
         total_death = math.random(100) <= rifle.total
         partial_death = math.random(100) <= rifle.partial
         hemorrhage = math.random(100) <= rifle.hemo
@@ -58,7 +61,7 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
 
     no_dmg = table.Copy(dmg)
     no_dmg.damage = 0
-    --PrintC(dmg, 8, "27")
+    PrintC(dmg, 8, "27")
 
     if (dmg.type == DMG_BLEEDING / 2) then
         table.remove(ply.wms_dmg_tbl)
@@ -72,21 +75,23 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
 
     elseif (dmginfo:IsFallDamage()) then
         PrintC("AÏE !!", 8, 81)
+        ply:SetLastHitGroup(math.random(0,1) and 6 or 7)
+        table.remove(ply.wms_dmg_tbl)
+        WMS.DamageSystem.RegisterDamage(dmg.victim, dmginfo)
+        return dmg
+    elseif (dmginfo:IsExplosionDamage() or dmg.inflictor:GetClass() == "base_shell") then
+        PrintC("BOOM !!", 8, 202)
+        dmg.isExplosion = true
         --TODO
-        return no_dmg
+        return dmg
 
     elseif (IsValid(dmg.wep) and not WMS.Utils.tblContains(WMS.weapons, dmg.wep:GetClass())) then
+        table.remove(ply.wms_dmg_tbl)
         PrintC("ARME NON RECONNU -> DÉGATS ANNULÉS\nSi vous voulez qu'elle fonctionne, pensez à la rajouter dans 'WMS.weapons.json'", 8, 184)
         return no_dmg
 
     elseif (not dmg.inflictor:IsPlayer() and IsValid(dmg.inflictor)) then
         local name = dmg.inflictor:GetClass()
-
-        if (dmginfo:IsExplosionDamage() or name == "base_shell") then
-            PrintC("BOOM !!", 8, 202)
-            --TODO
-            return no_dmg
-        end
 
         if (dmg.inflictor:IsVehicle()) then
             if (dmg.inflictor == dmg.victim:GetVehicle() or dmg.damage <= 10) then return no_dmg end
@@ -152,11 +157,9 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
     return dmg
 end
 
-
 WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
     local dmg = WMS.DamageSystem.DamageHandler(ply, dmginfo)
 
-    print("prout", dmg.damage)
     if (dmg.total_death) then
         PrintC("FINITO PIPO", 8, 1)
         ply:Kill()
@@ -169,7 +172,9 @@ WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
             ply:SetBleeding(true, 5, 1)
             PrintC("\tOOF Sègne", 8, 9)
         end
-        dmg.damage = 70
+
+        print(dmg.type)
+        if (not dmg.isExplosion and dmg.type != DMG_BLEEDING / 2) then dmg.damage = math.random(65, 85) end
 
         if (ply:Health() - dmg.damage <= 0) then
             ply:Kill()
@@ -195,6 +200,9 @@ function meta:SetBleeding(bool, ...)
         timer.Remove("Hemo_" .. self:EntIndex())
     end
 end
+
+
+
 
 WMS.DamageSystem.StartHemorrhage = function(ply, speed, importance)
     if (not ply:GetNWBool("hemo")) then return end
