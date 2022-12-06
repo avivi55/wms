@@ -14,4 +14,8 @@ if (SERVER) then
     include("server/wms_init.lua")
 end
 
+if (CLIENT) then
+    include("client/wms_client.lua")
+end
+
 WMS.Utils.loadPrint()

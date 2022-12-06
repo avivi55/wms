@@ -42,23 +42,13 @@ properties.Add("medic_sheet", {
         if (not IsValid(ent)) then return false end
         if (not ent:IsPlayer()) then return false end
         if (not ply:IsAdmin()) then return false end
-
+        --local panel = vgui.Create("DFrame")
+        
         return true
     end,
 
     Action = function(self, ent)
-        self:MsgStart()
-            net.WriteEntity(ent)
-        self:MsgEnd()
-    end,
-
-    Receive = function(self, length, ply)
-        if (not IsValid(ply)) then return end
-        local ent = net.ReadEntity()
-        if (not IsValid(ent)) then return end
-        if (not self:Filter(ent, ply)) then return end
-
-        local dmgs = ent.wms_dmg_tbl
+        local dmgs = ent.wms_dmg_tbl or {}
 
         local str = ""
 
@@ -71,6 +61,19 @@ properties.Add("medic_sheet", {
             str = str .. "\n"
         end
 
-        ply:ChatPrint(str)
+        print(str)
+
+        self:MsgStart()
+            net.WriteEntity(ent)
+        self:MsgEnd()
+    end,
+
+    Receive = function(self, length, ply)
+        if (not IsValid(ply)) then return end
+        local ent = net.ReadEntity()
+        if (not IsValid(ent)) then return end
+        if (not self:Filter(ent, ply)) then return end
+
+        print(ply:Nick() .. " a ouvert le diagnostique sur " .. ent:Nick())
     end
 })

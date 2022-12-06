@@ -24,6 +24,11 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     end
 
     table.insert(dmg.victim.wms_dmg_tbl, dmg)
+    net.Start("send_damage_table_to_client")
+        net.WriteEntity(ply)
+        net.WriteTable(dmg.victim.wms_dmg_tbl)
+    net.Broadcast()
+    print("tezesdfsd")
 end
 
 WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
@@ -61,6 +66,7 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
 
     no_dmg = table.Copy(dmg)
     no_dmg.damage = 0
+
     PrintC(dmg, 8, "27")
 
     if (dmg.type == DMG_BLEEDING / 2) then
@@ -154,7 +160,8 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
     dmg.partial_death = partial_death
     dmg.hemorrhage = hemorrhage
 
-    return dmg
+    return no_dmg
+    //return dmg
 end
 
 WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
