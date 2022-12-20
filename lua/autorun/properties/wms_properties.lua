@@ -50,6 +50,7 @@ properties.Add("medic_sheet", {
     Action = function(self, ent)
         local dmgs = ent.wms_dmg_tbl or {}
 
+        print("test", #dmgs)
         local str = ""
 
         for k, dmg in pairs(dmgs) do
@@ -74,6 +75,9 @@ properties.Add("medic_sheet", {
         if (not IsValid(ent)) then return end
         if (not self:Filter(ent, ply)) then return end
 
+        local dmgs = ent.wms_dmg_tbl or {}
+
+        print("test", #dmgs)
         print(ply:Nick() .. " a ouvert le diagnostique sur " .. ent:Nick())
     end
 })

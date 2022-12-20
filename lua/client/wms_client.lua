@@ -3,7 +3,7 @@ net.Receive( "send_damage_table_to_client", function( len, ply )
     return
 end )
 
-
+print("tststststststst")
 do
 local PANEL = {}
 

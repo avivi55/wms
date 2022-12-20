@@ -1,5 +1,5 @@
 AddCSLuaFile()
-AddCSLuaFile("client/wms_death_screen.lua")
+AddCSLuaFile("client/wms_client.lua")
 WMS = WMS or {}
 --PrintTable(WMS.sounds)
 

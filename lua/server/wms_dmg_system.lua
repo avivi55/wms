@@ -15,10 +15,10 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     dmg.damage = dmgi:GetDamage()
     dmg.type = dmgi:GetDamageType()
     dmg.wep = dmg.attacker:IsPlayer() and dmg.attacker:GetActiveWeapon() or
-                dmg.inflictor:IsPlayer() and dmg.inflictor:GetActiveWeapon() or nil
+              dmg.inflictor:IsPlayer() and dmg.inflictor:GetActiveWeapon() or nil
 
 
-    if (not IsValid(dmg.inflictor) and dmg.attacker:IsPlayer() and dmg.attacker:InVehicle()) then
+    if (WMS.DamageSystem.IsVehicleDamage(dmg)) then--not IsValid(dmg.inflictor) and dmg.attacker:IsPlayer() and dmg.attacker:InVehicle()) then
         dmg.inflictor = dmg.attacker
         dmg.wep = "vehicle"
     end
@@ -28,7 +28,6 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         net.WriteEntity(ply)
         net.WriteTable(dmg.victim.wms_dmg_tbl)
     net.Broadcast()
-    print("tezesdfsd")
 end
 
 WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
@@ -61,6 +60,19 @@ WMS.DamageSystem.GenericDamage = function(dmg, rifle, pistol, cut)
     return total_death, partial_death, hemorrhage
 end
 
+WMS.DamageSystem.IsBleedingDmg = function(dmg)
+    return dmg.type == DMG_BLEEDING / 2
+end
+
+WMS.DamageSystem.IsExplosionDamage = function(dmg, dmgI)
+    return dmgI:IsExplosionDamage() or (IsValid(dmg.inflictor) and dmg.inflictor:GetClass() == "base_shell")
+end
+
+WMS.DamageSystem.IsVehicleDamage = function(dmg)
+    return IsValid(dmg.inflictor) and (dmg.inflictor:IsVehicle() or dmg.inflictor:GetClass() == "worldspawn")
+end
+
+
 WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
     local dmg = ply.wms_dmg_tbl[#ply.wms_dmg_tbl]
 
@@ -68,8 +80,9 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
     no_dmg.damage = 0
 
     PrintC(dmg, 8, "27")
+    PrintC(dmginfo, 8, "28")
 
-    if (dmg.type == DMG_BLEEDING / 2) then
+    if (WMS.DamageSystem.IsBleedingDmg(dmg)) then
         table.remove(ply.wms_dmg_tbl)
         PrintC("SEN", 8, 9)
         return dmg
@@ -85,26 +98,27 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
         table.remove(ply.wms_dmg_tbl)
         WMS.DamageSystem.RegisterDamage(dmg.victim, dmginfo)
         return dmg
-    elseif (dmginfo:IsExplosionDamage() or dmg.inflictor:GetClass() == "base_shell") then
+
+    elseif (WMS.DamageSystem.IsExplosionDamage(dmg, dmginfo)) then
         PrintC("BOOM !!", 8, 202)
         dmg.isExplosion = true
         --TODO
         return dmg
 
-    elseif (IsValid(dmg.wep) and not WMS.Utils.tblContains(WMS.weapons, dmg.wep:GetClass())) then
-        table.remove(ply.wms_dmg_tbl)
-        PrintC("ARME NON RECONNU -> DÉGATS ANNULÉS\nSi vous voulez qu'elle fonctionne, pensez à la rajouter dans 'WMS.weapons.json'", 8, 184)
+    elseif (WMS.DamageSystem.IsVehicleDamage(dmg)) then
+        PrintC("TUT TUT !!", 8, 211)
+        dmg.wep = "vehicle"
+        if (dmg.inflictor == dmg.victim:GetVehicle() or dmg.damage <= 10) then return no_dmg end
+        --TODO
         return no_dmg
 
-    elseif (not dmg.inflictor:IsPlayer() and IsValid(dmg.inflictor)) then
-        local name = dmg.inflictor:GetClass()
+    elseif (IsValid(dmg.wep) and not WMS.Utils.tblContains(WMS.weapons, dmg.wep:GetClass())) then
+        table.remove(ply.wms_dmg_tbl)
+        PrintC("ARME NON RECONNU -> DÉGATS ANNULÉS\nSi vous voulez qu'elle fonctionne, pensez à la rajouter dans 'config/weapons.lua'", 8, 184)
+        return no_dmg
 
-        if (dmg.inflictor:IsVehicle()) then
-            if (dmg.inflictor == dmg.victim:GetVehicle() or dmg.damage <= 10) then return no_dmg end
-            PrintC("TUT TUT !!", 8, 211)
-            --TODO
-            return no_dmg
-        end
+    elseif (IsValid(dmg.inflictor) and !dmg.inflictor:IsPlayer()) then
+        local name = dmg.inflictor:GetClass()
 
         if (not WMS.Utils.tblContains(WMS.weapons, name)) then
             table.remove(ply.wms_dmg_tbl)
@@ -166,13 +180,17 @@ end
 
 WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
     local dmg = WMS.DamageSystem.DamageHandler(ply, dmginfo)
+    ply:PartialDeath()
+    return dmg.damage
+    /*
+
 
     if (dmg.total_death) then
         PrintC("FINITO PIPO", 8, 1)
         ply:Kill()
     elseif (dmg.partial_death) then
         PrintC("FINITO", 8, 202)
-        ply:Kill()
+        ply:PartialDeath()
     elseif (dmg.damage != 0) then
         PrintC("Abatar t viven", 8, 14)
         if (dmg.hemorrhage and not ply:GetNWBool("hemo")) then
@@ -180,7 +198,7 @@ WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
             PrintC("\tOOF Sègne", 8, 9)
         end
 
-        print(dmg.type)
+        --print(dmg.type)
         if (not dmg.isExplosion and dmg.type != DMG_BLEEDING / 2) then dmg.damage = math.random(65, 85) end
 
         if (ply:Health() - dmg.damage <= 0) then
@@ -192,15 +210,16 @@ WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
         end
     end
     return dmg.damage
+    */
 end
 
 --BLEEDING
 local meta = FindMetaTable("Player")
 
-function meta:SetBleeding(bool, ...)
-    self:SetNWBool("hemo", bool)
+function meta:SetBleeding(isBleeding, ...)
+    self:SetNWBool("hemo", isBleeding)
 
-    if (bool) then
+    if (isBleeding) then
         local args = {...}
         WMS.DamageSystem.StartHemorrhage(self, args[1], args[2])
     else
@@ -208,6 +227,67 @@ function meta:SetBleeding(bool, ...)
     end
 end
 
+do -- Partial Death
+    function meta:PartialDeath()
+        if (self.isPartialDead) then return end
+
+        self.isPartialDead = true
+
+        local doll = ents.Create("playerPartialDoll")
+
+        doll.Player = self
+
+        doll:Spawn()
+        doll:Activate()
+
+        self:StripWeapons()
+        self:Spectate(OBS_MODE_CHASE)
+        self:SpectateEntity(doll)
+    
+        self.doll = doll
+    end
+
+    function meta:Revive()
+        if (!self.isPartialDead) then return end
+
+        self.isPartialDead = false
+
+        self.doll:Remove()
+        self:UnSpectate()
+        self:Spawn()
+    
+        self:StripWeapons()
+        self:Spectate(OBS_MODE_CHASE)
+        self:SpectateEntity(doll)
+    
+        self.doll = nil
+    end
+
+    hook.Add("PlayerSpawnObject", "WMS_Partial_Death", function(ply)
+        if (ply.isPartialDead and IsValid(ply.doll)) then return false end
+    end)
+    
+    hook.Add("CanPlayerSuicide", "WMS_Partial_Death", function(ply)
+        if (ply.isPartialDead and IsValid(ply.doll)) then return false end
+    end)
+    
+    hook.Add("PlayerDeath", "WMS_Partial_Death", function(ply)
+        if (ply.isPartialDead and IsValid(ply.doll)) then ply.doll:Remove() end
+    end)
+    
+    hook.Add("PlayerDeathThink", "WMS_Partial_Death", function(ply)
+        if (ply.isPartialDead and IsValid(ply.doll)) then return false end
+    end)
+    
+    hook.Add("PlayerDisconnected", "WMS_Partial_Death", function(ply)
+        if (not ply.doll) then return end
+    
+        if (ply.isPartialDead and IsValid(ply.doll)) then
+            ply.doll:Remove()
+            return
+        end
+    end)
+end
 
 
 
@@ -245,9 +325,14 @@ WMS.DamageSystem.StartHemorrhage = function(ply, speed, importance)
 end
 
 WMS.DamageSystem.Init = function(ply, trans)
-    PrintC("[WMS] Player Damage table initialized !", 8, "112")
+    PrintC(ply:SteamID() .. "[WMS] Player Damage table initialized !", 8, "112")
     ply:SetNWInt("Pulse", math.random(70, 90))
     ply.wms_dmg_tbl = {}
+    ply.isPartialDead = false
+    net.Start("send_damage_table_to_client")
+        net.WriteEntity(ply)
+        net.WriteTable({})
+    net.Broadcast()
 end
 
 WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
@@ -263,7 +348,7 @@ WMS.DamageSystem.DamageHook = function(target, dmginfo)
     if (not target:IsPlayer()) then return end
     WMS.DamageSystem.RegisterDamage(target, dmginfo)
     dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmginfo))
-    print(dmginfo:GetDamage())
+    --print(dmginfo:GetDamage())
     --return true
 end
 
