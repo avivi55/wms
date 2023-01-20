@@ -212,7 +212,7 @@ WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
     return dmg.damage
     */
 end
-
+--util.ScreenShake( Vector(0, 0, 0), 300, 0.1, 30, 50000 )
 --BLEEDING
 local meta = FindMetaTable("Player")
 
@@ -229,65 +229,60 @@ end
 
 do -- Partial Death
     function meta:PartialDeath()
-        if (self.isPartialDead) then return end
+        if (self:GetNWBool("isPartialDead")) then return end
 
-        self.isPartialDead = true
+        self:SetNWBool("isPartialDead", true)
 
-        local doll = ents.Create("playerPartialDoll")
-
-        doll.Player = self
-
-        doll:Spawn()
-        doll:Activate()
+        self:CreateRagdoll()
 
         self:StripWeapons()
-        self:Spectate(OBS_MODE_CHASE)
-        self:SpectateEntity(doll)
-    
-        self.doll = doll
+        
+        self:SetNWInt("Pulse", math.random(3, 20))
+        self:SetNWInt("Partial_death_timer", CurTime())
+        timer.Simple(WMS.PartialDeathTime, function()
+            if(not self:GetCreator():GetNWBool("isPartialDead")) then return end
+            self:Kill()
+        end)
     end
 
     function meta:Revive()
-        if (!self.isPartialDead) then return end
+        if (!self:GetNWBool("isPartialDead")) then return end
+        self:SetNWBool("isPartialDead", false)
 
-        self.isPartialDead = false
-
-        self.doll:Remove()
         self:UnSpectate()
         self:Spawn()
-    
-        self:StripWeapons()
-        self:Spectate(OBS_MODE_CHASE)
-        self:SpectateEntity(doll)
-    
-        self.doll = nil
+        local rag = self:GetRagdollEntity()
+        self:SetPos(rag:GetPos())
+        prone.Enter(self)
+        self:SetHealth(math.random(7, 16))
+        self:RemoveRagdoll()
     end
 
-    hook.Add("PlayerSpawnObject", "WMS_Partial_Death", function(ply)
-        if (ply.isPartialDead and IsValid(ply.doll)) then return false end
+    hook.Add("PlayerSpawnObject", "WMS_Partial_Death_spawn_obj", function(ply)
+        if (ply:GetNWBool("isPartialDead")) then return false end
     end)
     
-    hook.Add("CanPlayerSuicide", "WMS_Partial_Death", function(ply)
-        if (ply.isPartialDead and IsValid(ply.doll)) then return false end
+    hook.Add("CanPlayerSuicide", "WMS_Partial_Death_suicide", function(ply)
+        if (ply:GetNWBool("isPartialDead")) then return false end
     end)
     
-    hook.Add("PlayerDeath", "WMS_Partial_Death", function(ply)
-        if (ply.isPartialDead and IsValid(ply.doll)) then ply.doll:Remove() end
+    hook.Add("PlayerDeath", "WMS_Partial_Death_remove_ragdoll_death", function(ply)
+        if (ply:GetNWBool("isPartialDead")) then ply:RemoveRagdoll() end
     end)
-    
-    hook.Add("PlayerDeathThink", "WMS_Partial_Death", function(ply)
-        if (ply.isPartialDead and IsValid(ply.doll)) then return false end
-    end)
-    
-    hook.Add("PlayerDisconnected", "WMS_Partial_Death", function(ply)
-        if (not ply.doll) then return end
-    
-        if (ply.isPartialDead and IsValid(ply.doll)) then
-            ply.doll:Remove()
-            return
+
+   
+ --[[     hook.Add("PlayerDeathThink", "WMS_Partial_Death_allow_spawn", function(ply)
+        print(CurTime(), ply:GetNWInt("Partial_death_timer") + 5)
+        if (ply:GetNWBool("isPartialDead") and (ply:GetNWInt("Partial_death_timer") != -1 and CurTime() <= ply:GetNWInt("Partial_death_timer") + 5)) then
+            ply:SetNWInt("Partial_death_timer", -1)
+            return false
         end
-    end)
+    end) ]]
 end
+
+--[[ hook.Add("Think", "tettetet", function(ply)
+
+end) ]]
 
 
 
@@ -328,7 +323,8 @@ WMS.DamageSystem.Init = function(ply, trans)
     PrintC(ply:SteamID() .. "[WMS] Player Damage table initialized !", 8, "112")
     ply:SetNWInt("Pulse", math.random(70, 90))
     ply.wms_dmg_tbl = {}
-    ply.isPartialDead = false
+    ply:SetNWBool("isPartialDead", false)
+    ply:SetNWInt("Partial_death_timer", -1)
     net.Start("send_damage_table_to_client")
         net.WriteEntity(ply)
         net.WriteTable({})
@@ -340,6 +336,12 @@ WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
         timer.Remove("Hemo_" .. victim:EntIndex())
         victim:SetBleeding(false)
     end
+    print("mortoto")
+    local rag = victim:Create_Untied_Ragdoll()
+    timer.Simple(WMS.CorpsDeleteTime, function()
+        rag:Remove()
+    end)
+
     PrintC("[WMS] Player Damage table Deleted !", 8, "1")
     WMS.DamageSystem.Init(victim, false)
 end

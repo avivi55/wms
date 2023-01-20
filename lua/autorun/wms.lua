@@ -6,6 +6,7 @@ WMS = WMS or {}
 include("autorun/properties/wms_properties.lua")
 include("config/sounds.lua")
 include("config/weapons.lua")
+include("config/config.lua")
 
 include("sh_wms_utils.lua")
 
