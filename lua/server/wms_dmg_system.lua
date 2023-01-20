@@ -213,6 +213,7 @@ WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
     */
 end
 --util.ScreenShake( Vector(0, 0, 0), 300, 0.1, 30, 50000 )
+
 --BLEEDING
 local meta = FindMetaTable("Player")
 
@@ -221,7 +222,8 @@ function meta:SetBleeding(isBleeding, ...)
 
     if (isBleeding) then
         local args = {...}
-        WMS.DamageSystem.StartHemorrhage(self, args[1], args[2])
+        WMS.DamageSystem.StartHemorrhage(self, args[1], args[2]) 
+        --                                     speed    importrance
     else
         timer.Remove("Hemo_" .. self:EntIndex())
     end
