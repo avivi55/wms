@@ -269,21 +269,7 @@ do -- Partial Death
     hook.Add("PlayerDeath", "WMS_Partial_Death_remove_ragdoll_death", function(ply)
         if (ply:GetNWBool("isPartialDead")) then ply:RemoveRagdoll() end
     end)
-
-   
- --[[     hook.Add("PlayerDeathThink", "WMS_Partial_Death_allow_spawn", function(ply)
-        print(CurTime(), ply:GetNWInt("Partial_death_timer") + 5)
-        if (ply:GetNWBool("isPartialDead") and (ply:GetNWInt("Partial_death_timer") != -1 and CurTime() <= ply:GetNWInt("Partial_death_timer") + 5)) then
-            ply:SetNWInt("Partial_death_timer", -1)
-            return false
-        end
-    end) ]]
 end
-
---[[ hook.Add("Think", "tettetet", function(ply)
-
-end) ]]
-
 
 
 WMS.DamageSystem.StartHemorrhage = function(ply, speed, importance)
