@@ -281,6 +281,7 @@ if (SERVER) then
 	hook_Add('PlayerSpawn', addonName, function( ply, trans )
 		if (trans) then return end
 		ply:RemoveRagdoll()
+		ply:UnSpectate()
 	end)
 
 	-- gmod_cameraprop ragdoll support

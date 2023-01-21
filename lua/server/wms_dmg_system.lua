@@ -25,7 +25,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     table.insert(dmg.victim.wms_dmg_tbl, dmg)
     net.Start("send_damage_table_to_client")
-        net.WriteEntity(ply)
+        net.WriteEntity(dmg.victim)
         net.WriteTable(dmg.victim.wms_dmg_tbl)
     net.Broadcast()
 end
@@ -174,15 +174,15 @@ WMS.DamageSystem.DamageHandler = function(ply, dmginfo)
     dmg.partial_death = partial_death
     dmg.hemorrhage = hemorrhage
 
-    return no_dmg
-    //return dmg
+    //return no_dmg
+    return dmg
 end
 
 WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
     local dmg = WMS.DamageSystem.DamageHandler(ply, dmginfo)
-    ply:PartialDeath()
-    return dmg.damage
-    /*
+    --ply:PartialDeath()
+    --return dmg.damage
+    
 
 
     if (dmg.total_death) then
@@ -204,13 +204,21 @@ WMS.DamageSystem.DamageApplier = function(ply, dmginfo)
         if (ply:Health() - dmg.damage <= 0) then
             ply:Kill()
         end
+        
 
-        if (not dmg.victim:IsProne()) then
+        --[[ if (not dmg.victim:IsProne()) then
             prone.Enter(dmg.victim)
-        end
+        end ]]
     end
+
+    --PrintTable(dmg)
+    dmg.victim.wms_dmg_tbl[#dmg.victim.wms_dmg_tbl] = dmg
+    net.Start("send_damage_table_to_client")
+        net.WriteEntity(dmg.victim)
+        net.WriteTable(dmg.victim.wms_dmg_tbl)
+    net.Broadcast()
+
     return dmg.damage
-    */
 end
 --util.ScreenShake( Vector(0, 0, 0), 300, 0.1, 30, 50000 )
 
@@ -258,6 +266,12 @@ do -- Partial Death
         prone.Enter(self)
         self:SetHealth(math.random(7, 16))
         self:RemoveRagdoll()
+
+        for k,v in pairs(rag.Weapons) do
+            self:Give(v)
+        end
+
+        self:SetActiveWeapon(rag.ActiveWeapon)
     end
 
     hook.Add("PlayerSpawnObject", "WMS_Partial_Death_spawn_obj", function(ply)
@@ -271,6 +285,85 @@ do -- Partial Death
     hook.Add("PlayerDeath", "WMS_Partial_Death_remove_ragdoll_death", function(ply)
         if (ply:GetNWBool("isPartialDead")) then ply:RemoveRagdoll() end
     end)
+end
+
+do -- Limb Damage (handicaps)
+    function meta:LegFracture()
+        if (self:GetNWBool("isLimp")) then return end
+        self:SetNWBool("isLimp", true)
+
+        self:SetRunSpeed(WMS.FractureRunSpeed)
+        self:SetWalkSpeed(WMS.FractureWalkSpeed)
+
+        prone.Enter(self)
+    end
+
+    function meta:HealLegFracture()
+        if (!self:GetNWBool("isLimp")) then return end
+        self:SetNWBool("isLimp", false)
+
+        self:SetRunSpeed(WMS.DefaultRunSpeed)
+        self:SetWalkSpeed(WMS.DefaultWalkSpeed)
+    end
+
+    WMS.DamageSystem.LegHitHook = function(ply)
+        return !ply:GetNWBool("isLimp")
+    end
+
+    hook.Add("prone.CanExit", "wms_stop_getting_up", WMS.DamageSystem.LegHitHook)
+
+
+    -- ARMS
+    function meta:RightArmFracture(side)
+        if (self:GetNWBool("RightArmFracture")) then return end
+        self:SetNWBool("RightArmFracture", true)
+
+        local wep = self:GetActiveWeapon()
+        if (WMS.Utils.tblContains(WMS.weapons.rifle, wep:GetClass()) or
+            WMS.Utils.tblContains(WMS.weapons.pistol, wep:GetClass()) or
+            WMS.Utils.tblContains(WMS.weapons.cut, wep:GetClass())
+        ) then
+            self:DropWeapon(wep)
+        end
+    end
+
+    function meta:LeftArmFracture(side)
+        if (self:GetNWBool("LeftArmFracture")) then return end
+        self:SetNWBool("LeftArmFracture", true)
+
+        local wep = self:GetActiveWeapon()
+        if (WMS.Utils.tblContains(WMS.weapons.rifle, wep:GetClass()) or
+            WMS.Utils.tblContains(WMS.weapons.pistol, wep:GetClass()) or
+            WMS.Utils.tblContains(WMS.weapons.cut, wep:GetClass()) and
+            !WMS.Utils.tblContains(WMS.weapons.one_arm, wep:GetClass())
+        ) then
+            self:DropWeapon(wep)
+        end
+    end
+
+    function meta:HealRightArmFracture()       
+        if (!self:GetNWBool("RightArmFracture")) then return end
+        
+        self:SetNWBool("RightArmFracture", false)
+    end
+
+    function meta:HealLeftArmFracture()       
+        if (!self:GetNWBool("LefttArmFracture")) then return end
+        
+        self:SetNWBool("LefttArmFracture", false)
+    end
+
+    WMS.DamageSystem.ArmDamageHook = function(ply, oldWep, newWep)
+        if (ply:GetNWBool("RightArmFracture")) then return true end
+
+        if (ply:GetNWBool("LeftArmFracture") ) then
+            if(WMS.Utils.tblContains(WMS.weapons.one_arm, wep:GetClass()))then 
+                return false
+            end
+        end
+    end
+
+    hook.Add("PlayerSwitchWeapon", "wms_left_arm_broken", WMS.DamageSystem.ArmDamageHook)
 end
 
 
@@ -308,15 +401,24 @@ WMS.DamageSystem.StartHemorrhage = function(ply, speed, importance)
 end
 
 WMS.DamageSystem.Init = function(ply, trans)
+    ply:UnSpectate()
     PrintC(ply:SteamID() .. "[WMS] Player Damage table initialized !", 8, "112")
-    ply:SetNWInt("Pulse", math.random(70, 90))
     ply.wms_dmg_tbl = {}
-    ply:SetNWBool("isPartialDead", false)
-    ply:SetNWInt("Partial_death_timer", -1)
+    
     net.Start("send_damage_table_to_client")
         net.WriteEntity(ply)
         net.WriteTable({})
     net.Broadcast()
+    ply:UnSpectate()
+    
+    ply:SetNWInt("Pulse", math.random(70, 90))
+    
+    ply:SetNWInt("Partial_death_timer", -1)
+    ply:SetNWBool("isPartialDead", false)
+    
+    ply:SetNWBool("isLimp", false)
+    ply:SetNWBool("RightArmFracture", false)
+    ply:SetNWBool("LeftArmFracture", false)
 end
 
 WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
@@ -324,7 +426,7 @@ WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
         timer.Remove("Hemo_" .. victim:EntIndex())
         victim:SetBleeding(false)
     end
-    print("mortoto")
+
     local rag = victim:Create_Untied_Ragdoll()
     timer.Simple(WMS.CorpsDeleteTime, function()
         rag:Remove()

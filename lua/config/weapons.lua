@@ -97,5 +97,22 @@ WMS.weapons = {
     fire = "codww2_molotov",
     no_damage = {
         "prop_physics",
-        "gmod_balloon"}
+        "gmod_balloon"},
+
+
+    one_arm = {
+        "cw_kk_ins2_doi_luger",
+        "cw_kk_ins2_doi_p38",
+        "cw_kk_ins2_doi_c96",
+
+        "cw_kk_ins2_doi_m1911",
+        "cw_kk_ins2_doi_browninghp",
+        "cw_kk_ins2_doi_m1917",
+
+        "cw_kk_ins2_doi_webley",
+        "cw_kk_ins2_doi_welrod",
+
+        "cw_kk_ins2_doi_east_tt33",
+        "cw_kk_ins2_doi_ppk",
+    }
 }
