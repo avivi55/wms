@@ -115,6 +115,46 @@ properties.Add("revive", {
     end
 })
 
+properties.Add("Heal", {
+    MenuLabel = "#Heal",
+    Order = 3,
+    MenuIcon = "icon16/lightning.png",
+
+    PrependSpacer = true,
+
+    Filter = function(self, ent, ply)
+        if (not IsValid(ent)) then return false end
+        if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
+        if (not ply:IsAdmin()) then return false end
+
+        return true
+    end,
+
+    Action = function(self, ent)
+        self:MsgStart()
+            net.WriteEntity(ent)
+        self:MsgEnd()
+    end,
+
+    Receive = function(self, length, ply)
+        local ent = net.ReadEntity()
+        if (ent:IsPlayerRagdoll()) then ent = ent:GetCreator() end
+        if (not IsValid(ent)) then return end
+        if (not self:Filter(ent, ply)) then return end
+        print("right", ent:GetNWBool("RightArmFracture"))
+        print("left", ent:GetNWBool("LeftArmFracture"))
+        print("leg", ent:GetNWBool("isLimp"))
+
+        ent:HealRightArmFracture()
+        ent:HealLeftArmFracture()
+        ent:HealLegFracture()
+
+        print("right", ent:GetNWBool("RightArmFracture"))
+        print("left", ent:GetNWBool("LeftArmFracture"))
+        print("leg", ent:GetNWBool("isLimp"))
+    end
+})
+
 properties.Add("spacer", {
     MenuLabel = "#",
     Order = 4,

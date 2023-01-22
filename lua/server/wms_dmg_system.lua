@@ -174,15 +174,27 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         final_dmg.total_death = true 
     end
 
+    if (dmg.wms_type == WMS.DmgTypes.DT_VEHICLE) then final_dmg.hemorrhage = false end
+
     final_dmg.wms_type = dmg.wms_type
 
-    final_dmg.should_prone = false
+    final_dmg.limp = false
 
     if (dmg.area == WMS.DmgArea.DA_LEG or
         dmg.wms_type == WMS.DmgTypes.DT_VEHICLE or
         final_dmg.damage >= 30) then
         
-        final_dmg.should_prone = true 
+        final_dmg.limp = true 
+    end
+
+    final_dmg.broken_r_arm = false 
+    final_dmg.broken_l_arm = false 
+    if (dmg.area == WMS.DmgArea.DA_ARM) then
+        if (dmg.hit_grp == HITGROUP_RIGHTARM)then
+            final_dmg.broken_r_arm = true 
+        else
+            final_dmg.broken_l_arm = true  
+        end
     end
 
 
@@ -212,11 +224,16 @@ WMS.DamageSystem.DamageApplier = function(ply, dmg)
         if (WMS.DEBUG) then PrintC("\tOOF Sègne", 8, 9) end
         --ply:SetBleeding(true, 5, 1)
 
-    end
-    --[[ if (not dmg.victim:IsProne()) then
-    prone.Enter(dmg.victim)
-    end ]]  
+    elseif(dmg.limp)then
+        ply:LegFracture()
 
+    elseif(dmg.broken_r_arm)then
+        --ply:RightArmFracture()
+    
+    elseif(dmg.broken_l_arm)then
+        --ply:LeftArmFracture()
+    
+    end
 
 
     ply.wms_dmg_tbl[#ply.wms_dmg_tbl] = dmg
@@ -353,7 +370,7 @@ do -- PLAYER FUNCTIONS
 
 
         -- ARMS
-        function PLAYER:RightArmFracture(side)
+        function PLAYER:RightArmFracture()
             if (self:GetNWBool("RightArmFracture")) then return end
             self:SetNWBool("RightArmFracture", true)
 
@@ -366,7 +383,7 @@ do -- PLAYER FUNCTIONS
             end
         end
 
-        function PLAYER:LeftArmFracture(side)
+        function PLAYER:LeftArmFracture()
             if (self:GetNWBool("LeftArmFracture")) then return end
             self:SetNWBool("LeftArmFracture", true)
 
