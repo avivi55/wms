@@ -54,6 +54,8 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     if (WMS.DamageSystem.IsBleedingDmg(dmg)) then
         dmg.wms_type = WMS.DmgTypes.DT_BLEED
+        dmg.hemorrhage = true
+        return dmg
 
     elseif(WMS.Utils.tblContains(WMS.weapons.no_damage, dmg.inflictor:GetClass()))then
         dmg.wms_type = WMS.DmgTypes.DT_NO_DAMAGE
@@ -225,21 +227,21 @@ WMS.DamageSystem.DamageApplier = function(ply, dmg)
     elseif (dmg.partial_death) then
         if (WMS.DEBUG) then PrintC("FINITO", 8, 202) end
 
-        --ply:PartialDeath()
+        ply:PartialDeath()
         return 0
 
     elseif (dmg.hemorrhage and not ply:GetNWBool("hemo")) then
         if (WMS.DEBUG) then PrintC("\tOOF Sègne", 8, 9) end
-        --ply:SetBleeding(true, 5, 1)
+        ply:SetBleeding(true, 5, 1)
 
     elseif(dmg.limp)then
-        --ply:LegFracture()
+        ply:LegFracture()
 
     elseif(dmg.broken_r_arm)then
-        --ply:RightArmFracture()
+        ply:RightArmFracture()
     
     elseif(dmg.broken_l_arm)then
-        --ply:LeftArmFracture()
+        ply:LeftArmFracture()
     
     end
 
