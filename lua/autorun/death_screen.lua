@@ -19,7 +19,7 @@ local bloodVisionMat = Material("deathperception_blood_overlay.png")
 
 if (SERVER) then
 	hook.Add("OnDamagedByExplosion", "DP_OnDamagedByExplosion", function(ply, dmg)
-		if not(GetConVar("DP_Enabled"):GetBool()) then return end
+		--if not(GetConVar("DP_Enabled"):GetBool()) then return end
 		if not(GetConVar("DP_NoEarRing"):GetBool()) then return end
 		if (ply:GetViewEntity() ~= ply) then return end
 		if ((IsValid(ply)) and (ply:Health() <= 0)) then

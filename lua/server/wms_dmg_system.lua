@@ -90,6 +90,10 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     elseif (WMS.Utils.tblContains(WMS.weapons.rifle, dmg.wep_class) or not IsValid(dmg.wep)) then
         dmg.wep_type = WMS.WepTypes.WT_RIFLE
         dmg.h_wep = "Fusil"
+    
+    elseif (not WMS.Utils.tblContains(WMS.weapons.rifle, dmg.wep_class) and IsValid(dmg.wep) and dmg.inflictor:IsPlayer() and not dmg.inflictor:InVehicle()) then
+        dmg.wep_type = -1
+        dmg.h_wep = "NON RECONNU"
     end
 
 
@@ -154,6 +158,8 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         end
     end
 
+    local death_explosion = dmg.wms_type == WMS.DmgTypes.DT_EXPLOSION and dmg.damage >= 70
+
     local final_dmg = {}
 
     final_dmg.total_death = false 
@@ -175,6 +181,8 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     end
 
     if (dmg.wms_type == WMS.DmgTypes.DT_VEHICLE) then final_dmg.hemorrhage = false end
+    if (death_explosion) then final_dmg.total_death = true end
+    
 
     final_dmg.wms_type = dmg.wms_type
 
@@ -211,7 +219,7 @@ WMS.DamageSystem.DamageApplier = function(ply, dmg)
     if (dmg.total_death) then
         if (WMS.DEBUG) then PrintC("FINITO PIPO", 8, 1) end
         
-        --ply:Kill()
+        ply:Kill()
         return 0
         
     elseif (dmg.partial_death) then
@@ -225,7 +233,7 @@ WMS.DamageSystem.DamageApplier = function(ply, dmg)
         --ply:SetBleeding(true, 5, 1)
 
     elseif(dmg.limp)then
-        ply:LegFracture()
+        --ply:LegFracture()
 
     elseif(dmg.broken_r_arm)then
         --ply:RightArmFracture()
@@ -425,12 +433,11 @@ end
 
 WMS.DamageSystem.Init = function(ply, trans)
     ply:UnSpectate()
+    ply:Spectate(OBS_MODE_NONE)
     PrintC(ply:SteamID() .. "[WMS] Player Damage table initialized !", 8, "112")
     ply.wms_dmg_tbl = {}
     
     WMS.Utils.syncDmgTbl(ply)
-
-    ply:UnSpectate()
     
     ply:SetNWInt("Pulse", math.random(70, 90))
     
@@ -440,6 +447,7 @@ WMS.DamageSystem.Init = function(ply, trans)
     ply:SetNWBool("isLimp", false)
     ply:SetNWBool("RightArmFracture", false)
     ply:SetNWBool("LeftArmFracture", false)
+
 end
 
 WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
@@ -450,7 +458,7 @@ WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
 
     local rag = victim:Create_Untied_Ragdoll()
     timer.Simple(WMS.CorpsDeleteTime, function()
-        rag:Remove()
+        if(IsValid(rag))then rag:Remove() end
     end)
 
     PrintC("[WMS] Player Damage table Deleted !", 8, "1")
@@ -461,7 +469,6 @@ WMS.DamageSystem.DamageHook = function(target, dmginfo)
     if (not target:IsPlayer()) then return end
     local dmg = WMS.DamageSystem.RegisterDamage(target, dmginfo)
     dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmg))
-    --return true
 end
 
 
