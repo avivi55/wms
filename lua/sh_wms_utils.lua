@@ -62,3 +62,10 @@ WMS.Utils.addFileToClient = function()
         end
     end
 end
+
+WMS.Utils.syncDmgTbl = function(ply)
+    net.Start("send_damage_table_to_client")
+        net.WriteEntity(ply)
+        net.WriteTable(ply.wms_dmg_tbl)
+    net.Broadcast()
+end
