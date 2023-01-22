@@ -254,6 +254,10 @@ if (SERVER) then
 				table.insert( ent.Weapons, wep:GetClass() )
 			end
 
+			ent.ammo = self:GetAmmo()
+
+			ent.wms_dmg_tbl = table.Copy(self.wms_dmg_tbl)
+
 			-- Fire Transmission
 			if self:IsOnFire() then
 				self:Extinguish()

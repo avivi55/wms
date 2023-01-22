@@ -27,6 +27,17 @@ WMS.DmgTypes = {
     ["DT_NORMAL"] = 7
 }
 
+WMS.DmgTypesH = { 
+    [WMS.DmgTypes.DT_BLEED] = "Saignement",
+    [WMS.DmgTypes.DT_PROP] = "Objet",
+    [WMS.DmgTypes.DT_FALL] = "Chute",
+    [WMS.DmgTypes.DT_EXPLOSION] = "Explosion",
+    [WMS.DmgTypes.DT_VEHICLE] = "Véhicule",
+    [WMS.DmgTypes.DT_NO_DAMAGE] = "NON",
+    [WMS.DmgTypes.DT_NORMAL] = "Arme à feu"
+}
+
+
 WMS.WepTypes = { 
     ["WT_CUT"] = 1,
     ["WT_PISTOL"] = 2,

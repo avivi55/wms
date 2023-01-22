@@ -50,14 +50,15 @@ properties.Add("medic_sheet", {
 
     Action = function(self, ent)
         local dmgs = ent.wms_dmg_tbl or {}
+        --PrintTable(dmgs)
 
-        print("test", #dmgs)
         local str = ""
         if (ent:IsPlayerRagdoll()) then str = str .. "MORT" end
         for k, dmg in pairs(dmgs) do
             str = str .. "Diagnostic n°" .. tostring(k) .. "\n"
             if (isstring(dmg.h_hit_grp)) then str = str .. "- Localisation : " .. dmg.h_hit_grp .. "\n" end
-            if (isstring(dmg.h_wep)) then str = str .. "- Type de dégats : " .. dmg.h_wep .. "\n" end
+            if (isstring(dmg.h_wep)) then str = str .. "- source de dégats : " .. dmg.h_wep .. "\n" 
+            elseif (isnumber(dmg.wms_type) and dmg.wms_type > 0) then str = str .. "- source de dégats : " .. WMS.DmgTypesH[dmg.wms_type] .. "\n" end
             if (isnumber(dmg.damage)) then str = str .. "- Dégats : " .. tostring(math.Round(dmg.damage)) .. "\n" end
             if (ent:GetNWBool("hemo")) then str = str .. "HÉMORAGIE!!\n" end
             str = str .. "\n"
@@ -79,7 +80,6 @@ properties.Add("medic_sheet", {
 
         local dmgs = ent.wms_dmg_tbl or {}
 
-        print("test", #dmgs)
         print(ply:Nick() .. " a ouvert le diagnostique sur " .. ent:Nick())
     end
 })
@@ -152,6 +152,41 @@ properties.Add("Heal", {
         print("right", ent:GetNWBool("RightArmFracture"))
         print("left", ent:GetNWBool("LeftArmFracture"))
         print("leg", ent:GetNWBool("isLimp"))
+    end
+})
+
+properties.Add("Grab", {
+    MenuLabel = "#Grab",
+    Order = 3,
+    MenuIcon = "icon16/arrow_up.png",
+
+    PrependSpacer = true,
+
+    Filter = function(self, ent, ply)
+        if (not IsValid(ent)) then return false end
+        if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
+        if (not ply:IsAdmin()) then return false end
+        if (ent:Health() > 30) then return false end
+
+        return true
+    end,
+
+    Action = function(self, ent)
+        self:MsgStart()
+            net.WriteEntity(ent)
+        self:MsgEnd()
+    end,
+
+    Receive = function(self, length, ply)
+        local ent = net.ReadEntity()
+        --if (ent:IsPlayerRagdoll()) then ent = ent:GetCreator() end
+        if (not IsValid(ent)) then return end
+        if (not self:Filter(ent, ply)) then return end
+
+
+        ent:SetNWBool("isDragged", true)
+        ent:SetNWEntity("Kidnapper", ply)
+
     end
 })
 
