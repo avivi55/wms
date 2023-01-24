@@ -7,7 +7,7 @@ WMS.DEBUG = true
 WMS.HemoSpeed = 5
 WMS.HemoImortance = 1 --hp
 
-WMS.PartialDeathTime = 100
+WMS.PartialDeathTime = 20
 WMS.CorpsDeleteTime = 50
 
 WMS.DefaultWalkSpeed = 400 -- 400
@@ -61,6 +61,25 @@ WMS.DmgArea = {
     
     ["DA_LEG"] = 11,
     ["DA_FOOT"] = 12,
+}
+
+WMS.DmgAreaH = {
+    [WMS.DmgArea.DA_SKULL] = "Crâne",
+    [WMS.DmgArea.DA_NECK] = "Cou",
+    [WMS.DmgArea.DA_FACE] = "Visage",
+
+    [WMS.DmgArea.DA_TORSO] = "Torse",
+    [WMS.DmgArea.DA_HEART] = "Coeur",
+    [WMS.DmgArea.DA_LUNGS] = "Poumons",
+
+    [WMS.DmgArea.DA_STOMACH] = "Estomac",
+    [WMS.DmgArea.DA_LIVER] = "Foie",
+    
+    [WMS.DmgArea.DA_ARM] = "Bras",
+    [WMS.DmgArea.DA_HAND] = "Mains",
+    
+    [WMS.DmgArea.DA_LEG] = "Jambe",
+    [WMS.DmgArea.DA_FOOT] = "Pied",
 }
 
 WMS.Chances = {

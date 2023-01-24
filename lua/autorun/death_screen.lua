@@ -72,6 +72,7 @@ elseif (CLIENT) then
 	hook.Add("PostDrawHUD", "DP_PostdrawHUD", function()
 		if not(GetConVar("DP_Enabled"):GetBool()) then return end
 		local ply = LocalPlayer()
+		if(ply:Alive() and not ply:GetNWBool("isPartialDead"))then return end
 		if (ply:GetViewEntity() ~= ply) then return end
 		if (GoneFraction <= 0) then return end
 		local ColorMode, ShouldBlur, OverlayMode, VisionCutOff = GetConVar("DP_ColorMode"):GetInt(), GetConVar("DP_Blur"):GetBool(), GetConVar("DP_OverlayMode"):GetInt(), GetConVar("DP_VisionCutOffMode"):GetInt()
@@ -164,32 +165,5 @@ elseif (CLIENT) then
 			surface.SetTextPos(ScrW()/2, ScrH()/1.20)
 			surface.DrawText(tostring(math.floor((ply:GetNWInt("Partial_death_timer") + WMS.PartialDeathTime + 1) - CurTime())) .. "s")
 		end
-	end)
-
-	hook.Add("CalcView", "DP_CalcView", function(ply, pos, angles, fov)
-		if not(GetConVar("DP_Enabled"):GetBool()) then return end
-		if not(GetConVar("DP_PoV"):GetBool()) then return end
-		if not(IsValid(ply)) then return end
-		if (ply:GetViewEntity() ~= ply) then return end
-		local Ragdoll = ply:GetRagdollEntity()
-		if not(IsValid(Ragdoll)) then return end
-		local view = Ragdoll:GetAttachment(Ragdoll:LookupAttachment("eyes"))
-		if not view then return end
-
-		local HeadID = Ragdoll:LookupBone("ValveBiped.Bip01_Head1")
-		if (HeadID) then
-			Ragdoll:ManipulateBoneScale(HeadID, Vector(.01, .01, .01))
-		end
-
-		view.Ang:Normalize()
-		local CustomAngle = LerpAngle(GoneFraction ^ .5, LastLivingEyeAngle, view.Ang)
-
-		local playerview = {
-			origin = view.Pos,
-			angles = CustomAngle,
-			znear = 1
-		}
-	
-		return playerview
 	end)
 end

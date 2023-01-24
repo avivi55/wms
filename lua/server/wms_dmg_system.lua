@@ -327,6 +327,7 @@ do -- PLAYER FUNCTIONS
             if (self:GetNWBool("isPartialDead")) then return end
 
             self:SetNWBool("isPartialDead", true)
+            self:SetNWBool("isDragged", false)
 
             self:CreateRagdoll()
 
@@ -360,7 +361,8 @@ do -- PLAYER FUNCTIONS
                 self:GiveAmmo(k, v)
             end
 
-            self:SetActiveWeapon(rag.ActiveWeapon)
+            
+            self:SelectWeapon(rag.ActiveWeapon)
             
 
 
@@ -413,6 +415,7 @@ do -- PLAYER FUNCTIONS
             self:SetNWBool("RightArmFracture", true)
 
             local wep = self:GetActiveWeapon()
+            if (not IsValid(wep)) then return end
             if (WMS.Utils.tblContains(WMS.weapons.rifle, wep:GetClass()) or
                 WMS.Utils.tblContains(WMS.weapons.pistol, wep:GetClass()) or
                 WMS.Utils.tblContains(WMS.weapons.cut, wep:GetClass())
@@ -466,6 +469,7 @@ do -- PLAYER FUNCTIONS
 end
 
 WMS.DamageSystem.Init = function(ply, trans)
+    hook.Call( "CalcView" )
     ply:SetNW2Bool("Deathbug", false)
     ply:UnSpectate()
     PrintC(ply:SteamID() .. "[WMS] Player Damage table initialized !", 8, "112")
@@ -477,6 +481,7 @@ WMS.DamageSystem.Init = function(ply, trans)
     
     ply:SetNWInt("Partial_death_timer", -1)
     ply:SetNWBool("isPartialDead", false)
+    ply:SetNWBool("isDragged", false)
     
     ply:SetNWBool("isLimp", false)
     ply:SetNWBool("RightArmFracture", false)
@@ -498,9 +503,7 @@ WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
 
     PrintC("[WMS] Player Damage table Deleted !", 8, "1")
     WMS.DamageSystem.Init(victim, false)
-
-    victim:SetNW2Bool("Deathbug", true)
-    timer.Simple(5, function() victim:SetNW2Bool("Deathbug", false) end)
+    hook.Call( "CalcView" )
 end
 
 WMS.DamageSystem.DamageHook = function(target, dmginfo)
@@ -512,16 +515,6 @@ end
 
 
 hook.Add("EntityTakeDamage", "wms_damage_hook", WMS.DamageSystem.DamageHook)
-hook.Add("PostPlayerDeath", "wms_post_death_hook", function(ply) 
---[[     timer.Simple(0.1, function()
-        if(ply.test)then 
-            ply.test = false
-            return 
-        end    
-        ply:Kill()
-        ply.test = true
-    end) ]]
-end)
 
 hook.Add("PlayerInitialSpawn", "wms_init", WMS.DamageSystem.Init)
 hook.Add("PlayerDeath", "wms_death_hook", WMS.DamageSystem.DeathHook)
