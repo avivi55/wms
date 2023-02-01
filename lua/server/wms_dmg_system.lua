@@ -83,16 +83,19 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     if (WMS.Utils.tblContains(WMS.weapons.cut, dmg.wep_class) or WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass())) then
         dmg.wep_type = WMS.WepTypes.WT_CUT
-        dmg.h_wep = "Lame"
+        dmg.h_wep = "cut"
 
     elseif (WMS.Utils.tblContains(WMS.weapons.pistol, dmg.wep_class)) then
         dmg.wep_type = WMS.WepTypes.WT_PISTOL
-        dmg.h_wep = "Pistolet"
+        dmg.h_wep = "pistol"
 
     elseif (WMS.Utils.tblContains(WMS.weapons.rifle, dmg.wep_class) or not IsValid(dmg.wep)) then
         dmg.wep_type = WMS.WepTypes.WT_RIFLE
-        dmg.h_wep = "Fusil"
+        dmg.h_wep = "rifle"
     
+    elseif (dmg.wms_type == WMS.DmgTypes.DT_VEHICLE) then
+        dmg.h_wep = "vehicle"
+
     elseif (not WMS.Utils.tblContains(WMS.weapons.rifle, dmg.wep_class) and IsValid(dmg.wep) and dmg.inflictor:IsPlayer() and not dmg.inflictor:InVehicle()) then
         dmg.wep_type = -1
         dmg.h_wep = "NON RECONNU"
@@ -108,12 +111,14 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
         if (chance <= WMS.Chances[WMS.DmgArea.DA_TORSO].chance) then
             dmg.area = WMS.DmgArea.DA_TORSO
+            
         elseif(chance <= WMS.Chances[WMS.DmgArea.DA_TORSO].chance + WMS.Chances[WMS.DmgArea.DA_HEART].chance)then
             dmg.area = WMS.DmgArea.DA_HEART
+
         else
             dmg.area = WMS.DmgArea.DA_LUNGS
         end
-
+        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
     elseif(dmg.hit_grp == HITGROUP_GENERIC or 
         WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass()) or
         WMS.Utils.tblContains(WMS.weapons.cut, wep)
@@ -128,7 +133,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
                 break
             end
         end
-
+        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
     elseif (dmg.hit_grp == HITGROUP_HEAD) then
         if (chance <= WMS.Chances[WMS.DmgArea.DA_SKULL].chance) then
             dmg.area = WMS.DmgArea.DA_SKULL
@@ -137,13 +142,20 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         else
             dmg.area = WMS.DmgArea.DA_NECK
         end
-
+        --print("sound")
+        local sound_ = WMS.sounds.headshotsounds[math.random(#WMS.sounds.headshotsounds)]
+        
+        for i=0,10 do
+            ply:EmitSound(sound_, 90)
+        end
+        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
     elseif (dmg.hit_grp == HITGROUP_STOMACH) then
         if(chance <= WMS.Chances[WMS.DmgArea.DA_STOMACH].chance)then
             dmg.area = WMS.DmgArea.DA_STOMACH
         else
             dmg.area = WMS.DmgArea.DA_LIVER
         end
+        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
 
     elseif (dmg.hit_grp == HITGROUP_LEFTLEG or dmg.hit_grp == HITGROUP_RIGHTLEG) then
         if(chance <= WMS.Chances[WMS.DmgArea.DA_LEG].chance)then
@@ -187,7 +199,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         final_dmg.total_death = true 
         final_dmg.partial_death = true 
     end
-    print(ply:Health() - final_dmg.damage)
+    --print(ply:Health() - final_dmg.damage)
     if (ply:Health() - final_dmg.damage <= 30) then
         final_dmg.limp = true 
     end
@@ -198,7 +210,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     final_dmg.wms_type = dmg.wms_type
     final_dmg.h_wep = dmg.h_wep
-    final_dmg.h_hit_grp = dmg.h_hit_grp
+    final_dmg.hit_grp = dmg.hit_grp
 
 
     if (dmg.area == WMS.DmgArea.DA_LEG or
@@ -223,35 +235,48 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         final_dmg.h_wep = nil
     end
 
+    if (dmg.victim == dmg.inflictor) then
+        final_dmg.wms_type = WMS.DmgTypes.DT_NO_DAMAGE
+    end
+
+    final_dmg.area = dmg.area
 
 
     if (WMS.DEBUG) then
         PrintC(final_dmg, 8, 27)
         PrintC(dmg, 8, 33)
     end
-
+    PrintTable(dmg)
     table.Empty(dmg)
+    --print(55)
     return final_dmg
 end
 
 WMS.DamageSystem.DamageApplier = function(ply, dmg)
+    if (not ply:Alive()) then return end
+
+    if (dmg.wms_type == WMS.DmgTypes.DT_NO_DAMAGE)then
+        ply.wms_dmg_tbl[#ply.wms_dmg_tbl+1] = table.Copy(dmg)
+        WMS.Utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
+        return 0
+    end
     if (dmg.total_death) then
         if (WMS.DEBUG) then PrintC("FINITO PIPO", 8, 1) end
         
-        ply:Kill()
+        --ply:Kill()
         return 0
         
     elseif (dmg.partial_death) then
         if (WMS.DEBUG) then PrintC("FINITO", 8, 202) end
 
-        ply:PartialDeath()
+        --ply:PartialDeath()
         ply.wms_dmg_tbl[#ply.wms_dmg_tbl+1] = table.Copy(dmg)
         WMS.Utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
         return 0
 
     elseif (dmg.hemorrhage and not ply:GetNWBool("hemo")) then
         if (WMS.DEBUG) then PrintC("\tOOF Sègne", 8, 9) end
-        ply:SetBleeding(true, 5, 1)
+        --ply:SetBleeding(true, WMS.HemoSpeed, WMS.HemoImportance)
 
     elseif(dmg.limp)then
         ply:LegFracture()
@@ -391,6 +416,20 @@ do -- PLAYER FUNCTIONS
             self:SetRunSpeed(WMS.FractureRunSpeed)
             self:SetWalkSpeed(WMS.FractureWalkSpeed)
 
+            --[[ self:ManipulateBoneScale(self:LookupBone("ValveBiped.Bip01_L_Thigh"), Vector(1, 1, 1))
+            self:ManipulateBoneScale(self:LookupBone("ValveBiped.Bip01_L_Calf"), Vector(0, 0, 0))
+            self:ManipulateBoneScale(self:LookupBone("ValveBiped.Bip01_L_Foot"), Vector(0, 0, 0))
+            self:ManipulateBoneScale(self:LookupBone("ValveBiped.Bip01_L_Toe0"), Vector(0, 0, 0)) 
+            
+            self:ManipulateBonePosition(self:LookupBone("ValveBiped.Bip01_L_Thigh"), Vector(1, 1, 1))
+            self:ManipulateBonePosition(self:LookupBone("ValveBiped.Bip01_L_Calf"), Vector(0, 0, 0)/0)
+            self:ManipulateBonePosition(self:LookupBone("ValveBiped.Bip01_L_Foot"), Vector(0, 0, 0)/0)
+            self:ManipulateBonePosition(self:LookupBone("ValveBiped.Bip01_L_Toe0"), Vector(0, 0, 0)/0) ]]
+
+
+
+            --print("test")
+
             prone.Enter(self)
         end
 
@@ -470,7 +509,7 @@ end
 
 WMS.DamageSystem.Init = function(ply, trans)
     hook.Call( "CalcView" )
-    ply:SetNW2Bool("Deathbug", false)
+
     ply:UnSpectate()
     PrintC(ply:SteamID() .. "[WMS] Player Damage table initialized !", 8, "112")
     ply.wms_dmg_tbl = {}
@@ -490,6 +529,7 @@ WMS.DamageSystem.Init = function(ply, trans)
 end
 
 WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
+    if (victim:Alive()) then return end
     if (victim:GetNWBool("hemo")) then
         timer.Remove("Hemo_" .. victim:EntIndex())
         victim:SetBleeding(false)
@@ -501,6 +541,7 @@ WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
         if(IsValid(rag))then rag:Remove() end
     end)
 
+    
     PrintC("[WMS] Player Damage table Deleted !", 8, "1")
     WMS.DamageSystem.Init(victim, false)
     hook.Call( "CalcView" )
@@ -508,14 +549,31 @@ end
 
 WMS.DamageSystem.DamageHook = function(target, dmginfo)
     if (not target:IsPlayer()) then return end
-    if (target:HasGodMode()) then return true end
+    --if (target:HasGodMode()) then return true end
     local dmg = WMS.DamageSystem.RegisterDamage(target, dmginfo)
-    dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmg))
+    dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmg) or 0)
+    dmginfo:SetDamage(0)
+end
+WMS.DamageSystem.DiscoHook = function(ply)
+    ply.wms_dmg_tbl = {}
+    
+    WMS.Utils.syncDmgTbl(ply, ply.wms_dmg_tbl)
+    
+    ply:SetNWInt("Pulse", math.random(70, 90))
+    
+    ply:SetNWInt("Partial_death_timer", -1)
+    ply:SetNWBool("isPartialDead", false)
+    ply:SetNWBool("isDragged", false)
+    
+    ply:SetNWBool("isLimp", false)
+    ply:SetNWBool("RightArmFracture", false)
+    ply:SetNWBool("LeftArmFracture", false)
 end
 
 
-hook.Add("EntityTakeDamage", "wms_damage_hook", WMS.DamageSystem.DamageHook)
 
+hook.Add("EntityTakeDamage", "wms_damage_hook", WMS.DamageSystem.DamageHook)
+hook.Add( "PlayerDisconnected", "wms_disco_hook", WMS.DamageSystem.DiscoHook)
 hook.Add("PlayerInitialSpawn", "wms_init", WMS.DamageSystem.Init)
 hook.Add("PlayerDeath", "wms_death_hook", WMS.DamageSystem.DeathHook)
 hook.Add("PlayerDeathSound", "wms_death_sound_hook", function(ply) return true end)

@@ -51,6 +51,9 @@ elseif (CLIENT) then
 		else
 			local Time, Delay, HearingMode = CurTime(), GetConVar("DP_Delay"):GetFloat(), GetConVar("DP_HearingCutOff"):GetBool()
 			if (MyState == STATE_ALIVE) then -- we just got shot
+				for _ = 0, 10 do
+					ply:EmitSound("aie/Rising_storm_death.wav")
+				end
 				MyState = STATE_DYING
 				LeaveTime = Time + Delay
 				GoneFraction = 0
@@ -60,7 +63,11 @@ elseif (CLIENT) then
 				GoneFraction = 1 - (TimeLeft / Delay)
 				if (GoneFraction >= 1) then
 					GoneFraction = 1
-					if (HearingMode) then ply:ConCommand("soundfade 100 99999") end
+					if (HearingMode) then 
+						timer.Simple(0.7, function()
+							ply:ConCommand("soundfade 100 99999")
+						end)  
+					end
 					MyState = STATE_GONE
 				end
 			elseif (MyState == STATE_GONE) then

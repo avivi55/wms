@@ -4,10 +4,10 @@ WMS = WMS or {}
 
 WMS.sounds = {
     headshotsounds = {
-        "physics/flesh/flesh_squishy_impact_hard1.wav",
-        "physics/flesh/flesh_squishy_impact_hard2.wav",
-        "physics/flesh/flesh_squishy_impact_hard3.wav",
-        "physics/flesh/flesh_squishy_impact_hard4.wav"
+        "aie/ent_tool_melee_001.wav",
+        "aie/ent_tool_melee_002.wav",
+        "aie/ent_tool_melee_003.wav",
+        "aie/ent_tool_melee_004.wav"
     },
 
     sound_folder_len = {

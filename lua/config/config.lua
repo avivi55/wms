@@ -5,9 +5,9 @@ WMS = WMS or {}
 WMS.DEBUG = true
 
 WMS.HemoSpeed = 5
-WMS.HemoImortance = 1 --hp
+WMS.HemoImportance = 1 --hp
 
-WMS.PartialDeathTime = 20
+WMS.PartialDeathTime = 3
 WMS.CorpsDeleteTime = 50
 
 WMS.DefaultWalkSpeed = 400 -- 400
@@ -80,6 +80,19 @@ WMS.DmgAreaH = {
     
     [WMS.DmgArea.DA_LEG] = "Jambe",
     [WMS.DmgArea.DA_FOOT] = "Pied",
+}
+
+WMS.DmgAreaT = {
+    [HITGROUP_HEAD] = "head",
+
+    [HITGROUP_CHEST] = "torso",
+    [HITGROUP_STOMACH] = "torso",
+  
+    [HITGROUP_LEFTARM] = "arm_left",
+    [HITGROUP_RIGHTARM] = "arm_right",
+    
+    [HITGROUP_RIGHTLEG] = "leg_right",
+    [HITGROUP_LEFTLEG] = "leg_left",
 }
 
 WMS.Chances = {

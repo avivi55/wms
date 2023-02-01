@@ -61,6 +61,12 @@ WMS.Utils.addFileToClient = function()
             resource.AddFile("sound/aie/" .. tostring(k) .. "/" .. tostring(k) .. "_death_voice" .. tostring(i) .. ".wav")
         end
     end
+
+    for i = 1, 4 do
+        resource.AddFile("sound/aie/ent_tool_melee_00" .. tostring(i) .. ".wav")
+    end
+
+    resource.AddFile("sound/aie/Rising_storm_death.wav")
 end
 
 WMS.Utils.syncDmgTbl = function(ply, dmg)

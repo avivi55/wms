@@ -68,7 +68,7 @@ if CLIENT then
 		local x, y = ScrW(), ScrH()
 		local FT = FrameTime()
 		
-		if etb_muffle_sound:GetInt() then
+		if false then
 			if ply:Health() <= etb_muffle_effect:GetInt() then
 				if not ply.lastDSP then
 					ply:SetDSP(14)

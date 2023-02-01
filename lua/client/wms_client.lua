@@ -11,7 +11,7 @@ hook.Add("PlayerSpawn", "wms_spawn", function(ply)
 end) 
 
 hook.Add( "CalcView", "tetet_zz_simfphys_gunner_view", function( ply, pos, ang )
-	print(ply)
+	---print(ply)
 	return{origin = pos}
 end )
 

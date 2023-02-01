@@ -1,11 +1,24 @@
 if (SERVER)then
-
+	print(GetConVar("developer"):GetInt())
 for k,v in pairs(player.GetAll())do
-    print(v)
-    v:Give("re_hands")
+    print(v, v:Alive())
+--[[     v:Give("re_hands")
+	prone.Exit(v)
+	v:EmitSound(WMS.sounds.headshotsounds[math.random(#WMS.sounds.headshotsounds)])
+	
+	local test = ents.Create("prop_physics")
+	test:SetModel("models/hunter/plates/plate.mdl")
+	test:FollowBone(v, v:LookupBone("ValveBiped.Bip01_Spine4"))
+	local t = v:GetBonePosition(v:LookupBone("ValveBiped.Bip01_Spine4"))
+	test:SetPos(t + 10*t:Angle():Forward())
+
+	local a = v:GetAngles()
+	--a:Normalize()
+	test:SetAngles(a)
+	timer.Simple(3, function() test:Remove() end) ]]
 end
 
-hook.Add( "SetupMove", "Cuffs Move Penalty", function(ply, mv, cmd)
+hook.Add( "SetupMove", "DragWMS", function(ply, mv, cmd)
 	local cuffed = ply:GetNWBool("isDragged")
     local kidnapper = ply:GetNWEntity("Kidnapper")
 	if (not cuffed) then return end
@@ -63,13 +76,6 @@ hook.Add( "SetupMove", "Cuffs Move Penalty", function(ply, mv, cmd)
 	end
 	
 	mv:SetVelocity( dir )
-	
-	if SERVER and mv:GetVelocity():Length()>=(mv:GetMaxClientSpeed()*10) and ply:IsOnGround() and CurTime()>(ply.Cuff_NextDragDamage or 0) then
-		ply:SetHealth( ply:Health()-1 )
-		if ply:Health()<=0 then ply:Kill() end
-		
-		ply.Cuff_NextDragDamage = CurTime()+0.1
-	end
 end)
 
 end

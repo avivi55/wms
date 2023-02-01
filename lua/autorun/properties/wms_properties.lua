@@ -52,11 +52,14 @@ properties.Add("medic_sheet", {
         local dmgs = ent.wms_dmg_tbl or {}
         --PrintTable(dmgs)
 
+        --print(dmgs[1].area, 123456789)
+
         local str = ""
         if (ent:IsPlayerRagdoll()) then str = str .. "MORT" end
         for k, dmg in pairs(dmgs) do
             str = str .. "Diagnostic n°" .. tostring(k) .. "\n"
             if (isstring(dmg.h_hit_grp)) then str = str .. "- Localisation : " .. dmg.h_hit_grp .. "\n" end
+            if (isnumber(dmg.area)) then str = str .. "- Loca : " .. WMS.DmgAreaH[dmg.area] .. "\n" end
             if (isstring(dmg.h_wep)) then str = str .. "- source de dégats : " .. dmg.h_wep .. "\n" 
             elseif (isnumber(dmg.wms_type) and dmg.wms_type > 0) then str = str .. "- source de dégats : " .. WMS.DmgTypesH[dmg.wms_type] .. "\n" end
             if (isnumber(dmg.damage)) then str = str .. "- Dégats : " .. tostring(math.Round(dmg.damage)) .. "\n" end
@@ -66,6 +69,9 @@ properties.Add("medic_sheet", {
 
         print(str)
 
+        local t = vgui.Create("MedicExam")
+        t:SetPlayer(ent)
+        
         self:MsgStart()
             net.WriteEntity(ent)
         self:MsgEnd()
@@ -138,6 +144,7 @@ local debugOrder = {
     "Full Health",
     "Half Health",
     "Low Health",
+    "Add diagnostic"
 }
 local debugFun = {
     ["Revive"] = function(ply)
@@ -177,6 +184,15 @@ local debugFun = {
     ["Low Health"] = function(ply)
         ply:SetHealth(20)
     end,
+    ["Add diagnostic"] = function(ply)
+        ply.wms_dmg_tbl[#ply.wms_dmg_tbl+1] = {
+            damage = 20,
+            wms_type = 7,
+            h_wep = "OUI"
+        }
+
+        WMS.Utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
+    end,
 }
 
 local debugIcon = {
@@ -189,6 +205,7 @@ local debugIcon = {
     ["Full Health"] = "heart_add",
     ["Half Health"] = "heart",
     ["Low Health"] = "heart_delete",
+    ["Add diagnostic"] = "plus",
 }
 
 properties.Add( "debug", {
