@@ -85,7 +85,7 @@ properties.Add("medic_sheet", {
         if (not self:Filter(ent, ply)) then return end
 
         local dmgs = ent.wms_dmg_tbl or {}
-
+        
         print(ply:Nick() .. " a ouvert le diagnostique sur " .. ent:Nick())
     end
 })

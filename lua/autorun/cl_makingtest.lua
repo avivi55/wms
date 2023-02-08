@@ -149,15 +149,8 @@ for k,v in pairs(player.GetAll())do
 
     do -- MedicPlayerPrint TODO
         local PANEL = {}
-        AccessorFunc(PANEL, "t", "TorsoDamage", FORCE_BOOL)
-        AccessorFunc(PANEL, "h", "HeadDamage", FORCE_BOOL)
-        AccessorFunc(PANEL, "a_r", "ArmRightDamage", FORCE_BOOL)
-        AccessorFunc(PANEL, "a_l", "ArmLeftDamage", FORCE_BOOL)
-        AccessorFunc(PANEL, "l_r", "LegRightDamage", FORCE_BOOL)
-        AccessorFunc(PANEL, "l_l", "LegLeftDamage", FORCE_BOOL)
 
         function PANEL:Init()
-            self.name = vgui.Create("DLabel", self)
             self.background = vgui.Create("DImage", self)
             self.head = vgui.Create("DImage", self)
             self.torso = vgui.Create("DImage", self)
@@ -169,7 +162,10 @@ for k,v in pairs(player.GetAll())do
             self.arm_left_b = vgui.Create("DImage", self)
             self.leg_right_b = vgui.Create("DImage", self)
             self.leg_left_b = vgui.Create("DImage", self)
-
+            self.arm_right_t = vgui.Create("DImage", self)
+            self.arm_left_t = vgui.Create("DImage", self)
+            self.leg_right_t = vgui.Create("DImage", self)
+            self.leg_left_t = vgui.Create("DImage", self)
 
             self.background:SetImage("vgui/body/background.png")
             self.head:SetImage("vgui/body/head.png")
@@ -182,6 +178,10 @@ for k,v in pairs(player.GetAll())do
             self.arm_left_b:SetImage("vgui/body/arm_left_b.png")
             self.leg_right_b:SetImage("vgui/body/leg_right_b.png")
             self.leg_left_b:SetImage("vgui/body/leg_left_b.png")
+            self.arm_right_t:SetImage("vgui/body/arm_right_t.png")
+            self.arm_left_t:SetImage("vgui/body/arm_left_t.png")
+            self.leg_right_t:SetImage("vgui/body/leg_right_t.png")
+            self.leg_left_t:SetImage("vgui/body/leg_left_t.png")
 
             self.background:SetKeepAspect(true)
             self.head:SetKeepAspect(true)
@@ -194,29 +194,15 @@ for k,v in pairs(player.GetAll())do
             self.arm_left_b:SetKeepAspect(true)
             self.leg_right_b:SetKeepAspect(true)
             self.leg_left_b:SetKeepAspect(true)
-            
-            self.background:SetPos(0, 0)
-            self.head:SetPos(0, 0)
-            self.torso:SetPos(0, 0)
-            self.arm_right:SetPos(0, 0)
-            self.arm_left:SetPos(0, 0)
-            self.leg_right:SetPos(0, 0)
-            self.leg_left:SetPos(0, 0)
-            self.arm_right_b:SetPos(0, 0)
-            self.arm_left_b:SetPos(0, 0)
-            self.leg_right_b:SetPos(0, 0)
-            self.leg_left_b:SetPos(0, 0)
+            self.arm_right_t:SetKeepAspect(true)
+            self.arm_left_t:SetKeepAspect(true)
+            self.leg_right_t:SetKeepAspect(true)
+            self.leg_left_t:SetKeepAspect(true)
         end
 
         function PANEL:Paint(w, h)
             --print(self.name:GetText() )
-            if(self.name:GetText() == "Label")then
-                local n = self:GetParent():GetParent():GetPlayer():Nick()
-                self.name:SetText(n)
-                self.name:SetPos(w/2 - surface.GetTextSize(n)/2 +1, 0)
-                self.name:SetColor(Color(255, 255, 255))
-            end
-
+            draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 150))
             if(self.background:GetSize() != w)then
                 self.background:SetSize(w, h)
                 self.head:SetSize(w, h)
@@ -229,13 +215,46 @@ for k,v in pairs(player.GetAll())do
                 self.arm_left_b:SetSize(w, h)
                 self.leg_right_b:SetSize(w, h)
                 self.leg_left_b:SetSize(w, h)
+                self.arm_right_t:SetSize(w, h)
+                self.arm_left_t:SetSize(w, h)
+                self.leg_right_t:SetSize(w, h)
+                self.leg_left_t:SetSize(w, h)
             end
 
-            self.head:SetImageColor(Color(255, 0, 0))
-            self.torso:SetImageColor(Color(98, 0, 255))
-            self.arm_right_b:SetImageColor(Color(255, 0, 0))
+            local ply = self:GetParent():GetParent():GetPlayer()
+            local dmgs = ply.wms_dmg_tbl or {}
 
-            draw.RoundedBox(0, 0, 0, 3, h, Color(0, 0, 0, 200))
+            for id, dmg in pairs(dmgs) do
+                PrintTable(dmg)
+                print(WMS.DmgAreaT[dmg.hit_grp])
+                self[WMS.DmgAreaT[dmg.hit_grp]]:SetImageColor(Color(255, 0, 0, 255))
+
+                local brokenColor = Color(49, 49, 49)
+
+                if(dmg.broken_r_arm)then
+                    self.arm_right_b:SetImageColor(brokenColor)
+                elseif(dmg.broken_l_arm)then
+                    self.arm_left_b:SetImageColor(brokenColor)
+                elseif(dmg.limp)then
+                    if(dmg.hit_grp == HITGROUP_RIGHTLEG)then
+                        self.leg_right_b:SetImageColor(brokenColor)
+                    elseif(dmg.hit_grp == HITGROUP_LEFTLEG)then
+                        self.leg_left_b:SetImageColor(brokenColor)
+                    end
+                end
+            end
+
+            
+            --self.head:SetImageColor(Color(255, 0, 0))
+            --self.torso:SetImageColor(Color(98, 0, 255))
+            --self.arm_right_b:SetImageColor(Color(255, 0, 0))
+
+            self.arm_right_t:SetImageColor(Color(0, 0, 0, 0))
+            self.arm_left_t:SetImageColor(Color(0, 0, 0, 0))
+            self.leg_right_t:SetImageColor(Color(0, 0, 0, 0))
+            self.leg_left_t:SetImageColor(Color(0, 0, 0, 0))
+
+            --draw.RoundedBox(0, 0, 0, 3, h, Color(0, 0, 0, 200))
         end
         vgui.Register("MedicPlayerPrint", PANEL, "DPanel")
     end
@@ -255,14 +274,21 @@ for k,v in pairs(player.GetAll())do
             draw.RoundedBox(0, 0, 0, w, h, Color(78, 78, 78, 50))
 
             draw.RoundedBox(0, 0 ,0, h/4, h/4, Color(46, 46, 46))
-            draw.Text({text = "n°"..self:GetNumber(), pos = {0, h/16}})
+            surface.SetFont("TargetID")
+            local w_, h_ = surface.GetTextSize("n°"..self:GetNumber())
+            draw.DrawText("n°"..self:GetNumber(), "TargetID", h/8 - w_/2, h/8 - h_/2)
             
-            --draw.RoundedBox(0, h/4, 0, w-h/4, h/4, Color(0, 0, 0, 175))
             draw.RoundedBox(0, h/4, 0, ((w-h/4)*self:GetDamage())/100, h/4, Color(81, 78, 230, 232))
-            draw.Text({text = " "..self:GetDamage(), pos = {w/2 - h/8, h/16}})
+            
+            w_, h_ = surface.GetTextSize(self:GetDamage())
+            local nw = w - h/4
+            local x = h/4
+            draw.DrawText(self:GetDamage(), "TargetID",(x + nw - w_)/2, h/8 - h_/2)
+            
             
             draw.RoundedBox(0, w/2, h/4, 3, h-h/4, Color(0, 0, 0, 232))
             
+
             if(self.image:GetImage() == "")then
                 local x = ((w/2) - (3/4*h))/2
                 local source = self:GetSource()
@@ -288,11 +314,18 @@ for k,v in pairs(player.GetAll())do
 
         function PANEL:Paint(w, h)
             local grandParent = self:GetParent():GetParent()
-
+            
             if(self.t)then return end
-            self.t = true 
-            local dmgs = grandParent:GetPlayer().wms_dmg_tbl or {}
 
+            local dmgs = grandParent:GetPlayer().wms_dmg_tbl or {}
+            
+            if (#dmgs == 0) then
+                draw.RoundedBox(0, 0, 0, w, h, Color(0, 255, 21, 12))
+                surface.SetDrawColor(Color(0, 255, 0, 50))
+                surface.DrawLine(0, 0, w, h)
+                surface.DrawLine(0, h, w, 0)
+                return
+            end
             for k, dmg in pairs(dmgs) do
                 --print(dmg.h_wep, dmg.damage, WMS.DmgAreaT[dmg.hit_grp])
                 local t = self:Add("MedicDiagnostic")
@@ -311,10 +344,39 @@ for k,v in pairs(player.GetAll())do
                 l:SetHeight(10)
                 l.Paint = function(self, w, h) return end
                 l:Dock(TOP)
-            end            
+            end
+            self.t = true 
         end
 
         vgui.Register("MedicDiagnostics", PANEL, "DScrollPanel")
+    end
+
+    do -- MedicInfoCard
+        local PANEL = {}
+
+        function PANEL:Paint(w, h)
+            local grandParent = self:GetParent():GetParent()
+
+            local ply = grandParent:GetPlayer()
+            if(!ply)then return end
+
+
+            draw.RoundedBox(0, 0, 0, w, h, Color(68,68,68,150))
+            
+            surface.SetFont("CenterPrintText")
+            local w_, h_ = surface.GetTextSize("Nom : " .. ply:Nick())
+            draw.DrawText("Nom : " .. ply:Nick(), "CenterPrintText", h+ h/4, h_/4)
+            draw.DrawText("Grade : " .. ply:getJobTable().name, "CenterPrintText", h+ h/4, h/2 + h_/4)
+
+            --PrintTable(ply:getJobTable())
+            
+            local img = vgui.Create("DImage", self)
+            img:SetImage("vgui/ui/triage_card.png")
+            img:SetPos(0, 0)
+            img:SetSize(h, h)
+        end
+
+        vgui.Register("MedicInfoCard", PANEL, "DPanel")
     end
 
     do
@@ -344,29 +406,45 @@ for k,v in pairs(player.GetAll())do
             self.mainShelf = vgui.Create( "DPanel", self )
             self.mainShelf:SetSize(W, H-topH)
             self.mainShelf:SetPos(0, topH)
+            local test = true 
             local main = self.mainShelf
             main.Paint = function(s, w, h) 
                 surface.SetDrawColor(Color(0, 0, 0, 240))
                 surface.DrawRect(0, 0, w, h)
                 if(ply)then
-                    draw.RoundedBox(0, 0, h-h/8, w/2, h/8, Color(0, 0, 0, 157))
-                    draw.RoundedBox(0, 0, h-h/8, (ply:Health() * w)/200, h/8, Color(255, 96, 96, 232))
+                    if(test)then
+                        test = false
+                        if(#ply.wms_dmg_tbl != 0)then
+                            local dmg_list = vgui.Create("MedicDiagnostics", main)
+                            dmg_list:SetPos(w - w/4, 0)
+                            dmg_list:SetSize(w/4, h)
+                        else
+                            main:SetWidth(w-w/4)
+                            self.topShelf:SetWidth(w-w/4)
+                        end
+                    end
+
+                    draw.RoundedBox(0, 0, h-h/8, W/2, h/8, Color(0, 0, 0, 157))
+                    draw.RoundedBox(0, 0, h-h/8, (ply:Health()*W)/200, h/8, Color(255, 96, 96, 232))
+                    
+                    surface.SetFont("CenterPrintText")
                     local w_, h_ = surface.GetTextSize(ply:Health())
-                    draw.Text({text = ply:Health(), pos = {w/4, (h-h/16)-h_/2}})
+                    draw.DrawText(ply:Health(), "CenterPrintText", W/4 - w_/2, (h-h/16)-h_/2)
+                    
                     return 
                 end
                 ply = self:GetPlayer()
             end
-            W, H = main:GetSize()
 
+            _, H = main:GetSize()
 
             local playerModel = vgui.Create("MedicPlayerPrint", main)
-            playerModel:SetPos(W - W/4, 0)
+            playerModel:SetPos(W - 2*W/4, 0)
             playerModel:SetSize(W/4, H)
 
-            local dmg_list = vgui.Create("MedicDiagnostics", main)
-            dmg_list:SetPos(W - 2*W/4, 0)
-            dmg_list:SetSize(W/4, H)
+            local info_card = vgui.Create("MedicInfoCard", main)
+            info_card:SetPos(0, 0)
+            info_card:SetSize(W/2, H/8)
 
         end
 
