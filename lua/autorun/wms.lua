@@ -1,7 +1,6 @@
 AddCSLuaFile()
 AddCSLuaFile("client/wms_client.lua")
 WMS = WMS or {}
---PrintTable(WMS.sounds)
 
 include("autorun/properties/wms_properties.lua")
 include("config/sounds.lua")
@@ -10,8 +9,9 @@ include("config/config.lua")
 
 include("sh_wms_utils.lua")
 
+include("prettyPrint.lua")
+
 if (SERVER) then
-    include("prettyPrint.lua")
     include("server/wms_init.lua")
 end
 

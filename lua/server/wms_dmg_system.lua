@@ -1,9 +1,5 @@
-print()
-
 WMS = WMS or {}
 WMS.DamageSystem = WMS.DamageSystem or {}
-
-
 
 
 WMS.DamageSystem.IsBleedingDmg = function(dmg)
@@ -30,7 +26,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     if (not IsValid(dmg.inflictor)) then dmg.inflictor = dmg.attacker end
 
     dmg.hit_grp = ply:LastHitGroup()
-    dmg.h_hit_grp = WMS.HIT[dmg.hit_grp]
+    --dmg.h_hit_grp = WMS.HIT[dmg.hit_grp]
 
     dmg.damage = dmgi:GetDamage()
 
@@ -50,50 +46,50 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     end 
 
     -- dmg type
-    dmg.wms_type = WMS.DmgTypes.DT_NORMAL
+    dmg.wms_type = WMS.enums.dmgTypes.DT_NORMAL
 
     if (WMS.DamageSystem.IsBleedingDmg(dmg)) then
-        dmg.wms_type = WMS.DmgTypes.DT_BLEED
+        dmg.wms_type = WMS.enums.dmgTypes.DT_BLEED
         dmg.hemorrhage = true
         return dmg
 
     elseif(WMS.Utils.tblContains(WMS.weapons.no_damage, dmg.inflictor:GetClass()))then
-        dmg.wms_type = WMS.DmgTypes.DT_NO_DAMAGE
+        dmg.wms_type = WMS.enums.dmgTypes.DT_NO_DAMAGE
         
     elseif(dmgi:IsFallDamage())then
-        dmg.wms_type = WMS.DmgTypes.DT_FALL
+        dmg.wms_type = WMS.enums.dmgTypes.DT_FALL
     
     elseif(WMS.DamageSystem.IsExplosionDamage(dmg, dmgi))then
-        dmg.wms_type = WMS.DmgTypes.DT_EXPLOSION
+        dmg.wms_type = WMS.enums.dmgTypes.DT_EXPLOSION
 
     elseif(WMS.DamageSystem.IsVehicleDamage(dmg))then
-        dmg.wms_type = WMS.DmgTypes.DT_VEHICLE
+        dmg.wms_type = WMS.enums.dmgTypes.DT_VEHICLE
 
     elseif(dmg.attacker:IsPlayer())then
-        dmg.wms_type = WMS.DmgTypes.DT_NORMAL
+        dmg.wms_type = WMS.enums.dmgTypes.DT_NORMAL
 
     elseif(IsValid(dmg.wep))then
         if(not WMS.Utils.tblContains(WMS.weapons, dmg.wep_class))then
-            dmg.wms_type = WMS.DmgTypes.DT_NO_DAMAGE
+            dmg.wms_type = WMS.enums.dmgTypes.DT_NO_DAMAGE
         end
     end    
 
     dmg.h_wep = ""
-    dmg.wep_type = WMS.WepTypes.WT_RIFLE
+    dmg.wep_type = WMS.enums.wepTypes.WT_RIFLE
 
     if (WMS.Utils.tblContains(WMS.weapons.cut, dmg.wep_class) or WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass())) then
-        dmg.wep_type = WMS.WepTypes.WT_CUT
+        dmg.wep_type = WMS.enums.wepTypes.WT_CUT
         dmg.h_wep = "cut"
 
     elseif (WMS.Utils.tblContains(WMS.weapons.pistol, dmg.wep_class)) then
-        dmg.wep_type = WMS.WepTypes.WT_PISTOL
+        dmg.wep_type = WMS.enums.wepTypes.WT_PISTOL
         dmg.h_wep = "pistol"
 
     elseif (WMS.Utils.tblContains(WMS.weapons.rifle, dmg.wep_class) or not IsValid(dmg.wep)) then
-        dmg.wep_type = WMS.WepTypes.WT_RIFLE
+        dmg.wep_type = WMS.enums.wepTypes.WT_RIFLE
         dmg.h_wep = "rifle"
     
-    elseif (dmg.wms_type == WMS.DmgTypes.DT_VEHICLE) then
+    elseif (dmg.wms_type == WMS.enums.dmgTypes.DT_VEHICLE) then
         dmg.h_wep = "vehicle"
 
     elseif (not WMS.Utils.tblContains(WMS.weapons.rifle, dmg.wep_class) and IsValid(dmg.wep) and dmg.inflictor:IsPlayer() and not dmg.inflictor:InVehicle()) then
@@ -106,19 +102,19 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     local chance = math.random(100)
 
-    if ((dmg.hit_grp == HITGROUP_CHEST or dmg.wms_type == WMS.DmgTypes.DT_VEHICLE or not IsValid(dmg.wep)) and 
+    if ((dmg.hit_grp == HITGROUP_CHEST or dmg.wms_type == WMS.enums.dmgTypes.DT_VEHICLE or not IsValid(dmg.wep)) and 
         (not WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass()))) then
 
-        if (chance <= WMS.Chances[WMS.DmgArea.DA_TORSO].chance) then
-            dmg.area = WMS.DmgArea.DA_TORSO
+        if (chance <= WMS.Chances[WMS.enums.dmgArea.DA_TORSO].chance) then
+            dmg.area = WMS.enums.dmgArea.DA_TORSO
             
-        elseif(chance <= WMS.Chances[WMS.DmgArea.DA_TORSO].chance + WMS.Chances[WMS.DmgArea.DA_HEART].chance)then
-            dmg.area = WMS.DmgArea.DA_HEART
+        elseif(chance <= WMS.Chances[WMS.enums.dmgArea.DA_TORSO].chance + WMS.Chances[WMS.enums.dmgArea.DA_HEART].chance)then
+            dmg.area = WMS.enums.dmgArea.DA_HEART
 
         else
-            dmg.area = WMS.DmgArea.DA_LUNGS
+            dmg.area = WMS.enums.dmgArea.DA_LUNGS
         end
-        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
+        dmg.h_hit_grp = WMS.human.dmgArea[dmg.area]
     elseif(dmg.hit_grp == HITGROUP_GENERIC or 
         WMS.Utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass()) or
         WMS.Utils.tblContains(WMS.weapons.cut, wep)
@@ -133,14 +129,14 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
                 break
             end
         end
-        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
+        dmg.h_hit_grp = WMS.human.dmgArea[dmg.area]
     elseif (dmg.hit_grp == HITGROUP_HEAD) then
-        if (chance <= WMS.Chances[WMS.DmgArea.DA_SKULL].chance) then
-            dmg.area = WMS.DmgArea.DA_SKULL
-        elseif(chance <= WMS.Chances[WMS.DmgArea.DA_SKULL].chance + WMS.Chances[WMS.DmgArea.DA_FACE].chance)then
-            dmg.area = WMS.DmgArea.DA_FACE
+        if (chance <= WMS.Chances[WMS.enums.dmgArea.DA_SKULL].chance) then
+            dmg.area = WMS.enums.dmgArea.DA_SKULL
+        elseif(chance <= WMS.Chances[WMS.enums.dmgArea.DA_SKULL].chance + WMS.Chances[WMS.enums.dmgArea.DA_FACE].chance)then
+            dmg.area = WMS.enums.dmgArea.DA_FACE
         else
-            dmg.area = WMS.DmgArea.DA_NECK
+            dmg.area = WMS.enums.dmgArea.DA_NECK
         end
         --print("sound")
         local sound_ = WMS.sounds.headshotsounds[math.random(#WMS.sounds.headshotsounds)]
@@ -148,31 +144,31 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         for i=0,10 do
             ply:EmitSound(sound_, 90)
         end
-        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
+        dmg.h_hit_grp = WMS.human.dmgArea[dmg.area]
     elseif (dmg.hit_grp == HITGROUP_STOMACH) then
-        if(chance <= WMS.Chances[WMS.DmgArea.DA_STOMACH].chance)then
-            dmg.area = WMS.DmgArea.DA_STOMACH
+        if(chance <= WMS.Chances[WMS.enums.dmgArea.DA_STOMACH].chance)then
+            dmg.area = WMS.enums.dmgArea.DA_STOMACH
         else
-            dmg.area = WMS.DmgArea.DA_LIVER
+            dmg.area = WMS.enums.dmgArea.DA_LIVER
         end
-        dmg.h_hit_grp = WMS.DmgAreaH[dmg.area]
+        dmg.h_hit_grp = WMS.human.dmgArea[dmg.area]
 
     elseif (dmg.hit_grp == HITGROUP_LEFTLEG or dmg.hit_grp == HITGROUP_RIGHTLEG) then
-        if(chance <= WMS.Chances[WMS.DmgArea.DA_LEG].chance)then
-            dmg.area = WMS.DmgArea.DA_LEG
+        if(chance <= WMS.Chances[WMS.enums.dmgArea.DA_LEG].chance)then
+            dmg.area = WMS.enums.dmgArea.DA_LEG
         else
-            dmg.area = WMS.DmgArea.DA_FOOT
+            dmg.area = WMS.enums.dmgArea.DA_FOOT
         end
 
     elseif (dmg.hit_grp == HITGROUP_LEFTARM or dmg.hit_grp == HITGROUP_RIGHTARM) then
-        if(chance <= WMS.Chances[WMS.DmgArea.DA_ARM].chance)then
-            dmg.area = WMS.DmgArea.DA_ARM
+        if(chance <= WMS.Chances[WMS.enums.dmgArea.DA_ARM].chance)then
+            dmg.area = WMS.enums.dmgArea.DA_ARM
         else
-            dmg.area = WMS.DmgArea.DA_HAND
+            dmg.area = WMS.enums.dmgArea.DA_HAND
         end
     end
 
-    local death_explosion = dmg.wms_type == WMS.DmgTypes.DT_EXPLOSION and dmg.damage >= 70
+    local death_explosion = dmg.wms_type == WMS.enums.dmgTypes.DT_EXPLOSION and dmg.damage >= 70
 
     local final_dmg = {}
 
@@ -191,7 +187,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         final_dmg.damage = math.random(range[1], range[2])
     end
 
-    if (dmg.wms_type == WMS.DmgTypes.DT_FALL) then
+    if (dmg.wms_type == WMS.enums.dmgTypes.DT_FALL) then
         final_dmg.total_death = false
     end
 
@@ -204,7 +200,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         final_dmg.limp = true 
     end
 
-    if (dmg.wms_type == WMS.DmgTypes.DT_VEHICLE or dmg.wms_type == WMS.DmgTypes.DT_FALL) then final_dmg.hemorrhage = false end
+    if (dmg.wms_type == WMS.enums.dmgTypes.DT_VEHICLE or dmg.wms_type == WMS.enums.dmgTypes.DT_FALL) then final_dmg.hemorrhage = false end
     if (death_explosion) then final_dmg.total_death = true end
     
 
@@ -213,9 +209,9 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     final_dmg.hit_grp = dmg.hit_grp
 
 
-    if (dmg.area == WMS.DmgArea.DA_LEG or
-        dmg.wms_type == WMS.DmgTypes.DT_VEHICLE or
-        dmg.wms_type == WMS.DmgTypes.DT_FALL or
+    if (dmg.area == WMS.enums.dmgArea.DA_LEG or
+        dmg.wms_type == WMS.enums.dmgTypes.DT_VEHICLE or
+        dmg.wms_type == WMS.enums.dmgTypes.DT_FALL or
         final_dmg.damage >= 70) then
         
         final_dmg.limp = true
@@ -223,7 +219,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     final_dmg.broken_r_arm = false 
     final_dmg.broken_l_arm = false 
-    if (dmg.area == WMS.DmgArea.DA_ARM) then
+    if (dmg.area == WMS.enums.dmgArea.DA_ARM) then
         if (dmg.hit_grp == HITGROUP_RIGHTARM)then
             final_dmg.broken_r_arm = true 
         else
@@ -231,12 +227,12 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         end
     end
 
-    if (dmg.wms_type == WMS.DmgTypes.DT_FALL) then
+    if (dmg.wms_type == WMS.enums.dmgTypes.DT_FALL) then
         final_dmg.h_wep = nil
     end
 
     if (dmg.victim == dmg.inflictor) then
-        final_dmg.wms_type = WMS.DmgTypes.DT_NO_DAMAGE
+        final_dmg.wms_type = WMS.enums.dmgTypes.DT_NO_DAMAGE
     end
 
     final_dmg.area = dmg.area
@@ -255,7 +251,7 @@ end
 WMS.DamageSystem.DamageApplier = function(ply, dmg)
     if (not ply:Alive()) then return end
 
-    if (dmg.wms_type == WMS.DmgTypes.DT_NO_DAMAGE)then
+    if (dmg.wms_type == WMS.enums.dmgTypes.DT_NO_DAMAGE)then
         ply.wms_dmg_tbl[#ply.wms_dmg_tbl+1] = table.Copy(dmg)
         WMS.Utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
         return 0
