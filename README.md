@@ -31,4 +31,4 @@ and it's use is still buggy but I am working on it daily
 
 `Winnie's Medical System`
 
-🇦🇲
+🇦🇲❤️🇫🇷
