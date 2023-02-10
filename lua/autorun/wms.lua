@@ -19,4 +19,4 @@ if (CLIENT) then
     include("client/wms_client.lua")
 end
 
-WMS.Utils.loadPrint()
+WMS.utils.loadPrint()

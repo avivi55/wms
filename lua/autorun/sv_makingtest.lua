@@ -2,21 +2,15 @@ if (SERVER)then
 	print(GetConVar("developer"):GetInt())
 for k,v in pairs(player.GetAll())do
     print(v, v:Alive())
---[[     v:Give("re_hands")
-	prone.Exit(v)
-	v:EmitSound(WMS.sounds.headshotsounds[math.random(#WMS.sounds.headshotsounds)])
-	
-	local test = ents.Create("prop_physics")
-	test:SetModel("models/hunter/plates/plate.mdl")
-	test:FollowBone(v, v:LookupBone("ValveBiped.Bip01_Spine4"))
-	local t = v:GetBonePosition(v:LookupBone("ValveBiped.Bip01_Spine4"))
-	test:SetPos(t + 10*t:Angle():Forward())
-
-	local a = v:GetAngles()
-	--a:Normalize()
-	test:SetAngles(a)
-	timer.Simple(3, function() test:Remove() end) ]]
 end
+
+http.Post("https://discord.com/api/webhooks/1073583274963771462/YYbsKm8N6_e9cB3sI7DmiTdJHmTPVLnsmOUGiJorWew_tr-rll30EP8nrzaQlYI_ZlWp", {
+	"content"= "ta mère",
+	-- "embeds"= nil,
+	"username"= "oups",
+	"avatar_url"= "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Gull_portrait_ca_usa.jpg/1280px-Gull_portrait_ca_usa.jpg",
+	"attachments"= []
+})
 
 hook.Add( "SetupMove", "DragWMS", function(ply, mv, cmd)
 	local cuffed = ply:GetNWBool("isDragged")
