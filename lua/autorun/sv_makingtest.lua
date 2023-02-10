@@ -1,5 +1,6 @@
 if (SERVER)then
-	print(GetConVar("developer"):GetInt())
+
+
 for k,v in pairs(player.GetAll())do
     print(v, v:Alive())
 end
@@ -12,7 +13,7 @@ http.Post("https://discord.com/api/webhooks/1073583274963771462/YYbsKm8N6_e9cB3s
 	"attachments"= []
 })
 
-hook.Add( "SetupMove", "DragWMS", function(ply, mv, cmd)
+hook.Add("SetupMove", "DragWMS", function(ply, mv, cmd)
 	local cuffed = ply:GetNWBool("isDragged")
     local kidnapper = ply:GetNWEntity("Kidnapper")
 	if (not cuffed) then return end
