@@ -25,8 +25,6 @@ and it's use is still buggy but I am working on it daily
 - [ ] Healing System
 - [ ] CLEANING CODE
 ---
-> this addon is made for the LPS server
-
 
 ## Dependencies
 
@@ -35,6 +33,8 @@ and it's use is still buggy but I am working on it daily
 - [G-Core lib](https://github.com/SlownLS-Gmod/gcore-lib)
 
 ---
+> this addon is made for the LPS server
+
 `Winnie's Natural Selection`
 
 `Winnie's Medical System`
