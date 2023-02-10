@@ -357,7 +357,7 @@ do -- PLAYER FUNCTIONS
             
             self:SetNWInt("Pulse", math.random(3, 20))
             self:SetNWInt("Partial_death_timer", CurTime())
-            timer.Simple(WMS.PartialDeathTime, function()
+            timer.Simple(WMS.config.partialDeathTime, function()
                 if(not self:GetCreator():GetNWBool("isPartialDead")) then return end
                 self:Kill()
             end)

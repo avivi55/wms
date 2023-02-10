@@ -5,7 +5,7 @@ The WNS (War Nursing System) is a addon with the intent to bring a little bit of
 - high chance of death upon being hit
 - heamorage
 - limp
-- gabbing your mate when his limp
+- grabbing your mate when he is limp
 - ACE like diagnostic sheet
 - Death screen
 - low health effects
@@ -28,9 +28,10 @@ and it's use is still buggy but I am working on it daily
 
 ## Dependencies
 
-- [Entity Position Kit](https://github.com/Pika-Software/plib_entity_position_kit)
-- [Plib](https://github.com/Pika-Software/gmod_plib)
-- [G-Core lib](https://github.com/SlownLS-Gmod/gcore-lib)
+- [gmod_improved_player_ragdolls](https://github.com/Pika-Software/gmod_improved_player_ragdolls)
+- [~~Entity Position Kit~~](https://github.com/Pika-Software/plib_entity_position_kit)
+- [~~Plib~~](https://github.com/Pika-Software/gmod_plib)
+- [~~G-Core lib~~](https://github.com/SlownLS-Gmod/gcore-lib)
 
 ---
 > this addon is made for the LPS server

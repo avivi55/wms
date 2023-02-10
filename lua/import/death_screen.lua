@@ -170,7 +170,7 @@ elseif (CLIENT) then
 			surface.DrawText("Mais un medecin peut encore venir vous sauvez")
 	
 			surface.SetTextPos(ScrW()/2, ScrH()/1.20)
-			surface.DrawText(tostring(math.floor((ply:GetNWInt("Partial_death_timer") + WMS.PartialDeathTime + 1) - CurTime())) .. "s")
+			surface.DrawText(tostring(math.floor((ply:GetNWInt("Partial_death_timer") + WMS.config.partialDeathTime + 1) - CurTime())) .. "s")
 		end
 	end)
 end
