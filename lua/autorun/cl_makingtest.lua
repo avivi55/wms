@@ -226,8 +226,8 @@ for k,v in pairs(player.GetAll())do
 
             for id, dmg in pairs(dmgs) do
                 PrintTable(dmg)
-                print(WMS.DmgAreaT[dmg.hit_grp])
-                self[WMS.DmgAreaT[dmg.hit_grp]]:SetImageColor(Color(255, 0, 0, 255))
+                print(WMS.dmgAreaToImage[dmg.hit_grp])
+                self[WMS.dmgAreaToImage[dmg.hit_grp]]:SetImageColor(Color(255, 0, 0, 255))
 
                 local brokenColor = Color(49, 49, 49)
 
@@ -327,9 +327,9 @@ for k,v in pairs(player.GetAll())do
                 return
             end
             for k, dmg in pairs(dmgs) do
-                --print(dmg.h_wep, dmg.damage, WMS.DmgAreaT[dmg.hit_grp])
+                --print(dmg.h_wep, dmg.damage, WMS.dmgAreaToImage[dmg.hit_grp])
                 local t = self:Add("MedicDiagnostic")
-                t:SetArea(WMS.DmgAreaT[dmg.hit_grp])
+                t:SetArea(WMS.dmgAreaToImage[dmg.hit_grp])
                 t:SetDamage(dmg.damage)
                 t:SetNumber(k)
                 if(dmg.h_wep == "")then

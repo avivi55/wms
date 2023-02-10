@@ -191,7 +191,7 @@ local debugFun = {
             h_wep = "OUI"
         }
 
-        WMS.Utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
+        WMS.utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
     end,
 }
 local debugIcon = {

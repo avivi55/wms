@@ -3,14 +3,14 @@ AddCSLuaFile()
 WMS = WMS or {}
 
 WMS.sounds = {
-    headshotsounds = {
+    headshotSounds = {
         "aie/ent_tool_melee_001.wav",
         "aie/ent_tool_melee_002.wav",
         "aie/ent_tool_melee_003.wav",
         "aie/ent_tool_melee_004.wav"
     },
 
-    sound_folder_len = {
+    soundFolderLen = {
         ger_1 = 42,
         ger_2 = 40,
         ger_3 = 35,
