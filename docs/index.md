@@ -1,7 +1,3 @@
-hello
-
-# WNS/WMS
-
 The WNS (War Nursing System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing.
 
 - high chance of death upon being hit

@@ -95,12 +95,12 @@ WMS.weapons = {
     },
 
     fire = "codww2_molotov",
-    no_damage = {
+    noDamage = {
         "prop_physics",
         "gmod_balloon"},
 
 
-    one_arm = {
+    oneArm = {
         "cw_kk_ins2_doi_luger",
         "cw_kk_ins2_doi_p38",
         "cw_kk_ins2_doi_c96",

@@ -22,15 +22,6 @@ function ENTITY:IsPlayerRagdoll()
 end
 
 if (SERVER) then
-	hook.Add( "EntityTakeDamage", "EntityDamageExample", function( target, dmginfo )
-		if(target:IsPlayerRagdoll() and target:GetCreator():GetNWBool("isPartialDead")) then 
-			if(dmginfo:GetDamage() > 10) then
-				target:GetCreator():Kill()
-			end
-			return true
-		end
-	end )
-
 	local util_IsValidModel = util.IsValidModel
 	local ents_Create = ents.Create
 	local hook_Add = hook.Add

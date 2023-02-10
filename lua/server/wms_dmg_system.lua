@@ -1,6 +1,6 @@
 WMS = WMS or {}
 WMS.DamageSystem = WMS.DamageSystem or {}
-
+WMS.DamageSystem.Hooks = {}
 
 WMS.DamageSystem.IsBleedingDmg = function(dmg)
     return dmg.type == DMG_BLEEDING / 2
@@ -53,7 +53,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         dmg.hemorrhage = true
         return dmg
 
-    elseif(WMS.utils.tblContains(WMS.weapons.no_damage, dmg.inflictor:GetClass()))then
+    elseif(WMS.utils.tblContains(WMS.weapons.noDamage, dmg.inflictor:GetClass()))then
         dmg.wms_type = WMS.config.enums.dmgTypes.NO_DAMAGE
         
     elseif(dmgi:IsFallDamage())then
@@ -356,7 +356,7 @@ do -- PLAYER FUNCTIONS
             self:StripWeapons()
             
             self:SetNWInt("Pulse", math.random(3, 20))
-            self:SetNWInt("Partial_death_timer", CurTime())
+            self:SetNWInt("PartialDeathTimer", CurTime())
             timer.Simple(WMS.config.partialDeathTime, function()
                 if(not self:GetCreator():GetNWBool("isPartialDead")) then return end
                 self:Kill()
@@ -382,26 +382,18 @@ do -- PLAYER FUNCTIONS
             for k,v in pairs(rag.ammo) do
                 self:GiveAmmo(k, v)
             end
-
             
             self:SelectWeapon(rag.ActiveWeapon)
-            
-
 
             self.wms_dmg_tbl = table.Copy(rag.wms_dmg_tbl)
-
         end
 
-        hook.Add("PlayerSpawnObject", "WMS_Partial_Death_spawn_obj", function(ply)
+        hook.Add("PlayerSpawnObject", "WMS::PreventPropSpawnOnDeath", function(ply)
             if (ply:GetNWBool("isPartialDead")) then return false end
         end)
         
-        hook.Add("CanPlayerSuicide", "WMS_Partial_Death_suicide", function(ply)
+        hook.Add("CanPlayerSuicide", "WMS::PreventSuicide", function(ply)
             if (ply:GetNWBool("isPartialDead")) then return false end
-        end)
-        
-        hook.Add("PlayerDeath", "WMS_Partial_Death_remove_ragdoll_death", function(ply)
-            if (ply:GetNWBool("isPartialDead")) then ply:RemoveRagdoll() end
         end)
     end
 
@@ -424,11 +416,11 @@ do -- PLAYER FUNCTIONS
             self:SetWalkSpeed(WMS.config.defaultWalkSpeed)
         end
 
-        WMS.DamageSystem.LegHitHook = function(ply)
+        WMS.DamageSystem.Hooks.LegHit = function(ply)
             return !ply:GetNWBool("isLimp")
         end
 
-        hook.Add("prone.CanExit", "wms_stop_getting_up", WMS.DamageSystem.LegHitHook)
+        hook.Add("prone.CanExit", "WMS::PreventGettingUpOnLimp", WMS.DamageSystem.Hooks.LegHit)
 
 
         -- ARMS
@@ -454,7 +446,7 @@ do -- PLAYER FUNCTIONS
             if (WMS.utils.tblContains(WMS.weapons.rifle, wep:GetClass()) or
                 WMS.utils.tblContains(WMS.weapons.pistol, wep:GetClass()) or
                 WMS.utils.tblContains(WMS.weapons.cut, wep:GetClass()) and
-                !WMS.utils.tblContains(WMS.weapons.one_arm, wep:GetClass())
+                !WMS.utils.tblContains(WMS.weapons.oneArm, wep:GetClass())
             ) then
                 self:DropWeapon(wep)
             end
@@ -472,7 +464,7 @@ do -- PLAYER FUNCTIONS
             self:SetNWBool("LefttArmFracture", false)
         end
 
-        WMS.DamageSystem.ArmDamageHook = function(ply, oldWep, newWep)
+        WMS.DamageSystem.Hooks.ArmDamage = function(ply, oldWep, newWep)
             if (ply:Alive() and ply:Health() <= 30) then
                 ply:SetActiveWeapon(ply:Give("re_hands"))
                 return true 
@@ -480,20 +472,20 @@ do -- PLAYER FUNCTIONS
             if (ply:GetNWBool("RightArmFracture")) then return true end
 
             if (ply:GetNWBool("LeftArmFracture") ) then
-                if(WMS.utils.tblContains(WMS.weapons.one_arm, wep:GetClass()))then 
+                if(WMS.utils.tblContains(WMS.weapons.oneArm, wep:GetClass()))then 
                     return false
                 end
             end
         end
 
-        hook.Add("PlayerSwitchWeapon", "wms_left_arm_broken", WMS.DamageSystem.ArmDamageHook)
+        hook.Add("PlayerSwitchWeapon", "WMS::LeftArmBroke", WMS.DamageSystem.Hooks.ArmDamage)
     end
 end
 
 
 
 -- HOOKS
-WMS.DamageSystem.Init = function(ply, trans)
+WMS.DamageSystem.Hooks.Init = function(ply, trans)
     hook.Call( "CalcView" )
 
     ply:UnSpectate()
@@ -504,7 +496,7 @@ WMS.DamageSystem.Init = function(ply, trans)
     
     ply:SetNWInt("Pulse", math.random(70, 90))
     
-    ply:SetNWInt("Partial_death_timer", -1)
+    ply:SetNWInt("PartialDeathTimer", -1)
     ply:SetNWBool("isPartialDead", false)
     ply:SetNWBool("isDragged", false)
     
@@ -514,8 +506,11 @@ WMS.DamageSystem.Init = function(ply, trans)
 
 end
 
-WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
+WMS.DamageSystem.Hooks.Death = function(victim, inflictor, attacker)
     if (victim:Alive()) then return end
+
+    if (ply:GetNWBool("isPartialDead")) then ply:RemoveRagdoll() end
+    
     if (victim:GetNWBool("hemo")) then
         timer.Remove("Hemo_" .. victim:EntIndex())
         victim:SetBleeding(false)
@@ -529,11 +524,17 @@ WMS.DamageSystem.DeathHook = function(victim, inflictor, attacker)
 
     
     PrintC("[WMS] Player Damage table Deleted !", 8, "1")
-    WMS.DamageSystem.Init(victim, false)
+    WMS.DamageSystem.Hooks.Init(victim, false)
     hook.Call( "CalcView" )
 end
 
-WMS.DamageSystem.DamageHook = function(target, dmginfo)
+WMS.DamageSystem.Hooks.Damage = function(target, dmginfo)
+    if(target:IsPlayerRagdoll() and target:GetCreator():GetNWBool("isPartialDead")) then 
+        if(dmginfo:GetDamage() > 10) then
+            target:GetCreator():Kill()
+        end
+        return true
+    end
     if (not target:IsPlayer()) then return end
     if (target:HasGodMode()) then return true end
     local dmg = WMS.DamageSystem.RegisterDamage(target, dmginfo)
@@ -541,14 +542,14 @@ WMS.DamageSystem.DamageHook = function(target, dmginfo)
     dmginfo:SetDamage(0)
 end
 
-WMS.DamageSystem.DiscoHook = function(ply)
+WMS.DamageSystem.Hooks.Disconnect = function(ply)
     ply.wms_dmg_tbl = {}
     
     WMS.utils.syncDmgTbl(ply, ply.wms_dmg_tbl)
     
     ply:SetNWInt("Pulse", math.random(70, 90))
     
-    ply:SetNWInt("Partial_death_timer", -1)
+    ply:SetNWInt("PartialDeathTimer", -1)
     ply:SetNWBool("isPartialDead", false)
     ply:SetNWBool("isDragged", false)
     
@@ -559,8 +560,8 @@ end
 
 
 
-hook.Add("EntityTakeDamage", "wms_damage_hook", WMS.DamageSystem.DamageHook)
-hook.Add("PlayerDisconnected", "wms_disco_hook", WMS.DamageSystem.DiscoHook)
-hook.Add("PlayerInitialSpawn", "wms_init", WMS.DamageSystem.Init)
-hook.Add("PlayerDeath", "wms_death_hook", WMS.DamageSystem.DeathHook)
-hook.Add("PlayerDeathSound", "wms_death_sound_hook", function(ply) return true end)
+hook.Add("EntityTakeDamage", "WMS::DamageHook", WMS.DamageSystem.Hooks.Damage)
+hook.Add("PlayerDisconnected", "WMS::ResetOnDisconnect", WMS.DamageSystem.Hooks.Disconnect)
+hook.Add("PlayerInitialSpawn", "WMS::Init", WMS.DamageSystem.Hooks.Init)
+hook.Add("PlayerDeath", "WMS::DeathHook", WMS.DamageSystem.Hooks.Death)
+hook.Add("PlayerDeathSound", "WMS::DeathSOund", function(ply) return true end)
