@@ -7,7 +7,7 @@ end )
 hook.Add("PlayerSpawn", "wms_spawn", function(ply) 
     hook.Call( "CalcView" )
     hook.Run( "CalcView" )
-    print(66666)
+    -- print(66666)
 end) 
 
 hook.Add( "CalcView", "tetet_zz_simfphys_gunner_view", function( ply, pos, ang )
