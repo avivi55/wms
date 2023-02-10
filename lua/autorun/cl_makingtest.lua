@@ -9,7 +9,7 @@ for k,v in pairs(player.GetAll())do
         return (h/768) * ScrH()        
     end
 
-    do -- mEDIC WEAPON
+    do -- Medic Weapon
         local PANEL = {}
         function PANEL:Init()
             local panel = self
