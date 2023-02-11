@@ -44,4 +44,4 @@ and it's use is still buggy but I am working on it daily
 
 🇦🇲❤️🇫🇷
 
-theme:minima
+theme:hacker
