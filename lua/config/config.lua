@@ -5,6 +5,8 @@ WMS.config = {}
 
 WMS.config.DEBUG = true
 
+WMS.config.DMG_BLEEDING = 4294967296
+
 WMS.config.hemoSpeed = 5
 WMS.config.hemoImportance = 1 --hp
 

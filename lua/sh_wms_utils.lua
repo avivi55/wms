@@ -2,8 +2,6 @@ AddCSLuaFile()
 WMS = WMS or {}
 WMS.utils = WMS.utils or {}
 
-DMG_BLEEDING = 4294967296
-
 WMS.utils.tblContains = function(tbl, val)
     for k, v in pairs(tbl) do
         if v == val or (type(v) == "table" and WMS.utils.tblContains(v, val)) then return true end

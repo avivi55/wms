@@ -3,11 +3,11 @@ WMS.DamageSystem = WMS.DamageSystem or {}
 WMS.DamageSystem.Hooks = {}
 
 WMS.DamageSystem.IsBleedingDmg = function(dmg)
-    return dmg.type == DMG_BLEEDING / 2
+    return dmg.type == WMS.config.DMG_BLEEDING / 2
 end
 
-WMS.DamageSystem.IsExplosionDamage = function(dmg, dmgI)
-    return dmgI:IsExplosionDamage() or dmg.inflictor:GetClass() == "base_shell"
+WMS.DamageSystem.IsExplosionDamage = function(dmg, dmgi)
+    return dmgi:IsExplosionDamage() or dmg.inflictor:GetClass() == "base_shell"
 end
 
 WMS.DamageSystem.IsVehicleDamage = function(dmg)
@@ -306,7 +306,7 @@ do -- PLAYER FUNCTIONS
     
             local d = DamageInfo()
             d:SetDamage( importance )
-            d:SetDamageType( 4294967296 )
+            d:SetDamageType( WMS.config.DMG_BLEEDING )
     
             -- bleeding effect
             local bone = self:GetBonePosition(math.random(1, self:GetBoneCount() - 1))
@@ -355,8 +355,8 @@ do -- PLAYER FUNCTIONS
 
             self:StripWeapons()
             
-            self:SetNWInt("Pulse", math.random(3, 20))
-            self:SetNWInt("PartialDeathTimer", CurTime())
+            self:SetNWInt("pulse", math.random(3, 20))
+            self:SetNWInt("partialDeathTimer", CurTime())
             timer.Simple(WMS.config.partialDeathTime, function()
                 if(not self:GetCreator():GetNWBool("isPartialDead")) then return end
                 self:Kill()
@@ -425,8 +425,8 @@ do -- PLAYER FUNCTIONS
 
         -- ARMS
         function PLAYER:RightArmFracture()
-            if (self:GetNWBool("RightArmFracture")) then return end
-            self:SetNWBool("RightArmFracture", true)
+            if (self:GetNWBool("rightArmFracture")) then return end
+            self:SetNWBool("rightArmFracture", true)
 
             local wep = self:GetActiveWeapon()
             if (not IsValid(wep)) then return end
@@ -439,8 +439,8 @@ do -- PLAYER FUNCTIONS
         end
 
         function PLAYER:LeftArmFracture()
-            if (self:GetNWBool("LeftArmFracture")) then return end
-            self:SetNWBool("LeftArmFracture", true)
+            if (self:GetNWBool("leftArmFracture")) then return end
+            self:SetNWBool("leftArmFracture", true)
 
             local wep = self:GetActiveWeapon()
             if (WMS.utils.tblContains(WMS.weapons.rifle, wep:GetClass()) or
@@ -453,9 +453,9 @@ do -- PLAYER FUNCTIONS
         end
 
         function PLAYER:HealRightArmFracture()       
-            if (!self:GetNWBool("RightArmFracture")) then return end
+            if (!self:GetNWBool("rightArmFracture")) then return end
             
-            self:SetNWBool("RightArmFracture", false)
+            self:SetNWBool("rightArmFracture", false)
         end
 
         function PLAYER:HealLeftArmFracture()       
@@ -469,9 +469,9 @@ do -- PLAYER FUNCTIONS
                 ply:SetActiveWeapon(ply:Give("re_hands"))
                 return true 
             end
-            if (ply:GetNWBool("RightArmFracture")) then return true end
+            if (ply:GetNWBool("rightArmFracture")) then return true end
 
-            if (ply:GetNWBool("LeftArmFracture") ) then
+            if (ply:GetNWBool("leftArmFracture") ) then
                 if(WMS.utils.tblContains(WMS.weapons.oneArm, wep:GetClass()))then 
                     return false
                 end
@@ -494,15 +494,15 @@ WMS.DamageSystem.Hooks.Init = function(ply, trans)
     
     WMS.utils.syncDmgTbl(ply, ply.wms_dmg_tbl)
     
-    ply:SetNWInt("Pulse", math.random(70, 90))
+    ply:SetNWInt("pulse", math.random(70, 90))
     
-    ply:SetNWInt("PartialDeathTimer", -1)
+    ply:SetNWInt("partialDeathTimer", -1)
     ply:SetNWBool("isPartialDead", false)
     ply:SetNWBool("isDragged", false)
     
     ply:SetNWBool("isLimp", false)
-    ply:SetNWBool("RightArmFracture", false)
-    ply:SetNWBool("LeftArmFracture", false)
+    ply:SetNWBool("rightArmFracture", false)
+    ply:SetNWBool("leftArmFracture", false)
 
 end
 
@@ -547,15 +547,15 @@ WMS.DamageSystem.Hooks.Disconnect = function(ply)
     
     WMS.utils.syncDmgTbl(ply, ply.wms_dmg_tbl)
     
-    ply:SetNWInt("Pulse", math.random(70, 90))
+    ply:SetNWInt("pulse", math.random(70, 90))
     
-    ply:SetNWInt("PartialDeathTimer", -1)
+    ply:SetNWInt("partialDeathTimer", -1)
     ply:SetNWBool("isPartialDead", false)
     ply:SetNWBool("isDragged", false)
     
     ply:SetNWBool("isLimp", false)
-    ply:SetNWBool("RightArmFracture", false)
-    ply:SetNWBool("LeftArmFracture", false)
+    ply:SetNWBool("rightArmFracture", false)
+    ply:SetNWBool("leftArmFracture", false)
 end
 
 

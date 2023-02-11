@@ -6,7 +6,7 @@ end
 AddCSLuaFile()
 
 
-
+-- LITTERALLY STOLEN (https://steamcommunity.com/sharedfiles/filedetails/?id=652896605)
 
 --[[ 
 #################################################
@@ -18,17 +18,11 @@ AddCSLuaFile()
 #################################################
 ]]
 CreateConVar( "etb_healtheffect_system", 1, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY}, "0 = Health effect OFF // 1 = Health effect ON" )
-
 CreateConVar( "etb_heartbeat_sound", 1, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY}, "0 = OFF // 1 = On // At certain value of health will the heartbeat sound start playing?" )
-
 CreateConVar( "etb_redflash", 1, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY}, "0 = OFF // 1 = On // At certain value of health will the screen flash red?" )
-
 CreateConVar( "etb_vignette", 1, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY}, "0 = OFF // 1 = On // At certain value of health will the screen become darker?" )
-
 CreateConVar( "etb_threshold", 40, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY}, "At this point, sounds and screen will getting stronger" )
-
 CreateConVar( "etb_muffle_sound", 1, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY}, "0 = OFF // 1 = On // At certain value of health will the sound become muffled?" )
-
 CreateConVar( "etb_muffle_effect", 10, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY}, "Health value that the sounds will become muffled" )
 
 local etb_healtheffect_system = GetConVar( "etb_healtheffect_system" )
