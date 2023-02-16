@@ -43,7 +43,6 @@ properties.Add("medic_sheet", {
         if (not IsValid(ent)) then return false end
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
-        --local panel = vgui.Create("DFrame")
 
         return true
     end,
@@ -72,7 +71,6 @@ properties.Add("Grab", {
     MenuLabel = "#Grab",
     Order = 3,
     Type = "toggle",
-    --MenuIcon = "icon16/arrow_up.png",
 
     PrependSpacer = true,
 

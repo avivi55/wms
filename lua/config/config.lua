@@ -19,7 +19,7 @@ WMS.config.fractureWalkSpeed = 200  -- 400
 WMS.config.fractureRunSpeed = 400   -- 600
 
 WMS.config.enums = {}
-WMS.config.enums.dmgTypes = { 
+WMS.config.enums.dmgTypes = {
     ["BLEED"]     = 1,
     ["PROP"]      = 2,
     ["FALL"]      = 3,
@@ -28,7 +28,7 @@ WMS.config.enums.dmgTypes = {
     ["NO_DAMAGE"] = 6,
     ["NORMAL"]    = 7
 }
-WMS.config.enums.wepTypes = { 
+WMS.config.enums.wepTypes = {
     ["CUT"]    = 1,
     ["PISTOL"] = 2,
     ["RIFLE"]  = 3,
@@ -44,17 +44,17 @@ WMS.config.enums.dmgArea = {
 
     ["STOMACH"] = 7,
     ["LIVER"]   = 8,
-    
+
     ["ARM"]     = 9,
     ["HAND"]    = 10,
-    
+
     ["LEG"]     = 11,
     ["FOOT"]    = 12,
 }
 
 
 WMS.config.human = {}
-WMS.config.human.dmgTypes = { 
+WMS.config.human.dmgTypes = {
     [WMS.config.enums.dmgTypes.BLEED]     = "Saignement",
     [WMS.config.enums.dmgTypes.PROP]      = "Objet",
     [WMS.config.enums.dmgTypes.FALL]      = "Chute",
@@ -74,10 +74,10 @@ WMS.config.human.dmgArea = {
 
     [WMS.config.enums.dmgArea.STOMACH] = "Estomac",
     [WMS.config.enums.dmgArea.LIVER]   = "Foie",
-    
+
     [WMS.config.enums.dmgArea.ARM]     = "Bras",
     [WMS.config.enums.dmgArea.HAND]    = "Mains",
-    
+
     [WMS.config.enums.dmgArea.LEG]     = "Jambe",
     [WMS.config.enums.dmgArea.FOOT]    = "Pied",
 }
@@ -88,10 +88,10 @@ WMS.config.dmgAreaToImage = {
 
     [HITGROUP_CHEST]    = "torso",
     [HITGROUP_STOMACH]  = "torso",
-  
+
     [HITGROUP_LEFTARM]  = "arm_left",
     [HITGROUP_RIGHTARM] = "arm_right",
-    
+
     [HITGROUP_RIGHTLEG] = "leg_right",
     [HITGROUP_LEFTLEG]  = "leg_left",
 }
@@ -190,17 +190,17 @@ WMS.config.chances = {
         [WMS.config.enums.dmgArea.SKULL]    = 5,
         [WMS.config.enums.dmgArea.NECK]     = 2,
         [WMS.config.enums.dmgArea.FACE]     = 3,
-    
+
         [WMS.config.enums.dmgArea.TORSO]    = 28,
         [WMS.config.enums.dmgArea.HEART]    = 4,
         [WMS.config.enums.dmgArea.LUNGS]    = 8,
-    
+
         [WMS.config.enums.dmgArea.STOMACH]  = 6,
         [WMS.config.enums.dmgArea.LIVER]    = 4,
-        
+
         [WMS.config.enums.dmgArea.ARM]      = 8,
         [WMS.config.enums.dmgArea.HAND]     = 2,
-        
+
         [WMS.config.enums.dmgArea.LEG]      = 28,
         [WMS.config.enums.dmgArea.FOOT]     = 2,
     }
