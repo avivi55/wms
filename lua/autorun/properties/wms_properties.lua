@@ -44,34 +44,14 @@ properties.Add("medic_sheet", {
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
         --local panel = vgui.Create("DFrame")
-        
+
         return true
     end,
 
     Action = function(self, ent)
-        local dmgs = ent.wms_dmg_tbl or {}
-        --PrintTable(dmgs)
-
-        --print(dmgs[1].area, 123456789)
-
-        -- local str = ""
-        -- if (ent:IsPlayerRagdoll()) then str = str .. "MORT" end
-        -- for k, dmg in pairs(dmgs) do
-        --     str = str .. "Diagnostic n°" .. tostring(k) .. "\n"
-        --     if (isstring(dmg.h_hit_grp)) then str = str .. "- Localisation : " .. dmg.h_hit_grp .. "\n" end
-        --     if (isnumber(dmg.area)) then str = str .. "- Loca : " .. WMS.human.dmgArea[dmg.area] .. "\n" end
-        --     if (isstring(dmg.h_wep)) then str = str .. "- source de dégats : " .. dmg.h_wep .. "\n" 
-        --     elseif (isnumber(dmg.wms_type) and dmg.wms_type > 0) then str = str .. "- source de dégats : " .. WMS.human.dmgTypes[dmg.wms_type] .. "\n" end
-        --     if (isnumber(dmg.damage)) then str = str .. "- Dégats : " .. tostring(math.Round(dmg.damage)) .. "\n" end
-        --     if (ent:GetNWBool("hemo")) then str = str .. "HÉMORAGIE!!\n" end
-        --     str = str .. "\n"
-        -- end
-
-        -- print(str)
-
         local t = vgui.Create("MedicExam")
         t:SetPlayer(ent)
-        
+
         self:MsgStart()
             net.WriteEntity(ent)
         self:MsgEnd()
@@ -84,8 +64,6 @@ properties.Add("medic_sheet", {
         if (not IsValid(ent)) then return end
         if (not self:Filter(ent, ply)) then return end
 
-        local dmgs = ent.wms_dmg_tbl or {}
-        
         print(ply:Nick() .. " a ouvert le diagnostique sur " .. ent:Nick())
     end
 })
@@ -109,8 +87,8 @@ properties.Add("Grab", {
     end,
 
     Checked = function( self, ent, ply )
-		return ent:GetNWBool("isDragged")
-	end,
+        return ent:GetNWBool("isDragged")
+    end,
 
     Action = function(self, ent)
         self:MsgStart()
@@ -150,7 +128,7 @@ local debugFun = {
     ["Revive"] = function(ply)
         ply:Revive()
     end,
-    
+
     ["Partial Death"] =  function(ply)
         ply:PartialDeath()
     end,
@@ -158,17 +136,17 @@ local debugFun = {
     ["Repare"] = function(ply)
         ply:HealRightArmFracture()
         ply:HealLeftArmFracture()
-        ply:HealLegFracture()       
+        ply:HealLegFracture()
     end,
-    
+
     ["Leg Fracture"] = function(ply)
         ply:LegFracture()
     end,
-    
+
     ["Right Arm Fracture"] = function(ply)
         ply:RightArmFracture()
     end,
-    
+
     ["Left Arm Fracture"] = function(ply)
         ply:LeftArmFracture()
     end,
@@ -185,7 +163,7 @@ local debugFun = {
         ply:SetHealth(20)
     end,
     ["Add diagnostic"] = function(ply)
-        ply.wms_dmg_tbl[#ply.wms_dmg_tbl+1] = {
+        ply.wms_dmg_tbl[#ply.wms_dmg_tbl + 1] = {
             damage = 20,
             wms_type = 7,
             h_wep = "OUI"
@@ -195,7 +173,7 @@ local debugFun = {
     end,
 }
 local debugIcon = {
-    ["Repare"] = "wrench", 
+    ["Repare"] = "wrench",
     ["Revive"] = "add",
     ["Partial Death"] = "exclamation",
     ["Leg Fracture"] = "arrow_down",
@@ -208,40 +186,40 @@ local debugIcon = {
 }
 
 properties.Add( "debug", {
-	MenuLabel = "#Admin Option",
-	Order = 5,
-	MenuIcon = "icon16/wand.png",
+    MenuLabel = "#Admin Option",
+    Order = 5,
+    MenuIcon = "icon16/wand.png",
 
-	Filter = function( self, ent, ply )
+    Filter = function( self, ent, ply )
         if (not WMS.DEBUG) then return false end
         if (not IsValid(ent)) then return false end
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
 
-		return true 
-	end,
+        return true
+    end,
 
-	MenuOpen = function( self, option, ent, tr )
-		local submenu = option:AddSubMenu()
+    MenuOpen = function( self, option, ent, tr )
+        local submenu = option:AddSubMenu()
 
-		for k, name in ipairs(debugOrder) do
+        for k, name in ipairs(debugOrder) do
             --print(name)
-			local op = submenu:AddOption( name, function() self:NewAction(ent, name) end)
+            submenu:AddOption( name, function() self:NewAction(ent, name) end)
                             :SetIcon("icon16/" .. debugIcon[name] .. ".png")
-		end
-	end,
+        end
+    end,
 
 
 
-	NewAction = function( self, ent, name )
+    NewAction = function( self, ent, name )
         self:MsgStart()
             net.WriteEntity(ent)
             net.WriteString(name)
         self:MsgEnd()
-	end,
+    end,
 
-	Action = function( self, ent )
-	end,
+    Action = function( self, ent )
+    end,
 
 
     Receive = function( self, length, ply )
@@ -259,10 +237,10 @@ properties.Add( "debug", {
 
 
         local ed = EffectData()
-		ed:SetEntity( ent )
-		util.Effect( "LaserTracer", ed, true, true )
+        ed:SetEntity( ent )
+        util.Effect( "LaserTracer", ed, true, true )
         util.Effect( "entity_remove", ed, true, true )
-	end
+    end
 } )
 
 
@@ -277,7 +255,7 @@ properties.Add("spacer", {
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
 
-        return true 
+        return true
     end,
 
     Action = function(self, ent)

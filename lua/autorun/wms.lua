@@ -13,7 +13,7 @@ include("import/sh_improved_player_ragdolls.lua")
 include("import/sh_lowhealth.lua")
 include("import/death_screen.lua")
 
-include("prettyPrint.lua")
+include("sh_pretty_print.lua")
 
 
 if (SERVER) then

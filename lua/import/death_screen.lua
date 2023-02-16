@@ -1,16 +1,11 @@
 AddCSLuaFile()
 
-local blurMat = Material("pp/blurscreen")
-local tunnelVisionMat = Material("deathperception_vignette_overlay.png")
-local bloodVisionMat = Material("deathperception_blood_overlay.png")
-
 if (CLIENT) then
 	local STATE_ALIVE, STATE_DYING, STATE_GONE = 1, 0, -1
 	local MyState = STATE_ALIVE
 	local LeaveTime = 0
 	local GoneFraction = 0
 	local LastLivingEyeAngle = Angle(0, 0, 0)
-	local InterpolatedViewAngle = Angle(0, 0, 0)
 
 	hook.Add("Think", "DP_Think", function()
 		local ply = LocalPlayer()
@@ -58,7 +53,7 @@ if (CLIENT) then
 	hook.Add("PostDrawHUD", "DP_PostdrawHUD", function()
 		local ply = LocalPlayer()
 
-		if(ply:Alive() and not ply:GetNWBool("isPartialDead"))then return end
+		if (ply:Alive() and not ply:GetNWBool("isPartialDead")) then return end
 		if (ply:GetViewEntity() ~= ply) then return end
 		if (GoneFraction <= 0) then return end
 
@@ -69,19 +64,19 @@ if (CLIENT) then
 
 		surface.SetTextColor( 255, 43, 43)
 		surface.SetFont( "DEATH_SCREEN" )
-		local s1, s2 = surface.GetTextSize("VOUS ÊTES MORT")
+		local s1 = surface.GetTextSize("VOUS ÊTES MORT")
 
-		surface.SetTextPos((ScrW()/2)-(s1/2), ScrH()/3)
+		surface.SetTextPos((ScrW() / 2) - (s1 / 2), ScrH() / 3)
 		surface.DrawText("VOUS ÊTES MORT")
 
-		if(ply:GetNWBool("isPartialDead"))then
+		if (ply:GetNWBool("isPartialDead")) then
 			surface.SetFont( "DEATH_SCREEN_LITTLE" )
 			s1, s2 = surface.GetTextSize("Mais un medecin peut encore venir vous sauvez")
 	
-			surface.SetTextPos((ScrW()/2)-(s1/2), ScrH()/1.5)
+			surface.SetTextPos((ScrW() / 2) - (s1 / 2), ScrH() / 1.5)
 			surface.DrawText("Mais un medecin peut encore venir vous sauvez")
 	
-			surface.SetTextPos(ScrW()/2, ScrH()/1.20)
+			surface.SetTextPos(ScrW() / 2, ScrH() / 1.20)
 			surface.DrawText(tostring(math.floor((ply:GetNWInt("partialDeathTimer") + WMS.config.partialDeathTime + 1) - CurTime())) .. "s")
 		end
 	end)

@@ -55,9 +55,9 @@ if (SERVER) then
 		local ent = NULL
 
 		ent = ents_Create( self:GetBoneCount() > 1 and 'prop_ragdoll' or 'prop_physics' )
-		
 
-		if not IsValid( ent ) then return end
+
+		if !IsValid( ent ) then return end
 
 		ent:SetCreator( self )
 
@@ -67,7 +67,7 @@ if (SERVER) then
 
 		-- Skin
 		ent:SetSkin( self:GetSkin() )
-		
+
 
 		-- Bodygroups
 		for _, bodygroup in ipairs( self:GetBodyGroups() ) do
@@ -151,7 +151,7 @@ if (SERVER) then
 			local model = hook_Run( 'PlayerRagdollModel', self, ent )
 			if isstring( model ) and util_IsValidModel( model ) then
 				ent:SetModel( model )
-			elseif (model ~= false) then
+			elseif (model != false) then
 				ent:SetModel( self:GetModel() )
 			else
 				return
@@ -161,7 +161,7 @@ if (SERVER) then
 			local modelSkin = hook_Run( 'PlayerRagdollSkin', self, ent )
 			if isnumber( modelSkin ) then
 				ent:SetSkin( modelSkin )
-			elseif (modelSkin ~= false) then
+			elseif (modelSkin != false) then
 				ent:SetSkin( self:GetSkin() )
 			end
 
@@ -171,7 +171,7 @@ if (SERVER) then
 				for _, bodygroup in ipairs( modelBodygroups ) do
 					ent:SetBodygroup( bodygroup.id, bodygroup.value )
 				end
-			elseif (modelBodygroups ~= false) then
+			elseif (modelBodygroups != false) then
 				for _, bodygroup in ipairs( self:GetBodyGroups() ) do
 					ent:SetBodygroup( bodygroup.id, self:GetBodygroup( bodygroup.id ) )
 				end
@@ -212,19 +212,20 @@ if (SERVER) then
 			if ent:IsRagdoll() then
 				for physNum = 0, ent:GetPhysicsObjectCount() - 1 do
 					local phys = ent:GetPhysicsObjectNum( physNum )
-					if IsValid( phys ) then
-						local bone = ent:TranslatePhysBoneToBone( physNum )
-						if (bone >= 0) then
-							local pos, ang = self:GetBonePosition( bone )
-							phys:SetVelocity( velocity )
-							phys:SetAngles( ang )
-							phys:SetPos( pos )
-							phys:Wake()
-						end
-					end
+					if !IsValid( phys ) then continue end
+
+
+					local bone = ent:TranslatePhysBoneToBone( physNum )
+					if (bone < 0) then continue end
+
+
+					local pos, ang = self:GetBonePosition( bone )
+					phys:SetVelocity( velocity )
+					phys:SetAngles( ang )
+					phys:SetPos( pos )
+					phys:Wake()
 				end
 			else
-
 				local phys = ent:GetPhysicsObject()
 				if IsValid( phys ) then
 					phys:SetVelocity( velocity )
