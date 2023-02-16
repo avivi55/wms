@@ -6,7 +6,7 @@ The WNS (War Nursing System) is a addon with the intent to bring a little bit of
 - heamorage
 - limp
 - grabbing your mate when he is limp
-- ACE like diagnostic sheet
+- [ACE3](https://github.com/acemod/ACE3) like diagnostic sheet
 - Death screen
 - low health effects
 - pulse
