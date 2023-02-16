@@ -23,7 +23,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     dmg.attacker = dmgi:GetAttacker()
 
     dmg.inflictor = dmgi:GetInflictor()
-    if (! IsValid(dmg.inflictor)) then dmg.inflictor = dmg.attacker end
+    if (!IsValid(dmg.inflictor)) then dmg.inflictor = dmg.attacker end
 
     dmg.hit_grp = ply:LastHitGroup()
     --dmg.h_hit_grp = WMS.HIT[dmg.hit_grp]
@@ -53,7 +53,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         dmg.hemorrhage = true
         return dmg
 
-    elseif (WMS.utils.tblContains(WMS.weapons.noDamage, dmg.inflictor:GetClass())) then
+    elseif (WMS.weapons.noDamage[dmg.inflictor:GetClass()]) then
         dmg.wms_type = WMS.config.enums.dmgTypes.NO_DAMAGE
 
     elseif (dmgi:IsFallDamage()) then
@@ -69,7 +69,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         dmg.wms_type = WMS.config.enums.dmgTypes.NORMAL
 
     elseif (IsValid(dmg.wep)) then
-        if (! WMS.utils.tblContains(WMS.weapons, dmg.wep_class)) then
+        if (!WMS.weapons[dmg.wep_class]) then
             dmg.wms_type = WMS.config.enums.dmgTypes.NO_DAMAGE
         end
     end
@@ -77,22 +77,22 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     dmg.h_wep = ""
     dmg.wep_type = WMS.config.enums.wepTypes.RIFLE
 
-    if (WMS.utils.tblContains(WMS.weapons.cut, dmg.wep_class) or WMS.utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass())) then
+    if (WMS.weapons.cut[dmg.wep_class] or WMS.weapons.cut[dmg.inflictor:GetClass()]) then
         dmg.wep_type = WMS.config.enums.wepTypes.CUT
         dmg.h_wep = "cut"
 
-    elseif (WMS.utils.tblContains(WMS.weapons.pistol, dmg.wep_class)) then
+    elseif (WMS.weapons.pistol[dmg.wep_class]) then
         dmg.wep_type = WMS.config.enums.wepTypes.PISTOL
         dmg.h_wep = "pistol"
 
-    elseif (WMS.utils.tblContains(WMS.weapons.rifle, dmg.wep_class) or ! IsValid(dmg.wep)) then
+    elseif (WMS.weapons.rifle[dmg.wep_class] or !IsValid(dmg.wep)) then
         dmg.wep_type = WMS.config.enums.wepTypes.RIFLE
         dmg.h_wep = "rifle"
 
     elseif (dmg.wms_type == WMS.config.enums.dmgTypes.VEHICLE) then
         dmg.h_wep = "vehicle"
 
-    elseif (! WMS.utils.tblContains(WMS.weapons.rifle, dmg.wep_class) and IsValid(dmg.wep) and dmg.inflictor:IsPlayer() and ! dmg.inflictor:InVehicle()) then
+    elseif (!WMS.weapons.rifle[dmg.wep_class]) and IsValid(dmg.wep) and dmg.inflictor:IsPlayer() and !dmg.inflictor:InVehicle() then
         dmg.wep_type = -1
         dmg.h_wep = "NON RECONNU"
     end
@@ -102,8 +102,8 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
     local chance = math.random(100)
 
-    if ((dmg.hit_grp == HITGROUP_CHEST or dmg.wms_type == WMS.config.enums.dmgTypes.VEHICLE or ! IsValid(dmg.wep)) and
-        (! WMS.utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass()))) then
+    if ((dmg.hit_grp == HITGROUP_CHEST or dmg.wms_type == WMS.config.enums.dmgTypes.VEHICLE or !IsValid(dmg.wep)) and
+        (!WMS.weapons.cut[dmg.inflictor:GetClass()])) then
 
         if (chance <= WMS.chances[WMS.config.enums.dmgArea.TORSO].chance) then
             dmg.area = WMS.config.enums.dmgArea.TORSO
@@ -117,8 +117,8 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         dmg.h_hit_grp = WMS.config.human.dmgArea[dmg.area]
 
     elseif (dmg.hit_grp == HITGROUP_GENERIC or
-        WMS.utils.tblContains(WMS.weapons.cut, dmg.inflictor:GetClass()) or
-        WMS.utils.tblContains(WMS.weapons.cut, dmg.wep)) then
+        WMS.weapons.cut[dmg.inflictor:GetClass()]) or
+        WMS.weapons.cut[dmg.wep] then
 
         local sum = 0
 
@@ -249,7 +249,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 end
 
 WMS.DamageSystem.DamageApplier = function(ply, dmg)
-    if (! ply:Alive()) then return end
+    if (!ply:Alive()) then return end
 
     if (dmg.wms_type == WMS.config.enums.dmgTypes.NO_DAMAGE) then
         ply.wms_dmg_tbl[#ply.wms_dmg_tbl + 1] = table.Copy(dmg)
@@ -270,7 +270,7 @@ WMS.DamageSystem.DamageApplier = function(ply, dmg)
         WMS.utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
         return 0
 
-    elseif (dmg.hemorrhage and ! ply:GetNWBool("hemo")) then
+    elseif (dmg.hemorrhage and !ply:GetNWBool("hemo")) then
         if (WMS.DEBUG) then PrintC("\tOOF Sègne", 8, 9) end
         --ply:SetBleeding(true, WMS.config.hemoSpeed, WMS.config.hemoImportance)
 
@@ -299,9 +299,9 @@ do -- PLAYER FUNCTIONS
     local PLAYER = FindMetaTable("Player")
 
     function PLAYER:StartHemorrhage(speed, importance)
-        if (! self:GetNWBool("hemo")) then return end
+        if (!self:GetNWBool("hemo")) then return end
         timer.Create("Hemo_" .. self:EntIndex(), speed, 0, function()
-            if ! IsValid( self ) or ! self:Alive() then return end
+            if !IsValid( self ) or !self:Alive() then return end
 
             local d = DamageInfo()
             d:SetDamage( importance )
@@ -357,7 +357,7 @@ do -- PLAYER FUNCTIONS
             self:SetNWInt("pulse", math.random(3, 20))
             self:SetNWInt("partialDeathTimer", CurTime())
             timer.Simple(WMS.config.partialDeathTime, function()
-                if (! self:GetCreator():GetNWBool("isPartialDead")) then return end
+                if (!self:GetCreator():GetNWBool("isPartialDead")) then return end
                 self:Kill()
             end)
         end
@@ -429,11 +429,10 @@ do -- PLAYER FUNCTIONS
 
             local wep = self:GetActiveWeapon()
 
-            if (! IsValid(wep)) then return end
-            if (WMS.utils.tblContains(WMS.weapons.rifle, wep:GetClass()) or
-                WMS.utils.tblContains(WMS.weapons.pistol, wep:GetClass()) or
-                WMS.utils.tblContains(WMS.weapons.cut, wep:GetClass())
-            ) then
+            if (!IsValid(wep)) then return end
+            if (WMS.weapons.rifle[wep:GetClass()] or
+                WMS.weapons.pistol[wep:GetClass()] or
+                WMS.weapons.cut[wep:GetClass()]) then
                 self:DropWeapon(wep)
             end
         end
@@ -443,11 +442,10 @@ do -- PLAYER FUNCTIONS
             self:SetNWBool("leftArmFracture", true)
 
             local wep = self:GetActiveWeapon()
-            if (WMS.utils.tblContains(WMS.weapons.rifle, wep:GetClass()) or
-                WMS.utils.tblContains(WMS.weapons.pistol, wep:GetClass()) or
-                WMS.utils.tblContains(WMS.weapons.cut, wep:GetClass()) and
-                !WMS.utils.tblContains(WMS.weapons.oneArm, wep:GetClass())
-            ) then
+            if (WMS.weapons.rifle[wep:GetClass()] or
+                WMS.weapons.pistol[wep:GetClass()] or
+                WMS.weapons.cut[wep:GetClass()] and
+                !WMS.weapons.oneArm[wep:GetClass()]) then
                 self:DropWeapon(wep)
             end
         end
@@ -474,7 +472,7 @@ do -- PLAYER FUNCTIONS
 
 
             if (!ply:GetNWBool("leftArmFracture")) then return true end
-            if (WMS.utils.tblContains(WMS.weapons.oneArm, wep:GetClass())) then
+            if (WMS.weapons.oneArm[wep:GetClass()]) then
                 return false
             end
         end
@@ -536,7 +534,7 @@ WMS.DamageSystem.Hooks.Damage = function(target, dmginfo)
         end
         return true
     end
-    if (! target:IsPlayer()) then return end
+    if (!target:IsPlayer()) then return end
     if (target:HasGodMode()) then return true end
     local dmg = WMS.DamageSystem.RegisterDamage(target, dmginfo)
     dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmg) or 0)
