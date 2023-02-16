@@ -114,3 +114,8 @@ WMS.weapons = {
         ["cw_kk_ins2_doi_ppk"] = true,
     }
 }
+
+
+for _, wepTable in pairs(weapons.GetList()) do
+    PrintTable(wepTable)
+end
