@@ -36,6 +36,17 @@ and it's use is still buggy but I am working on it daily
 - [gmod_improved_player_ragdolls](https://github.com/Pika-Software/gmod_improved_player_ragdolls)
 - [Low Health Effect](https://steamcommunity.com/sharedfiles/filedetails/?id=652896605)
 
+---
+## CONFIG and Install
+
+### Config
+
+the config files are in `wms/lua/config/` . Most of it is developper side and isn't meant to be tampered with.
+
+
+### Install
+
+Installing the addon is the basic put `wms/` in `garrysmod/addons/`
 
 ---
 > this addon is made for the LPS server

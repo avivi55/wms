@@ -2,6 +2,15 @@ AddCSLuaFile()
 
 WMS = WMS or {}
 
+
+-- if you want to add specific weapons to this list follow the exemple
+
+
+-- ["weapon_class"] = true,
+
+-- this works  :   ["cw_kk_ins2_doi_stg44"] = true,
+
+
 WMS.weapons = {
     rifle = {
         ["cw_kk_ins2_doi_stg44"] = true,
@@ -116,6 +125,17 @@ WMS.weapons = {
 }
 
 
+-- ############################################################################
+-- ############################################################################
+-- ############################################################################
+
+
+
+-- /!\ This part is NOT to be changed /!\ 
+
+-- if you know what you are doing then good luck, I T   I S   M E S S Y
+
 for _, wepTable in pairs(weapons.GetList()) do
     PrintTable(wepTable)
+    -- TODO
 end

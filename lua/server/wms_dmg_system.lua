@@ -195,7 +195,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         final_dmg.total_death = true
         final_dmg.partial_death = true
     end
-    --print(ply:Health() - final_dmg.damage)
+
     if (ply:Health() - final_dmg.damage <= 30) then
         final_dmg.limp = true
     end
@@ -259,20 +259,29 @@ WMS.DamageSystem.DamageApplier = function(ply, dmg)
     if (dmg.total_death) then
         if (WMS.DEBUG) then PrintC("FINITO PIPO", 8, 1) end
 
-        --ply:Kill()
+        if (!WMS.config.NO_DMG) then
+            ply:Kill()
+        end
+
         return 0
 
     elseif (dmg.partial_death) then
         if (WMS.DEBUG) then PrintC("FINITO", 8, 202) end
 
-        --ply:PartialDeath()
+        if (!WMS.config.NO_DMG) then
+            ply:PartialDeath()
+        end
+
         ply.wms_dmg_tbl[#ply.wms_dmg_tbl + 1] = table.Copy(dmg)
         WMS.utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
         return 0
 
     elseif (dmg.hemorrhage and !ply:GetNWBool("hemo")) then
         if (WMS.DEBUG) then PrintC("\tOOF Sègne", 8, 9) end
-        --ply:SetBleeding(true, WMS.config.hemoSpeed, WMS.config.hemoImportance)
+
+        if (!WMS.config.NO_DMG) then
+            ply:SetBleeding(true, WMS.config.hemoSpeed, WMS.config.hemoImportance)
+        end
 
     elseif (dmg.limp) then
         ply:LegFracture()
@@ -282,7 +291,6 @@ WMS.DamageSystem.DamageApplier = function(ply, dmg)
 
     elseif (dmg.broken_l_arm) then
         ply:LeftArmFracture()
-
     end
 
 
@@ -515,7 +523,6 @@ WMS.DamageSystem.Hooks.Death = function(victim, inflictor, attacker)
         victim:SetBleeding(false)
     end
 
-    --if (victim.test) then return end
     local rag = victim:Create_Untied_Ragdoll()
     timer.Simple(WMS.CorpsDeleteTime, function()
         if (IsValid(rag)) then rag:Remove() end
@@ -524,7 +531,7 @@ WMS.DamageSystem.Hooks.Death = function(victim, inflictor, attacker)
 
     PrintC("[WMS] Player Damage table Deleted !", 8, "1")
     WMS.DamageSystem.Hooks.Init(victim, false)
-    hook.Call( "CalcView" )
+    -- hook.Call( "CalcView" ) -- not sure about that
 end
 
 WMS.DamageSystem.Hooks.Damage = function(target, dmginfo)
@@ -534,27 +541,20 @@ WMS.DamageSystem.Hooks.Damage = function(target, dmginfo)
         end
         return true
     end
+
     if (!target:IsPlayer()) then return end
     if (target:HasGodMode()) then return true end
+
     local dmg = WMS.DamageSystem.RegisterDamage(target, dmginfo)
     dmginfo:SetDamage(WMS.DamageSystem.DamageApplier(target, dmg) or 0)
-    dmginfo:SetDamage(0)
+
+    if (WMS.config.NO_DMG) then
+        dmginfo:SetDamage(0)
+    end
 end
 
 WMS.DamageSystem.Hooks.Disconnect = function(ply)
-    ply.wms_dmg_tbl = {}
-
-    WMS.utils.syncDmgTbl(ply, ply.wms_dmg_tbl)
-
-    ply:SetNWInt("pulse", math.random(70, 90))
-
-    ply:SetNWInt("partialDeathTimer", -1)
-    ply:SetNWBool("isPartialDead", false)
-    ply:SetNWBool("isDragged", false)
-
-    ply:SetNWBool("isLimp", false)
-    ply:SetNWBool("rightArmFracture", false)
-    ply:SetNWBool("leftArmFracture", false)
+    ply.wms_dmg_tbl = nil
 end
 
 
