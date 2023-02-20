@@ -1,3 +1,4 @@
+AddCSLuaFile()
 local function print_table(tab, cur_depth, max_depth)
     if cur_depth > max_depth then return tostring(tab) .. ",\n" end
 

@@ -45,7 +45,7 @@ WMS.utils.getRandomDeathSound = function(team)
     local man = tostring(math.random(3))
     if (team == "ger" or team == "sov") then
         local folder = team .. "_" .. man
-        local file_rand = tostring(math.random(WMS.sounds.sound_folder_len[folder]))
+        local file_rand = tostring(math.random(WMS.sounds.soundFolderLen[folder]))
 
         return "aie/" .. folder .. "/" .. team .. "_death_voice" .. file_rand .. ".wav"
     else
@@ -54,7 +54,7 @@ WMS.utils.getRandomDeathSound = function(team)
 end
 
 WMS.utils.addFileToClient = function()
-    for k, len in pairs(WMS.sounds.sound_folder_len) do
+    for k, len in pairs(WMS.sounds.soundFolderLen) do
         for i = 1, len do
             resource.AddFile("sound/aie/" .. tostring(k) .. "/" .. tostring(k) .. "_death_voice" .. tostring(i) .. ".wav")
         end

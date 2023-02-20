@@ -2,22 +2,118 @@ AddCSLuaFile()
 
 WMS = WMS or {}
 WMS.config = {}
-
+WMS.config.human = {}
+WMS.config.enums = {}
 
 -- This part is the ones you should be modifiing to please your taste
+WMS.DEBUG = true
 WMS.config.NO_DMG = true
-
 WMS.config.hemoSpeed = 5
 WMS.config.hemoImportance = 1 --hp
 
-WMS.config.PartialDeathTime = 3
-WMS.config.CorpsDeleteTime = 50
+WMS.config.partialDeathTime = 3
+WMS.config.corpsDeleteTime = 50
 
 WMS.config.defaultWalkSpeed = 400   -- 400
 WMS.config.defaultRunSpeed = 600    -- 600
 WMS.config.fractureWalkSpeed = 200  -- 400
 WMS.config.fractureRunSpeed = 400   -- 600
+
+
+
+
+-- ############################################################################
+-- ############################################################################
+-- ############################################################################
+
+
+
+
+
+-- /!\ This part is NOT to be changed /!\ 
+
+-- if you know what you are doing then good luck, I T   I S   M E S S Y
+WMS.config.DMG_BLEEDING = 4294967296
+
+WMS.config.enums.dmgTypes = {
+    ["BLEED"]     = 1,
+    ["PROP"]      = 2,
+    ["FALL"]      = 3,
+    ["EXPLOSION"] = 4,
+    ["VEHICLE"]   = 5,
+    ["NO_DAMAGE"] = 6,
+    ["NORMAL"]    = 7
+}
+WMS.config.enums.wepTypes = {
+    ["CUT"]    = 1,
+    ["PISTOL"] = 2,
+    ["RIFLE"]  = 3,
+}
+WMS.config.enums.dmgArea = {
+    ["SKULL"]   = 1,
+    ["NECK"]    = 2,
+    ["FACE"]    = 3,
+
+    ["TORSO"]   = 4,
+    ["HEART"]   = 5,
+    ["LUNGS"]   = 6,
+
+    ["STOMACH"] = 7,
+    ["LIVER"]   = 8,
+
+    ["ARM"]     = 9,
+    ["HAND"]    = 10,
+
+    ["LEG"]     = 11,
+    ["FOOT"]    = 12,
+}
+
+
+
+WMS.config.human.dmgTypes = {
+    [WMS.config.enums.dmgTypes.BLEED]     = "Saignement",
+    [WMS.config.enums.dmgTypes.PROP]      = "Objet",
+    [WMS.config.enums.dmgTypes.FALL]      = "Chute",
+    [WMS.config.enums.dmgTypes.EXPLOSION] = "Explosion",
+    [WMS.config.enums.dmgTypes.VEHICLE]   = "Véhicule",
+    [WMS.config.enums.dmgTypes.NO_DAMAGE] = "NON",
+    [WMS.config.enums.dmgTypes.NORMAL]    = "Arme à feu"
+}
+WMS.config.human.dmgArea = {
+    [WMS.config.enums.dmgArea.SKULL]   = "Crâne",
+    [WMS.config.enums.dmgArea.NECK]    = "Cou",
+    [WMS.config.enums.dmgArea.FACE]    = "Visage",
+
+    [WMS.config.enums.dmgArea.TORSO]   = "Torse",
+    [WMS.config.enums.dmgArea.HEART]   = "Coeur",
+    [WMS.config.enums.dmgArea.LUNGS]   = "Poumons",
+
+    [WMS.config.enums.dmgArea.STOMACH] = "Estomac",
+    [WMS.config.enums.dmgArea.LIVER]   = "Foie",
+
+    [WMS.config.enums.dmgArea.ARM]     = "Bras",
+    [WMS.config.enums.dmgArea.HAND]    = "Mains",
+
+    [WMS.config.enums.dmgArea.LEG]     = "Jambe",
+    [WMS.config.enums.dmgArea.FOOT]    = "Pied",
+}
+
+
+WMS.config.dmgAreaToImage = {
+    [HITGROUP_HEAD]     = "head",
+
+    [HITGROUP_CHEST]    = "torso",
+    [HITGROUP_STOMACH]  = "torso",
+
+    [HITGROUP_LEFTARM]  = "arm_left",
+    [HITGROUP_RIGHTARM] = "arm_right",
+
+    [HITGROUP_RIGHTLEG] = "leg_right",
+    [HITGROUP_LEFTLEG]  = "leg_left",
+}
 -----------------------------------------------------------------------------
+
+
 
 
 
@@ -138,93 +234,3 @@ WMS.config.chances = {
     }
 }
 
--- ############################################################################
--- ############################################################################
--- ############################################################################
-
-
-
-
-
--- /!\ This part is NOT to be changed /!\ 
-
--- if you know what you are doing then good luck, I T   I S   M E S S Y
-WMS.config.DMG_BLEEDING = 4294967296
-
-WMS.config.enums = {}
-WMS.config.enums.dmgTypes = {
-    ["BLEED"]     = 1,
-    ["PROP"]      = 2,
-    ["FALL"]      = 3,
-    ["EXPLOSION"] = 4,
-    ["VEHICLE"]   = 5,
-    ["NO_DAMAGE"] = 6,
-    ["NORMAL"]    = 7
-}
-WMS.config.enums.wepTypes = {
-    ["CUT"]    = 1,
-    ["PISTOL"] = 2,
-    ["RIFLE"]  = 3,
-}
-WMS.config.enums.dmgArea = {
-    ["SKULL"]   = 1,
-    ["NECK"]    = 2,
-    ["FACE"]    = 3,
-
-    ["TORSO"]   = 4,
-    ["HEART"]   = 5,
-    ["LUNGS"]   = 6,
-
-    ["STOMACH"] = 7,
-    ["LIVER"]   = 8,
-
-    ["ARM"]     = 9,
-    ["HAND"]    = 10,
-
-    ["LEG"]     = 11,
-    ["FOOT"]    = 12,
-}
-
-
-WMS.config.human = {}
--- WMS.config.human.dmgTypes = {
---     [WMS.config.enums.dmgTypes.BLEED]     = "Saignement",
---     [WMS.config.enums.dmgTypes.PROP]      = "Objet",
---     [WMS.config.enums.dmgTypes.FALL]      = "Chute",
---     [WMS.config.enums.dmgTypes.EXPLOSION] = "Explosion",
---     [WMS.config.enums.dmgTypes.VEHICLE]   = "Véhicule",
---     [WMS.config.enums.dmgTypes.NO_DAMAGE] = "NON",
---     [WMS.config.enums.dmgTypes.NORMAL]    = "Arme à feu"
--- }
--- WMS.config.human.dmgArea = {
---     [WMS.config.enums.dmgArea.SKULL]   = "Crâne",
---     [WMS.config.enums.dmgArea.NECK]    = "Cou",
---     [WMS.config.enums.dmgArea.FACE]    = "Visage",
-
---     [WMS.config.enums.dmgArea.TORSO]   = "Torse",
---     [WMS.config.enums.dmgArea.HEART]   = "Coeur",
---     [WMS.config.enums.dmgArea.LUNGS]   = "Poumons",
-
---     [WMS.config.enums.dmgArea.STOMACH] = "Estomac",
---     [WMS.config.enums.dmgArea.LIVER]   = "Foie",
-
---     [WMS.config.enums.dmgArea.ARM]     = "Bras",
---     [WMS.config.enums.dmgArea.HAND]    = "Mains",
-
---     [WMS.config.enums.dmgArea.LEG]     = "Jambe",
---     [WMS.config.enums.dmgArea.FOOT]    = "Pied",
--- }
-
-
-WMS.config.dmgAreaToImage = {
-    [HITGROUP_HEAD]     = "head",
-
-    [HITGROUP_CHEST]    = "torso",
-    [HITGROUP_STOMACH]  = "torso",
-
-    [HITGROUP_LEFTARM]  = "arm_left",
-    [HITGROUP_RIGHTARM] = "arm_right",
-
-    [HITGROUP_RIGHTLEG] = "leg_right",
-    [HITGROUP_LEFTLEG]  = "leg_left",
-}

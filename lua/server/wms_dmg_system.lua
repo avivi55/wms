@@ -105,10 +105,10 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     if ((dmg.hit_grp == HITGROUP_CHEST or dmg.wms_type == WMS.config.enums.dmgTypes.VEHICLE or !IsValid(dmg.wep)) and
         (!WMS.weapons.cut[dmg.inflictor:GetClass()])) then
 
-        if (chance <= WMS.chances[WMS.config.enums.dmgArea.TORSO].chance) then
+        if (chance <= WMS.config.chances[WMS.config.enums.dmgArea.TORSO].chance) then
             dmg.area = WMS.config.enums.dmgArea.TORSO
 
-        elseif (chance <= WMS.chances[WMS.config.enums.dmgArea.TORSO].chance + WMS.chances[WMS.config.enums.dmgArea.HEART].chance) then
+        elseif (chance <= WMS.config.chances[WMS.config.enums.dmgArea.TORSO].chance + WMS.config.chances[WMS.config.enums.dmgArea.HEART].chance) then
             dmg.area = WMS.config.enums.dmgArea.HEART
 
         else
@@ -122,7 +122,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
         local sum = 0
 
-        for area, pourcentage in ipairs(WMS.chances.cut) do
+        for area, pourcentage in ipairs(WMS.config.chances.cut) do
             sum = sum + pourcentage
             if (chance <= sum) then
                 dmg.area = area
@@ -132,9 +132,9 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         dmg.h_hit_grp = WMS.config.human.dmgArea[dmg.area]
 
     elseif (dmg.hit_grp == HITGROUP_HEAD) then
-        if (chance <= WMS.chances[WMS.config.enums.dmgArea.SKULL].chance) then
+        if (chance <= WMS.config.chances[WMS.config.enums.dmgArea.SKULL].chance) then
             dmg.area = WMS.config.enums.dmgArea.SKULL
-        elseif (chance <= WMS.chances[WMS.config.enums.dmgArea.SKULL].chance + WMS.chances[WMS.config.enums.dmgArea.FACE].chance) then
+        elseif (chance <= WMS.config.chances[WMS.config.enums.dmgArea.SKULL].chance + WMS.config.chances[WMS.config.enums.dmgArea.FACE].chance) then
             dmg.area = WMS.config.enums.dmgArea.FACE
         else
             dmg.area = WMS.config.enums.dmgArea.NECK
@@ -146,7 +146,7 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
 
         dmg.h_hit_grp = WMS.config.human.dmgArea[dmg.area]
     elseif (dmg.hit_grp == HITGROUP_STOMACH) then
-        if (chance <= WMS.chances[WMS.config.enums.dmgArea.STOMACH].chance) then
+        if (chance <= WMS.config.chances[WMS.config.enums.dmgArea.STOMACH].chance) then
             dmg.area = WMS.config.enums.dmgArea.STOMACH
         else
             dmg.area = WMS.config.enums.dmgArea.LIVER
@@ -154,14 +154,14 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
         dmg.h_hit_grp = WMS.config.human.dmgArea[dmg.area]
 
     elseif (dmg.hit_grp == HITGROUP_LEFTLEG or dmg.hit_grp == HITGROUP_RIGHTLEG) then
-        if (chance <= WMS.chances[WMS.config.enums.dmgArea.LEG].chance) then
+        if (chance <= WMS.config.chances[WMS.config.enums.dmgArea.LEG].chance) then
             dmg.area = WMS.config.enums.dmgArea.LEG
         else
             dmg.area = WMS.config.enums.dmgArea.FOOT
         end
 
     elseif (dmg.hit_grp == HITGROUP_LEFTARM or dmg.hit_grp == HITGROUP_RIGHTARM) then
-        if (chance <= WMS.chances[WMS.config.enums.dmgArea.ARM].chance) then
+        if (chance <= WMS.config.chances[WMS.config.enums.dmgArea.ARM].chance) then
             dmg.area = WMS.config.enums.dmgArea.ARM
         else
             dmg.area = WMS.config.enums.dmgArea.HAND
@@ -179,11 +179,11 @@ WMS.DamageSystem.RegisterDamage = function(ply, dmgi)
     final_dmg.damage = 0
 
     if (dmg.area > 0 and dmg.wep_type > 0) then
-        final_dmg.total_death = math.random(100) <= WMS.chances[dmg.area][dmg.wep_type].total
-        final_dmg.partial_death = math.random(100) <= WMS.chances[dmg.area][dmg.wep_type].partial
-        final_dmg.hemorrhage = math.random(100) <= WMS.chances[dmg.area][dmg.wep_type].hemo
+        final_dmg.total_death = math.random(100) <= WMS.config.chances[dmg.area][dmg.wep_type].total
+        final_dmg.partial_death = math.random(100) <= WMS.config.chances[dmg.area][dmg.wep_type].partial
+        final_dmg.hemorrhage = math.random(100) <= WMS.config.chances[dmg.area][dmg.wep_type].hemo
 
-        local range = WMS.chances[dmg.area][dmg.wep_type].dmgRange
+        local range = WMS.config.chances[dmg.area][dmg.wep_type].dmgRange
         final_dmg.damage = math.random(range[1], range[2])
     end
 
@@ -479,7 +479,7 @@ do -- PLAYER FUNCTIONS
 
 
 
-            if (!ply:GetNWBool("leftArmFracture")) then return true end
+            if (!ply:GetNWBool("leftArmFracture")) then return false end
             if (WMS.weapons.oneArm[wep:GetClass()]) then
                 return false
             end
@@ -524,7 +524,7 @@ WMS.DamageSystem.Hooks.Death = function(victim, inflictor, attacker)
     end
 
     local rag = victim:Create_Untied_Ragdoll()
-    timer.Simple(WMS.CorpsDeleteTime, function()
+    timer.Simple(WMS.config.corpsDeleteTime, function()
         if (IsValid(rag)) then rag:Remove() end
     end)
 

@@ -1,3 +1,5 @@
+
+AddCSLuaFile()
 local addonName = 'Improved Player Ragdolls'
 
 local PLAYER = FindMetaTable( 'Player' )

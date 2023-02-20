@@ -135,7 +135,10 @@ WMS.weapons = {
 
 -- if you know what you are doing then good luck, I T   I S   M E S S Y
 
-for _, wepTable in pairs(weapons.GetList()) do
-    PrintTable(wepTable)
-    -- TODO
-end
+-- for _, wepTable in pairs(weapons.GetList()) do
+--     --PrintTable(wepTable)
+--     if (wepTable.Category == "CW2.0") then
+--         print("a")
+--     end
+--     -- TODO
+-- end

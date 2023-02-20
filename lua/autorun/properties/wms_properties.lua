@@ -193,7 +193,6 @@ properties.Add( "debug", {
         if (not IsValid(ent)) then return false end
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
-
         return true
     end,
 
