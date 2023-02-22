@@ -119,6 +119,13 @@ for _, w in pairs(weapons.GetList()) do
 end
 ```
 
+```mermaid
+graph TD;
+    1-->2;
+    2-->3;
+```
+
+
 
 ---
 > this addon is originally made for the LPS server
