@@ -44,7 +44,7 @@ and it's use is still buggy but I am working on it daily
 
 Installing the addon is the basic put `wms/` in `garrysmod/addons/`
 
-### Config
+### $Confi.g)
 
 the config files are in `wms/lua/config/` . Most of it is developer side and isn't meant to be tampered with.
 
@@ -118,13 +118,6 @@ for _, w in pairs(weapons.GetList()) do
     end
 end
 ```
-
-```mermaid
-graph TD;
-    1-->2;
-    2-->3;
-```
-
 
 
 ---
