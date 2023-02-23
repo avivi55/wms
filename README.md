@@ -44,7 +44,8 @@ and it's use is still buggy but I am working on it daily
 
 Installing the addon is the basic put `wms/` in `garrysmod/addons/`
 
-### $Confi.g)
+### Config
+#### $6.4)$
 
 the config files are in `wms/lua/config/` . Most of it is developer side and isn't meant to be tampered with.
 
