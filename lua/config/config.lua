@@ -20,14 +20,9 @@ WMS.config.fractureWalkSpeed = 200  -- 400
 WMS.config.fractureRunSpeed = 400   -- 600
 
 
-
-
 -- ############################################################################
 -- ############################################################################
 -- ############################################################################
-
-
-
 
 
 -- /!\ This part is NOT to be changed /!\ 
@@ -69,7 +64,6 @@ WMS.config.enums.dmgArea = {
 }
 
 
-
 WMS.config.human.dmgTypes = {
     [WMS.config.enums.dmgTypes.BLEED]     = "Saignement",
     [WMS.config.enums.dmgTypes.PROP]      = "Objet",
@@ -79,6 +73,7 @@ WMS.config.human.dmgTypes = {
     [WMS.config.enums.dmgTypes.NO_DAMAGE] = "NON",
     [WMS.config.enums.dmgTypes.NORMAL]    = "Arme à feu"
 }
+
 WMS.config.human.dmgArea = {
     [WMS.config.enums.dmgArea.SKULL]   = "Crâne",
     [WMS.config.enums.dmgArea.NECK]    = "Cou",
@@ -114,12 +109,8 @@ WMS.config.dmgAreaToImage = {
 -----------------------------------------------------------------------------
 
 
-
-
-
 -- This part is meant for tweaking specific things and is generally made for devs, but it won't 
 -- break if you touch
-
 
 
 WMS.config.DEBUG = true

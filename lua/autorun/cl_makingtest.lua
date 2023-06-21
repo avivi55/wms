@@ -61,7 +61,7 @@ do -- Medic Weapon
 
         --print(H)
 
-        self.topShelf = vgui.Create( "DPanel", self )
+        self.topShelf = vgui.Create("DPanel", self)
         self.topShelf:SetSize(W, getH(15))
         self.topShelf:SetPos(0, 0)
         self.topShelf.Paint = function(s, w, h)
@@ -70,7 +70,7 @@ do -- Medic Weapon
         end
 
         local _, topH = self.topShelf:GetSize()
-        self.mainShelf = vgui.Create( "DPanel", self )
+        self.mainShelf = vgui.Create("DPanel", self)
         self.mainShelf:SetSize(W, H-topH)
         self.mainShelf:SetPos(0, topH)
         local main = self.mainShelf
@@ -78,13 +78,13 @@ do -- Medic Weapon
 
 
         do -- CLOSE BUTTON
-            local cb = vgui.Create( "DLabel", self.topShelf )
+            local cb = vgui.Create("DLabel", self.topShelf)
             local parent = cb:GetParent()
             cb:SetMouseInputEnabled(true)
             cb:SetText("")
-            cb:SetPos( 0, 0 )
+            cb:SetPos(0, 0)
             local sw, sh = parent:GetSize()
-            cb:SetSize( sw, sh )
+            cb:SetSize(sw, sh)
             --print(sw, sh)
             cb.DoClick = function() panel:Remove() end
             cb.Paint = function(s, w, h)
@@ -130,9 +130,9 @@ do -- MedicCloseButton
         local parent = self:GetParent()
         self:SetMouseInputEnabled(true)
         self:SetText("")
-        self:SetPos( 0, 0 )
+        self:SetPos(0, 0)
         local sw, sh = parent:GetSize()
-        self:SetSize( sw, sh )
+        self:SetSize(sw, sh)
         --print(sw, sh)
         self.DoClick = function() parent:Remove() end
     end
@@ -151,7 +151,7 @@ do -- MedicChooseLimbButton
         -- local parent = self:GetParent()
         self:SetMouseInputEnabled(true)
         self:SetText("")
-        self:SetPos( 0, 0 )
+        self:SetPos(0, 0)
         self.DoClick = function() print('nègre') end
     end
     function PANEL:Paint(w,h)
@@ -217,7 +217,7 @@ do -- MedicPlayerPrint TODO
     end
 
     function PANEL:Paint(w, h)
-        --print(self.name:GetText() )
+        --print(self.name:GetText())
         draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 150))
         if (self.background:GetSize() != w) then
             self.background:SetSize(w, h)
@@ -282,8 +282,8 @@ do -- MedicDiagnostic
 
         draw.RoundedBox(0, 0 ,0, h / 4, h / 4, Color(46, 46, 46))
         surface.SetFont("TargetID")
-        local w_, h_ = surface.GetTextSize("n°" .. self:GetNumber())
-        draw.DrawText("n°" .. self:GetNumber(), "TargetID", h / 8 - w_ / 2, h / 8 - h_ / 2)
+        local w_, h_ = surface.GetTextSize("n°"..self:GetNumber())
+        draw.DrawText("n°"..self:GetNumber(), "TargetID", h / 8 - w_ / 2, h / 8 - h_ / 2)
 
         draw.RoundedBox(0, h / 4, 0, ((w-h / 4) * self:GetDamage()) / 100, h / 4, Color(81, 78, 230, 232))
 
@@ -299,12 +299,12 @@ do -- MedicDiagnostic
         if (self.image:GetImage() == "") then
             x = ((w / 2) - (3 / 4 * h)) / 2
             local source = self:GetSource()
-            self.image:SetImage("vgui/wep/" .. source .. ".png")
+            self.image:SetImage("vgui/wep/"..source..".png")
             self.image:SetPos(x, h / 4)
             self.image:SetSize(3 / 4 * h, 3 / 4 * h)
 
             local area = self:GetArea()
-            self.body_img:SetImage("vgui/body/" .. area .. ".png")
+            self.body_img:SetImage("vgui/body/"..area..".png")
             self.body_img:SetPos(w / 2 + x, h / 4)
             self.body_img:SetSize(3 / 4 * h, 3 / 4 * h)
             self.body_img:SetImageColor(Color(255, 0, 0))
@@ -371,9 +371,9 @@ do -- MedicInfoCard
         draw.RoundedBox(0, 0, 0, w, h, Color(68,68,68,150))
 
         surface.SetFont("CenterPrintText")
-        local _, h_ = surface.GetTextSize("Nom : " .. ply:Nick())
-        draw.DrawText("Nom : " .. ply:Nick(), "CenterPrintText", h + h / 4, h_ / 4)
-        draw.DrawText("Grade : " .. ply:getJobTable().name, "CenterPrintText", h + h / 4, h / 2 + h_ / 4)
+        local _, h_ = surface.GetTextSize("Nom : "..ply:Nick())
+        draw.DrawText("Nom : "..ply:Nick(), "CenterPrintText", h + h / 4, h_ / 4)
+        draw.DrawText("Grade : "..ply:getJobTable().name, "CenterPrintText", h + h / 4, h / 2 + h_ / 4)
 
         --PrintTable(ply:getJobTable())
 
@@ -398,7 +398,7 @@ do
         self:CenterVertical()
 
         local ply = self:GetPlayer()
-        self.topShelf = vgui.Create( "DPanel", self )
+        self.topShelf = vgui.Create("DPanel", self)
         self.topShelf:SetSize(W, getH(15))
         self.topShelf:SetPos(0, 0)
         self.topShelf.Paint = function(_, _, _) end
@@ -409,7 +409,7 @@ do
         vgui.Create("MedicCloseButton", self.topShelf)
 
         local _, topH = self.topShelf:GetSize()
-        self.mainShelf = vgui.Create( "DPanel", self )
+        self.mainShelf = vgui.Create("DPanel", self)
         self.mainShelf:SetSize(W, H-topH)
         self.mainShelf:SetPos(0, topH)
         local test = true

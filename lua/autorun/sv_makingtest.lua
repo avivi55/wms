@@ -3,7 +3,7 @@ if (SERVER) then
 
 -- for k,v in pairs(player.GetAll()) do
 --     print(v, v:Alive())
---     v:SetUserGroup( "superadmin" )
+--     v:SetUserGroup("superadmin")
 --     print(v:GetNWBool("rightArmFracture"))
 --     print(v:GetNWBool("leftArmFracture"))
 --     v:SetActiveWeapon(v:Give("weapon_crowbar"))

@@ -8,28 +8,35 @@ properties.Add("pulse", {
     PrependSpacer = true,
 
     Filter = function(self, ent, ply)
+
         if (not IsValid(ent)) then return false end
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
 
         return true
+
     end,
 
     Action = function(self, ent)
+
         self:MsgStart()
             net.WriteEntity(ent)
         self:MsgEnd()
+
     end,
 
     Receive = function(self, length, ply)
+
         if (not IsValid(ply)) then return end
         local ent = net.ReadEntity()
+
         if (ent:IsPlayerRagdoll()) then ent = ent:GetCreator() end
         if (not IsValid(ent)) then return end
         if (not self:Filter(ent, ply)) then return end
 
         local pulse = tostring(ent:GetNWInt("Pulse"))
-        ply:ChatPrint("Le patient à : " .. pulse .. " de pouls")
+        ply:ChatPrint("Le patient à : "..pulse.." de pouls")
+
     end
 })
 
@@ -40,30 +47,37 @@ properties.Add("medic_sheet", {
     MenuIcon = "icon16/folder_heart.png",
 
     Filter = function(self, ent, ply)
+
         if (not IsValid(ent)) then return false end
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
 
         return true
+
     end,
 
     Action = function(self, ent)
+
         local t = vgui.Create("MedicExam")
         t:SetPlayer(ent)
 
         self:MsgStart()
             net.WriteEntity(ent)
         self:MsgEnd()
+
     end,
 
     Receive = function(self, length, ply)
+
         if (not IsValid(ply)) then return end
         local ent = net.ReadEntity()
+
         if (ent:IsPlayerRagdoll()) then ent = ent:GetCreator() end
         if (not IsValid(ent)) then return end
         if (not self:Filter(ent, ply)) then return end
 
-        print(ply:Nick() .. " a ouvert le diagnostique sur " .. ent:Nick())
+        print(ply:Nick().." a ouvert le diagnostique sur "..ent:Nick())
+
     end
 })
 
@@ -75,6 +89,7 @@ properties.Add("Grab", {
     PrependSpacer = true,
 
     Filter = function(self, ent, ply)
+
         if (not IsValid(ent)) then return false end
         if (not (ent:IsPlayer())) then return false end
         if (not ply:IsAdmin()) then return false end
@@ -82,19 +97,23 @@ properties.Add("Grab", {
         if (ent:Health() > 30) then return false end
 
         return true
+
     end,
 
-    Checked = function( self, ent, ply )
+    Checked = function(self, ent, ply)
         return ent:GetNWBool("isDragged")
     end,
 
     Action = function(self, ent)
+
         self:MsgStart()
             net.WriteEntity(ent)
         self:MsgEnd()
+
     end,
 
     Receive = function(self, length, ply)
+
         local ent = net.ReadEntity()
         if (not IsValid(ent)) then return end
         if (not self:Filter(ent, ply)) then return end
@@ -107,6 +126,7 @@ properties.Add("Grab", {
             ent:SetNWBool("isDragged", false)
             ent:SetNWEntity("Kidnapper", nil)
         end
+
     end
 })
 
@@ -122,6 +142,7 @@ local debugOrder = {
     "Low Health",
     "Add diagnostic"
 }
+
 local debugFun = {
     ["Revive"] = function(ply)
         ply:Revive()
@@ -132,9 +153,11 @@ local debugFun = {
     end,
 
     ["Repare"] = function(ply)
+
         ply:HealRightArmFracture()
         ply:HealLeftArmFracture()
         ply:HealLegFracture()
+
     end,
 
     ["Leg Fracture"] = function(ply)
@@ -161,6 +184,7 @@ local debugFun = {
         ply:SetHealth(20)
     end,
     ["Add diagnostic"] = function(ply)
+
         ply.wms_dmg_tbl[#ply.wms_dmg_tbl + 1] = {
             damage = 20,
             wms_type = 7,
@@ -168,6 +192,7 @@ local debugFun = {
         }
 
         WMS.utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
+
     end,
 }
 local debugIcon = {
@@ -183,43 +208,50 @@ local debugIcon = {
     ["Add diagnostic"] = "plus",
 }
 
-properties.Add( "debug", {
+properties.Add("debug", {
     MenuLabel = "#Admin Option",
     Order = 5,
     MenuIcon = "icon16/wand.png",
 
-    Filter = function( self, ent, ply )
+    Filter = function(self, ent, ply)
+
         if (not WMS.DEBUG) then return false end
         if (not IsValid(ent)) then return false end
         if (not (ent:IsPlayer() or ent:IsPlayerRagdoll())) then return false end
         if (not ply:IsAdmin()) then return false end
+       
         return true
+
     end,
 
-    MenuOpen = function( self, option, ent, tr )
+    MenuOpen = function(self, option, ent, tr)
         local submenu = option:AddSubMenu()
 
         for k, name in ipairs(debugOrder) do
             --print(name)
-            submenu:AddOption( name, function() self:NewAction(ent, name) end)
-                            :SetIcon("icon16/" .. debugIcon[name] .. ".png")
+            submenu:AddOption(name, function() self:NewAction(ent, name) end)
+                    :SetIcon("icon16/"..debugIcon[name]..".png")
         end
+        
     end,
 
 
 
-    NewAction = function( self, ent, name )
+    NewAction = function(self, ent, name)
+        
         self:MsgStart()
             net.WriteEntity(ent)
             net.WriteString(name)
         self:MsgEnd()
+
     end,
 
-    Action = function( self, ent )
+    Action = function(self, ent)
     end,
 
 
-    Receive = function( self, length, ply )
+    Receive = function(self, length, ply)
+
         local ent = net.ReadEntity()
         if (ent:IsPlayerRagdoll()) then ent = ent:GetCreator() end
         if (not IsValid(ent)) then return end
@@ -234,11 +266,12 @@ properties.Add( "debug", {
 
 
         local ed = EffectData()
-        ed:SetEntity( ent )
-        util.Effect( "LaserTracer", ed, true, true )
-        util.Effect( "entity_remove", ed, true, true )
+        ed:SetEntity(ent)
+        util.Effect("LaserTracer", ed, true, true)
+        util.Effect("entity_remove", ed, true, true)
+
     end
-} )
+})
 
 
 

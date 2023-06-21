@@ -1,10 +1,7 @@
 AddCSLuaFile()
 
 WMS = WMS or {}
-
-
 -- if you want to add specific weapons to this list follow the exemple
-
 
 -- ["weapon_class"] = true,
 
@@ -86,8 +83,6 @@ for _, w in pairs(weapons.GetList()) do
 end
 
 PrintTable(WMS.weapons)
-
-
 
 -- save
 

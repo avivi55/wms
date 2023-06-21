@@ -62,22 +62,22 @@ if (CLIENT) then
 		surface.SetDrawColor(0, 0, 0, 255 * GoneFraction ^ 2)
 		surface.DrawRect(-W, -H, ScrW() * 3, ScrH() * 3)
 
-		surface.SetTextColor( 255, 43, 43)
-		surface.SetFont( "DEATH_SCREEN" )
+		surface.SetTextColor(255, 43, 43)
+		surface.SetFont("DEATH_SCREEN")
 		local s1 = surface.GetTextSize("VOUS ÊTES MORT")
 
 		surface.SetTextPos((ScrW() / 2) - (s1 / 2), ScrH() / 3)
 		surface.DrawText("VOUS ÊTES MORT")
 
 		if (ply:GetNWBool("isPartialDead")) then
-			surface.SetFont( "DEATH_SCREEN_LITTLE" )
+			surface.SetFont("DEATH_SCREEN_LITTLE")
 			s1, s2 = surface.GetTextSize("Mais un medecin peut encore venir vous sauvez")
 	
 			surface.SetTextPos((ScrW() / 2) - (s1 / 2), ScrH() / 1.5)
 			surface.DrawText("Mais un medecin peut encore venir vous sauvez")
 	
 			surface.SetTextPos(ScrW() / 2, ScrH() / 1.20)
-			surface.DrawText(tostring(math.floor((ply:GetNWInt("partialDeathTimer") + WMS.config.partialDeathTime + 1) - CurTime())) .. "s")
+			surface.DrawText(tostring(math.floor((ply:GetNWInt("partialDeathTimer") + WMS.config.partialDeathTime + 1) - CurTime())).."s")
 		end
 	end)
 end

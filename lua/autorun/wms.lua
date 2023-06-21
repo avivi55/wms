@@ -1,5 +1,6 @@
 AddCSLuaFile()
 AddCSLuaFile("client/wms_client.lua")
+
 WMS = WMS or {}
 
 include("autorun/properties/wms_properties.lua")

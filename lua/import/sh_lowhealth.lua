@@ -5,7 +5,6 @@ end
 
 AddCSLuaFile()
 
-
 -- LITTERALLY STOLEN (https://steamcommunity.com/sharedfiles/filedetails/?id=652896605)
 
 if CLIENT then
