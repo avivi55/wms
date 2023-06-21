@@ -93,9 +93,6 @@ do -- Medic Weapon
             end
         end
 
-
-
-
         --print(H,H / 2)
         local x = panelPadding
         for _, choise in pairs(Choises) do
@@ -145,6 +142,26 @@ do -- MedicCloseButton
     end
     vgui.Register("MedicCloseButton", PANEL, "DLabel")
 end
+
+
+do -- MedicChooseLimbButton
+    local PANEL = {}
+
+    function PANEL:Init()
+        -- local parent = self:GetParent()
+        self:SetMouseInputEnabled(true)
+        self:SetText("")
+        self:SetPos( 0, 0 )
+        self.DoClick = function() print('nègre') end
+    end
+    function PANEL:Paint(w,h)
+        -- draw.RoundedBoxEx(8, 0, 0, w, h, Color(255, 0, 0), true, true)
+        -- surface.SetDrawColor(255, 255, 255)
+    end
+    vgui.Register("MedicChooseLimb", PANEL, "DLabel")
+end
+
+
 
 do -- MedicPlayerPrint TODO
     local PANEL = {}
@@ -224,8 +241,6 @@ do -- MedicPlayerPrint TODO
         local dmgs = ply.wms_dmg_tbl or {}
 
         for id, dmg in pairs(dmgs) do
-            PrintTable(dmg)
-            print(WMS.config.dmgAreaToImage[dmg.hit_grp])
             self[WMS.config.dmgAreaToImage[dmg.hit_grp]]:SetImageColor(Color(255, 0, 0, 255))
 
             local brokenColor = Color(49, 49, 49)
@@ -243,17 +258,10 @@ do -- MedicPlayerPrint TODO
             end
         end
 
-
-        --self.head:SetImageColor(Color(255, 0, 0))
-        --self.torso:SetImageColor(Color(98, 0, 255))
-        --self.arm_right_b:SetImageColor(Color(255, 0, 0))
-
         self.arm_right_t:SetImageColor(Color(0, 0, 0, 0))
         self.arm_left_t:SetImageColor(Color(0, 0, 0, 0))
         self.leg_right_t:SetImageColor(Color(0, 0, 0, 0))
         self.leg_left_t:SetImageColor(Color(0, 0, 0, 0))
-
-        --draw.RoundedBox(0, 0, 0, 3, h, Color(0, 0, 0, 200))
     end
     vgui.Register("MedicPlayerPrint", PANEL, "DPanel")
 end

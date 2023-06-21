@@ -85,6 +85,8 @@ for _, w in pairs(weapons.GetList()) do
     end
 end
 
+PrintTable(WMS.weapons)
+
 
 
 -- save
