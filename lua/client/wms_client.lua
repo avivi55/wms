@@ -1,5 +1,5 @@
 net.Receive("send_damage_table_to_client", function(len, ply)
-    net.ReadEntity().wms_dmg_tbl = net.ReadTable()
+    net.ReadEntity().damagesTable = net.ReadTable()
     return
 end)
 

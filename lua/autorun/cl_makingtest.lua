@@ -238,21 +238,21 @@ do -- MedicPlayerPrint TODO
         end
 
         local ply = self:GetParent():GetParent():GetPlayer()
-        local dmgs = ply.wms_dmg_tbl or {}
+        local dmgs = ply.damagesTable or {}
 
         for id, dmg in pairs(dmgs) do
-            self[WMS.config.dmgAreaToImage[dmg.hit_grp]]:SetImageColor(Color(255, 0, 0, 255))
+            self[WMS.config.damageAreaToImage[dmg.hitGroup]]:SetImageColor(Color(255, 0, 0, 255))
 
             local brokenColor = Color(49, 49, 49)
 
-            if (dmg.broken_r_arm) then
+            if (dmg.brokenRightArm) then
                 self.arm_right_b:SetImageColor(brokenColor)
-            elseif (dmg.broken_l_arm) then
+            elseif (dmg.brokenLeftArm) then
                 self.arm_left_b:SetImageColor(brokenColor)
             elseif (dmg.limp) then
-                if (dmg.hit_grp == HITGROUP_RIGHTLEG) then
+                if (dmg.hitGroup == HITGROUP_RIGHTLEG) then
                     self.leg_right_b:SetImageColor(brokenColor)
-                elseif (dmg.hit_grp == HITGROUP_LEFTLEG) then
+                elseif (dmg.hitGroup == HITGROUP_LEFTLEG) then
                     self.leg_left_b:SetImageColor(brokenColor)
                 end
             end
@@ -324,7 +324,7 @@ do -- MedicDiagnostics
 
         if (self.t) then return end
 
-        local dmgs = grandParent:GetPlayer().wms_dmg_tbl or {}
+        local dmgs = grandParent:GetPlayer().damagesTable or {}
 
         if (#dmgs == 0) then
             draw.RoundedBox(0, 0, 0, w, h, Color(0, 255, 21, 12))
@@ -334,15 +334,15 @@ do -- MedicDiagnostics
             return
         end
         for k, dmg in pairs(dmgs) do
-            --print(dmg.h_wep, dmg.damage, WMS.config.dmgAreaToImage[dmg.hit_grp])
+            --print(dmg.verboseWeapon, dmg.damageAmount, WMS.config.damageAreaToImage[dmg.hitGroup])
             local t = self:Add("MedicDiagnostic")
-            t:SetArea(WMS.config.dmgAreaToImage[dmg.hit_grp])
-            t:SetDamage(dmg.damage)
+            t:SetArea(WMS.config.damageAreaToImage[dmg.hitGroup])
+            t:SetDamage(dmg.damageAmount)
             t:SetNumber(k)
-            if (dmg.h_wep == "") then
+            if (dmg.verboseWeapon == "") then
                 t:SetSource("rifle")
             else
-                t:SetSource(dmg.h_wep or "rifle")
+                t:SetSource(dmg.verboseWeapon or "rifle")
             end
             t:SetSize(w, h / 4)
             t:Dock(TOP)
@@ -420,7 +420,7 @@ do
             if (ply) then
                 if (test) then
                     test = false
-                    if (#ply.wms_dmg_tbl != 0) then
+                    if (#ply.damagesTable != 0) then
                         local dmg_list = vgui.Create("MedicDiagnostics", main)
                         dmg_list:SetPos(w - w / 4, 0)
                         dmg_list:SetSize(w / 4, h)

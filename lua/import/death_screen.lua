@@ -12,7 +12,7 @@ if (CLIENT) then
 
 		if not(IsValid(ply)) then return end
 
-		if (ply:Alive() and not ply:GetNWBool("isPartialDead")) then
+		if (ply:Alive() and not ply:GetNWBool("isPartiallyDead")) then
 			LastLivingEyeAngle = ply:GetAimVector():Angle()
 			LastLivingEyeAngle:Normalize()
 			if (MyState ~= STATE_ALIVE) then
@@ -53,7 +53,7 @@ if (CLIENT) then
 	hook.Add("PostDrawHUD", "DP_PostdrawHUD", function()
 		local ply = LocalPlayer()
 
-		if (ply:Alive() and not ply:GetNWBool("isPartialDead")) then return end
+		if (ply:Alive() and not ply:GetNWBool("isPartiallyDead")) then return end
 		if (ply:GetViewEntity() ~= ply) then return end
 		if (GoneFraction <= 0) then return end
 
@@ -69,7 +69,7 @@ if (CLIENT) then
 		surface.SetTextPos((ScrW() / 2) - (s1 / 2), ScrH() / 3)
 		surface.DrawText("VOUS ÊTES MORT")
 
-		if (ply:GetNWBool("isPartialDead")) then
+		if (ply:GetNWBool("isPartiallyDead")) then
 			surface.SetFont("DEATH_SCREEN_LITTLE")
 			s1, s2 = surface.GetTextSize("Mais un medecin peut encore venir vous sauvez")
 	

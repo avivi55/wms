@@ -249,7 +249,7 @@ if (SERVER) then
 
 			ent.ammo = self:GetAmmo()
 
-			ent.wms_dmg_tbl = table.Copy(self.wms_dmg_tbl)
+			ent.damagesTable = table.Copy(self.damagesTable)
 
 			-- Fire Transmission
 			if self:IsOnFire() then

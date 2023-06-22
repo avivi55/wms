@@ -185,13 +185,13 @@ local debugFun = {
     end,
     ["Add diagnostic"] = function(ply)
 
-        ply.wms_dmg_tbl[#ply.wms_dmg_tbl + 1] = {
+        ply.damagesTable[#ply.damagesTable + 1] = {
             damage = 20,
-            wms_type = 7,
-            h_wep = "OUI"
+            customDamageType = 7,
+            verboseWeapon = "OUI"
         }
 
-        WMS.utils.syncDmgTbl(ply, table.Copy(ply.wms_dmg_tbl))
+        WMS.utils.syncDmgTbl(ply, table.Copy(ply.damagesTable))
 
     end,
 }
