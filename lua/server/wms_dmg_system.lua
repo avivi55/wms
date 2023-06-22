@@ -1,61 +1,80 @@
 -- This file contains the functions and hook functions related to parsing the damage info taken by each player
 -- how it works :
--- The point is to parse the information given by the EntityTakeDamage hook
+-- The point is to parse the information given by the EntityTakeDamage hook and only get the generated
+-- amount of damage depending on the weapon and the area and luck.
 
 
 WMS = WMS or {}
 WMS.DamageSystem = WMS.DamageSystem or {}
 WMS.DamageSystem.Hooks = {}
 
-WMS.DamageSystem.isBleedingDmg = function(damages)
-    return damages.type == WMS.config.DMG_BLEEDING / 2
+-- Checks if a parsed damage table is bleeding damage
+-- @param damage: table The parsed damage table
+-- @returns boolean Whether the damage is bleeding damage
+WMS.DamageSystem.isBleedingDmg = function(damage)
+    return damage.type == WMS.config.DMG_BLEEDING / 2
 end
 
-WMS.DamageSystem.isExplosionDamage = function(damages, damageInfo)
-    return damageInfo:isExplosionDamage() or damages.inflictor:GetClass() == "base_shell"
+-- Checks if a parsed damage table is explosion damage
+-- @param damage: table The parsed damage table
+-- @param damageInfo: CTakeDamageInfo The original damage info
+-- @returns boolean Whether the damage is explosion damage
+WMS.DamageSystem.isExplosionDamage = function(damage, damageInfo)
+    return damageInfo:isExplosionDamage() or damage.inflictor:GetClass() == "base_shell"
 end
 
-WMS.DamageSystem.isVehicleDamage = function(damages)
-    return damages.inflictor:IsVehicle() or damages.inflictor:GetClass() == "worldspawn"
+-- Checks if a parsed damage table is vehicle damage
+-- @param damage: table The parsed damage table
+-- @returns boolean Whether the damage is vehicle damage
+WMS.DamageSystem.isVehicleDamage = function(damage)
+    return damage.inflictor:IsVehicle() or damage.inflictor:GetClass() == "worldspawn"
 end
 
-WMS.DamageSystem.getWeaponType = function(damages)
+-- Gets the predefined weapon type with the parsed damage table
+-- @param damage: table The parsed damage table 
+-- @returns number The custom weapon type
+WMS.DamageSystem.getWeaponType = function(damage)
     
-    if (WMS.weapons.cut[damages.weaponClass] or WMS.weapons.cut[damages.inflictor:GetClass()]) then
+    if (WMS.weapons.cut[damage.weaponClass] or WMS.weapons.cut[damage.inflictor:GetClass()]) then
 
-        return WMS.config.enums.weaponTypes.CUT, "cut"
+        return WMS.config.enums.weaponTypes.CUT
 
-    elseif (WMS.weapons.pistol[damages.weaponClass]) then
+    elseif (WMS.weapons.pistol[damage.weaponClass]) then
 
-        return WMS.config.enums.weaponTypes.PISTOL, "pistol"
+        return WMS.config.enums.weaponTypes.PISTOL
 
-    elseif (WMS.weapons.rifle[damages.weaponClass] or !IsValid(damages.weapon)) then
+    elseif (WMS.weapons.rifle[damage.weaponClass] or !IsValid(damage.weapon)) then
 
-        return WMS.config.enums.weaponTypes.RIFLE, "rifle"
+        return WMS.config.enums.weaponTypes.RIFLE
 
-    elseif (damages.customDamageType == WMS.config.enums.damageTypes.VEHICLE) then
+    elseif (damage.customDamageType == WMS.config.enums.damageTypes.VEHICLE) then
 
-        return 0, "vehicle"
+        return WMS.config.enums.weaponTypes.VEHICLE
 
-    elseif (!WMS.weapons.rifle[damages.weaponClass]
-            and IsValid(damages.weapon) 
-            and damages.inflictor:IsPlayer() 
-            and !damages.inflictor:InVehicle()) then
+    elseif (!WMS.weapons.rifle[damage.weaponClass]
+            and IsValid(damage.weapon) 
+            and damage.inflictor:IsPlayer() 
+            and !damage.inflictor:InVehicle()) then
 
-        return -1, "UNRECOGNIZED"
+        return WMS.config.enums.weaponTypes.UNRECOGNIZED
+
     end
 
-    return WMS.config.enums.weaponTypes.RIFLE, "rifle"
+    return WMS.config.enums.weaponTypes.RIFLE
 
 end
 
-WMS.DamageSystem.getCustomDamageType = function(damages)
+-- Gets the predefined damage type of a parsed damage table
+-- @param damage: table The parsed damage table
+-- @param damageInfo: CTakeDamageInfo The original damage info
+-- @returns number The custom damage type detected
+WMS.DamageSystem.getCustomDamageType = function(damage, damageInfo)
 
-    if (WMS.DamageSystem.isBleedingDmg(damages)) then
+    if (WMS.DamageSystem.isBleedingDmg(damage)) then
         return WMS.config.enums.damageTypes.BLEED
     end
     
-    if (WMS.weapons.noDamage[damages.inflictor:GetClass()]) then
+    if (WMS.weapons.noDamage[damage.inflictor:GetClass()]) then
         return WMS.config.enums.damageTypes.NO_DAMAGE
     end
 
@@ -63,21 +82,21 @@ WMS.DamageSystem.getCustomDamageType = function(damages)
         return WMS.config.enums.damageTypes.FALL
     end
 
-    if (WMS.DamageSystem.isExplosionDamage(damages, damageInfo)) then
+    if (WMS.DamageSystem.isExplosionDamage(damage, damageInfo)) then
         return WMS.config.enums.damageTypes.EXPLOSION
     end
     
-    if (WMS.DamageSystem.isVehicleDamage(damages)) then
+    if (WMS.DamageSystem.isVehicleDamage(damage)) then
         return WMS.config.enums.damageTypes.VEHICLE
     end
 
-    if (damages.attacker:IsPlayer()) then
+    if (damage.attacker:IsPlayer()) then
         return WMS.config.enums.damageTypes.NORMAL
     end
 
-    if (IsValid(damages.weapon)) then
+    if (IsValid(damage.weapon)) then
 
-        if (!WMS.weapons[damages.weaponClass]) then
+        if (!WMS.weapons[damage.weaponClass]) then
             return WMS.config.enums.damageTypes.NO_DAMAGE
         end
 
@@ -87,14 +106,17 @@ WMS.DamageSystem.getCustomDamageType = function(damages)
 
 end
 
-WMS.DamageSystem.getDamageArea = function(damages)
+-- Gets the predefined damage area with the parsed damage table
+-- @param damage: table The parsed damage table 
+-- @returns number The custom damage area
+WMS.DamageSystem.getDamageArea = function(damage)
 
     local chance = math.random(100)
 
-    if ((damages.hitGroup == HITGROUP_CHEST 
-        or damages.customDamageType == WMS.config.enums.damageTypes.VEHICLE 
-        or !IsValid(damages.weapon))
-        and (!WMS.weapons.cut[damages.inflictor:GetClass()])) then
+    if ((damage.hitGroup == HITGROUP_CHEST 
+        or damage.customDamageType == WMS.config.enums.damageTypes.VEHICLE 
+        or !IsValid(damage.weapon))
+        and (!WMS.weapons.cut[damage.inflictor:GetClass()])) then
 
         if (chance <= WMS.config.chances[WMS.config.enums.damageArea.TORSO].chance) then
             return WMS.config.enums.damageArea.TORSO
@@ -108,15 +130,15 @@ WMS.DamageSystem.getDamageArea = function(damages)
 
     end
 
-    if (damages.hitGroup == HITGROUP_GENERIC
-        or WMS.weapons.cut[damages.inflictor:GetClass()]
-        or WMS.weapons.cut[damages.weapon]) then
+    if (damage.hitGroup == HITGROUP_GENERIC
+        or WMS.weapons.cut[damage.inflictor:GetClass()]
+        or WMS.weapons.cut[damage.weapon]) then
 
-        local sum --int
+        local sum = 0
 
-        for area, pourcentage in ipairs(WMS.config.chances.cut) do
+        for area, percentage in ipairs(WMS.config.chances.cut) do
 
-            sum = sum + pourcentage
+            sum = sum + percentage
             if (chance <= sum) then
                 return area
             end
@@ -125,7 +147,7 @@ WMS.DamageSystem.getDamageArea = function(damages)
 
     end
     
-    if (damages.hitGroup == HITGROUP_HEAD) then
+    if (damage.hitGroup == HITGROUP_HEAD) then
 
         if (chance <= WMS.config.chances[WMS.config.enums.damageArea.SKULL].chance) then
             return WMS.config.enums.damageArea.SKULL
@@ -144,7 +166,7 @@ WMS.DamageSystem.getDamageArea = function(damages)
         -- for i = 0,10 do player:EmitSound(sound_, 90) end
     end
 
-    if (damages.hitGroup == HITGROUP_STOMACH) then
+    if (damage.hitGroup == HITGROUP_STOMACH) then
 
         if (chance <= WMS.config.chances[WMS.config.enums.damageArea.STOMACH].chance) then
             return WMS.config.enums.damageArea.STOMACH
@@ -154,7 +176,7 @@ WMS.DamageSystem.getDamageArea = function(damages)
 
     end
 
-    if (damages.hitGroup == HITGROUP_LEFTLEG or damages.hitGroup == HITGROUP_RIGHTLEG) then
+    if (damage.hitGroup == HITGROUP_LEFTLEG or damage.hitGroup == HITGROUP_RIGHTLEG) then
 
         if (chance <= WMS.config.chances[WMS.config.enums.damageArea.LEG].chance) then
             return WMS.config.enums.damageArea.LEG
@@ -164,7 +186,7 @@ WMS.DamageSystem.getDamageArea = function(damages)
 
     end
 
-    if (damages.hitGroup == HITGROUP_LEFTARM or damages.hitGroup == HITGROUP_RIGHTARM) then
+    if (damage.hitGroup == HITGROUP_LEFTARM or damage.hitGroup == HITGROUP_RIGHTARM) then
 
         if (chance <= WMS.config.chances[WMS.config.enums.damageArea.ARM].chance) then
             return WMS.config.enums.damageArea.ARM
@@ -174,11 +196,15 @@ WMS.DamageSystem.getDamageArea = function(damages)
 
     end
 
-    return -1
+    return WMS.config.enums.damageArea.UNRECOGNIZED
 
 end
 
-WMS.DamageSystem.getDamageTable = function(damages)
+-- Calculates the chances of different types of deaths and gives a table containing 
+-- the necessary information
+-- @param damage: table The parsed damage table
+-- @returns table The final damage table
+WMS.DamageSystem.getDamageTable = function(damage)
 
     local finalDamages = {}
 
@@ -188,50 +214,50 @@ WMS.DamageSystem.getDamageTable = function(damages)
 
     finalDamages.damageAmount = 0
 
-    if (damages.area > 0 and damages.weaponType > 0) then
-        finalDamages.totalDeath   = math.random(100) <= WMS.config.chances[damages.area][damages.weaponType].total
-        finalDamages.partialDeath = math.random(100) <= WMS.config.chances[damages.area][damages.weaponType].partial
-        finalDamages.hemorrhage    = math.random(100) <= WMS.config.chances[damages.area][damages.weaponType].hemorrhage
+    if (damage.area > 0 and damage.weaponType > 0) then
+        finalDamages.totalDeath = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].total
+        finalDamages.partialDeath = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].partial
+        finalDamages.hemorrhage = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].hemorrhage
 
-        local range = WMS.config.chances[damages.area][damages.weaponType].dmgRange
+        local range = WMS.config.chances[damage.area][damage.weaponType].dmgRange
         finalDamages.damageAmount = math.random(range[1], range[2])
     end
 
-    if (damages.customDamageType == WMS.config.enums.damageTypes.FALL) then
+    if (damage.customDamageType == WMS.config.enums.damageTypes.FALL) then
         finalDamages.totalDeath = false
     end
 
-    if (player:Health() - finalDamages.damageAmount <= 0) then
+    if (damage.victim:Health() - finalDamages.damageAmount <= 0) then
         finalDamages.totalDeath = true
         finalDamages.partialDeath = true
     end
 
-    if (player:Health() - finalDamages.damageAmount <= 30) then
+    if (damage.victim:Health() - finalDamages.damageAmount <= 30) then
         finalDamages.limp = true
     end
 
-    if (damages.customDamageType == WMS.config.enums.damageTypes.VEHICLE 
-        or damages.customDamageType == WMS.config.enums.damageTypes.FALL) then
+    if (damage.customDamageType == WMS.config.enums.damageTypes.VEHICLE 
+        or damage.customDamageType == WMS.config.enums.damageTypes.FALL) then
 
         finalDamages.hemorrhage = false 
 
     end
 
-    local explosionByDeathCondition = damages.customDamageType == WMS.config.enums.damageTypes.EXPLOSION and damages.damageAmount >= 70
+    local explosionByDeathCondition = damage.customDamageType == WMS.config.enums.damageTypes.EXPLOSION and damage.damageAmount >= 70
 
     if (explosionByDeathCondition) then 
         finalDamages.totalDeath = true 
     end
 
-    finalDamages.customDamageType = damages.customDamageType
-    finalDamages.verboseWeapon = damages.verboseWeapon
-    finalDamages.hitGroup = damages.hitGroup
+    finalDamages.customDamageType = damage.customDamageType
+    finalDamages.verboseWeapon = damage.verboseWeapon
+    finalDamages.hitGroup = damage.hitGroup
 
 
-    if (damages.area == WMS.config.enums.damageArea.LEG or
-        damages.customDamageType == WMS.config.enums.damageTypes.VEHICLE or
-        damages.customDamageType == WMS.config.enums.damageTypes.FALL or
-        finalDamages.damageAmount >= 70) then
+    if (damage.area == WMS.config.enums.damageArea.LEG 
+        or damage.customDamageType == WMS.config.enums.damageTypes.VEHICLE
+        or damage.customDamageType == WMS.config.enums.damageTypes.FALL
+        or finalDamages.damageAmount >= 70) then
 
         finalDamages.limp = true
 
@@ -239,9 +265,10 @@ WMS.DamageSystem.getDamageTable = function(damages)
 
     finalDamages.brokenRightArm = false
     finalDamages.brokenLeftArm = false
-    if (damages.area == WMS.config.enums.damageArea.ARM) then
 
-        if (damages.hitGroup == HITGROUP_RIGHTARM) then
+    if (damage.area == WMS.config.enums.damageArea.ARM) then
+
+        if (damage.hitGroup == HITGROUP_RIGHTARM) then
             finalDamages.brokenRightArm = true
         else
             finalDamages.brokenLeftArm = true
@@ -249,97 +276,126 @@ WMS.DamageSystem.getDamageTable = function(damages)
 
     end
 
-    if (damages.customDamageType == WMS.config.enums.damageTypes.FALL) then
+    if (damage.customDamageType == WMS.config.enums.damageTypes.FALL) then
         finalDamages.verboseWeapon = nil
     end
 
-    if (damages.victim == damages.inflictor) then
+    if (damage.victim == damage.inflictor) then
         finalDamages.customDamageType = WMS.config.enums.damageTypes.NO_DAMAGE
     end
 
-    finalDamages.area = damages.area
+    finalDamages.area = damage.area
 
     if (WMS.DEBUG) then
-        PrintC(finalDamages, 8, 27)
-        PrintC(damages, 8, 33)
 
-        PrintTable(damages)
-        table.Empty(damages)
+        PrintC(finalDamages, 8, 27)
+        PrintC(damage, 8, 33)
+
+        PrintTable(damage)
+        table.Empty(damage)
+
     end
     
     return finalDamages
 end
 
-WMS.DamageSystem.registerDamage = function(player, damageInfo)
+-- The main parsing function
+-- @param player: Player The victim
+-- @param damageInfo: CTakeDamageInfo The original damage info
+-- @returns table The final damage table
+WMS.DamageSystem.parseDamage = function(player, damageInfo)
 
-    local damages = {}
+    local damage = {}
 
-    damages.victim = player
+    damage.victim = player
 
-    damages.attacker = damageInfo:GetAttacker()
-    damages.inflictor = damageInfo:GetInflictor()
+    damage.attacker = damageInfo:GetAttacker()
+    damage.inflictor = damageInfo:GetInflictor()
 
-    if (!IsValid(damages.inflictor)) then 
-        damages.inflictor = damages.attacker 
+    if (!IsValid(damage.inflictor)) then 
+        damage.inflictor = damage.attacker 
     end
 
-    damages.hitGroup = player:LastHitGroup()
-    --damages.verboseHitGroup = WMS.HIT[damages.hitGroup]
+    damage.hitGroup = player:LastHitGroup()
+    --damage.verboseHitGroup = WMS.HIT[damage.hitGroup]
 
-    damages.damageAmount = damageInfo:GetDamage()
+    damage.damageAmount = damageInfo:GetDamage()
 
-    damages.type = damageInfo:GetDamageType()
+    damage.type = damageInfo:GetDamageType()
 
-    damages.totalDeath = false
-    damages.partialDeath = false
-    damages.hemorrhage = false
+    damage.totalDeath = false
+    damage.partialDeath = false
+    damage.hemorrhage = false
 
-    damages.weapon = nil
+    damage.weapon = nil
 
     local damageOriginEntity
 
-    if (damages.attacker:IsPlayer()) then
-        damageOriginEntity = damages.attacker
+    if (damage.attacker:IsPlayer()) then
+        damageOriginEntity = damage.attacker
 
-    elseif (damages.inflictor:IsPlayer()) then
-        damageOriginEntity = damages.inflictor
+    elseif (damage.inflictor:IsPlayer()) then
+        damageOriginEntity = damage.inflictor
     end
 
     if (IsValid(damageOriginEntity)) then
         
-        damages.weapon = damageOriginEntity:GetActiveWeapon()
+        damage.weapon = damageOriginEntity:GetActiveWeapon()
 
-        if (IsValid(damages.weapon)) then 
-            damages.weaponClass = damages.weapon:GetClass() 
+        if (IsValid(damage.weapon)) then 
+            damage.weaponClass = damage.weapon:GetClass() 
         end
 
     end
 
-    damages.customDamageType = WMS.DamageSystem.getCustomDamageType(damages)
+    damage.customDamageType = WMS.DamageSystem.getCustomDamageType(damage, damageInfo)
 
-    if (WMS.DamageSystem.isBleedingDmg(damages)) then
-        damages.hemorrhage = true
-        return damages
+    if (WMS.DamageSystem.isBleedingDmg(damage)) then
+        damage.hemorrhage = true
+        return damage
     end
     
-    damages.verboseWeapon, damages.weaponType = WMS.DamageSystem.getWeaponType(damages)
+    damage.weaponType = WMS.DamageSystem.getWeaponType(damage)
+    damage.verboseWeapon = WMS.config.human.weaponTypes[damage.weaponType]
 
-    damages.area = WMS.DamageSystem.getDamageArea(damages)
-    damages.verboseHitGroup = WMS.config.human.damageArea[damages.area]
+    damage.area = WMS.DamageSystem.getDamageArea(damage)
+    damage.verboseHitGroup = WMS.config.human.damageArea[damage.area]
 
-    return WMS.DamageSystem.getDamageTable(damages)
+    return damage
 end
 
-WMS.DamageSystem.damageApplier = function(player, damages)
+-- The main registering function
+-- @param player: Player The victim
+-- @param damageInfo: CTakeDamageInfo The original damage info
+-- @returns table The final damage table
+WMS.DamageSystem.registerDamage = function(player, damageInfo)
+
+    local damage = WMS.DamageSystem.parseDamage(player, damageInfo)
+
+    local finalDamages = WMS.DamageSystem.getDamageTable(damage)
+
+    return finalDamages
+
+end
+
+WMS.DamageSystem.damageApplier = function(player, damage)
+
     if (!player:Alive()) then return end
 
-    if (damages.customDamageType == WMS.config.enums.damageTypes.NO_DAMAGE) then
-        player.damagesTable[#player.damagesTable + 1] = table.Copy(damages)
+    if (damage.customDamageType == WMS.config.enums.damageTypes.NO_DAMAGE) then
+
+        player.damagesTable[#player.damagesTable + 1] = table.Copy(damage)
         WMS.utils.syncDmgTbl(player, table.Copy(player.damagesTable))
+
         return 0
+
     end
-    if (damages.totalDeath) then
-        if (WMS.DEBUG) then PrintC("FINITO PIPO", 8, 1) end
+
+    if (damage.totalDeath) then
+
+        if (WMS.DEBUG) then 
+            PrintC("FINITO PIPO", 8, 1) 
+        end
 
         if (!WMS.config.NO_DMG) then
             player:Kill()
@@ -347,39 +403,50 @@ WMS.DamageSystem.damageApplier = function(player, damages)
 
         return 0
 
-    elseif (damages.partialDeath) then
-        if (WMS.DEBUG) then PrintC("FINITO", 8, 202) end
+    end
+
+    if (damage.partialDeath) then
+
+        if (WMS.DEBUG) then 
+            PrintC("FINITO", 8, 202) 
+        end
 
         if (!WMS.config.NO_DMG) then
             player:PartialDeath()
         end
 
-        player.damagesTable[#player.damagesTable + 1] = table.Copy(damages)
+        player.damagesTable[#player.damagesTable + 1] = table.Copy(damage)
         WMS.utils.syncDmgTbl(player, table.Copy(player.damagesTable))
+
         return 0
 
-    elseif (damages.hemorrhage and !player:GetNWBool("isBleeding")) then
-        if (WMS.DEBUG) then PrintC("\tOOF Sègne", 8, 9) end
-
-        if (!WMS.config.NO_DMG) then
-            player:SetBleeding(true, WMS.config.hemoSpeed, WMS.config.hemoImportance)
-        end
-
-    elseif (damages.limp) then
-        player:LegFracture()
-
-    elseif (damages.brokenRightArm) then
-        player:RightArmFracture()
-
-    elseif (damages.brokenLeftArm) then
-        player:LeftArmFracture()
     end
 
+    if (damage.hemorrhage and !player:GetNWBool("isBleeding")) then
 
-    player.damagesTable[#player.damagesTable + 1] = table.Copy(damages)
+        if (WMS.DEBUG) then PrintC("\tOOF Bleeds", 8, 9) end
+
+        if (!WMS.config.NO_DMG) then
+            player:SetBleeding(true, WMS.config.bleedingSpeed, WMS.config.bleedingImportance)
+        end
+
+    elseif (damage.limp) then
+        player:LegFracture()
+
+    elseif (damage.brokenRightArm) then
+        player:RightArmFracture()
+
+    elseif (damage.brokenLeftArm) then
+        player:LeftArmFracture()
+
+    end
+
+    player.damagesTable[#player.damagesTable + 1] = table.Copy(damage)
+
     WMS.utils.syncDmgTbl(player, table.Copy(player.damagesTable))
 
-    return damages.damageAmount
+    return damage.damageAmount
+
 end
 --util.ScreenShake(Vector(0, 0, 0), 300, 0.1, 30, 50000)
 
@@ -669,8 +736,8 @@ WMS.DamageSystem.Hooks.damageAmount = function(target, damageInfo)
     if (!target:IsPlayer()) then return end
     if (target:HasGodMode()) then return true end
 
-    local damages = WMS.DamageSystem.registerDamage(target, damageInfo)
-    damageInfo:SetDamage(WMS.DamageSystem.damageApplier(target, damages) or 0)
+    local damage = WMS.DamageSystem.registerDamage(target, damageInfo)
+    damageInfo:SetDamage(WMS.DamageSystem.damageApplier(target, damage) or 0)
 
     if (WMS.config.NO_DMG) then
         damageInfo:SetDamage(0)
@@ -683,9 +750,8 @@ WMS.DamageSystem.Hooks.Disconnect = function(player)
 end
 
 
-
 hook.Add("EntityTakeDamage", "WMS::DamageHook", WMS.DamageSystem.Hooks.damageAmount)
 hook.Add("PlayerDisconnected", "WMS::ResetOnDisconnect", WMS.DamageSystem.Hooks.Disconnect)
 hook.Add("PlayerInitialSpawn", "WMS::Init", WMS.DamageSystem.Hooks.Init)
 hook.Add("PlayerDeath", "WMS::DeathHook", WMS.DamageSystem.Hooks.Death)
-hook.Add("PlayerDeathSound", "WMS::DeathSOund", function(player) return true end)
+hook.Add("PlayerDeathSound", "WMS::DeathSound", function(player) return true end)

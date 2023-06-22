@@ -5,11 +5,11 @@ WMS.config = {}
 WMS.config.human = {}
 WMS.config.enums = {}
 
--- This part is the ones you should be modifiing to please your taste
+-- This part is the ones you should be modifying to please your taste
 WMS.DEBUG = true
 WMS.config.NO_DMG = true
-WMS.config.hemoSpeed = 5
-WMS.config.hemoImportance = 1 --hp
+WMS.config.bleedingSpeed = 5
+WMS.config.bleedingImportance = 1 --hp
 
 WMS.config.partialDeathTime = 3
 WMS.config.corpsDeleteTime = 50
@@ -40,11 +40,14 @@ WMS.config.enums.damageTypes = {
     ["NORMAL"]    = 7
 }
 WMS.config.enums.weaponTypes = {
-    ["CUT"]    = 1,
-    ["PISTOL"] = 2,
-    ["RIFLE"]  = 3,
+    ["VEHICLE"]      = 0,
+    ["CUT"]          = 1,
+    ["PISTOL"]       = 2,
+    ["RIFLE"]        = 3,
+    ["UNRECOGNIZED"] = 4,
 }
 WMS.config.enums.damageArea = {
+    ["UNRECOGNIZED"] = 0,
     ["SKULL"]   = 1,
     ["NECK"]    = 2,
     ["FACE"]    = 3,
@@ -63,6 +66,13 @@ WMS.config.enums.damageArea = {
     ["FOOT"]    = 12,
 }
 
+WMS.config.human.weaponTypes = {
+    [WMS.config.enums.weaponTypes.VEHICLE]      = "vehicle",
+    [WMS.config.enums.weaponTypes.CUT]          = "cut",
+    [WMS.config.enums.weaponTypes.PISTOL]       = "pistol",
+    [WMS.config.enums.weaponTypes.RIFLE]        = "rifle",
+    [WMS.config.enums.weaponTypes.UNRECOGNIZED] = "UNRECOGNIZED",
+}
 
 WMS.config.human.damageTypes = {
     [WMS.config.enums.damageTypes.BLEED]     = "Saignement",

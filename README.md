@@ -17,7 +17,7 @@ The WNS (War Nursing System) is a addon with the intent to bring a little bit of
 - Somewhat compatible with simfphys armed
 ### **THE ADDON IS UNFINISHED**
 
-and it's use is still buggy but I am working on it daily 
+and it's use is still buggy but I am working on it ~~daily~~ 
 
 
 ### TODO
