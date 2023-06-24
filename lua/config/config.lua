@@ -19,6 +19,8 @@ WMS.config.defaultRunSpeed = 600    -- 600
 WMS.config.fractureWalkSpeed = 200  -- 400
 WMS.config.fractureRunSpeed = 400   -- 600
 
+WMS.config.amountOfDamageToKillCorps = 10
+
 
 -- ############################################################################
 -- ############################################################################

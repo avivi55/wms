@@ -32,7 +32,7 @@ if CLIENT then
 		
 		if false then
 			if ply:Health() <= 40 then
-				if !ply.lastDSP then
+				if not ply.lastDSP then
 					ply:SetDSP(14)
 					ply.lastDSP = 14
 				end
@@ -55,7 +55,7 @@ if CLIENT then
 			clr[ "$pp_colour_colour" ] = 1 - intensity
 			DrawColorModify(clr)
 			
-			if (!ply:Alive()) then return end
+			if (not ply:Alive()) then return end
 
 			local CT = CurTime()
 			

@@ -2,6 +2,7 @@ AddCSLuaFile()
 AddCSLuaFile("client/wms_client.lua")
 
 WMS = WMS or {}
+WMS._VERSION = 0.1
 
 include("autorun/properties/wms_properties.lua")
 include("config/sounds.lua")

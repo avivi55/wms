@@ -5,9 +5,11 @@ WMS.utils = WMS.utils or {}
 WMS.utils.tblContains = function(tbl, val)
 
     for k, v in pairs(tbl) do
-        if v == val or (type(v) == "table" and WMS.utils.tblContains(v, val)) then 
+
+        if (v == val or (type(v) == "table" and WMS.utils.tblContains(v, val)))then 
             return true 
         end
+
     end
 
     return false
@@ -83,7 +85,7 @@ WMS.utils.addFileToClient = function()
 
 end
 
-WMS.utils.syncDmgTbl = function(ply, dmg)
+WMS.utils.syncDamageTable = function(ply, dmg)
 
     net.Start("send_damage_table_to_client")
         net.WriteEntity(ply)

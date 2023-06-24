@@ -31,7 +31,7 @@ function PrintC(var, mode, fg_ansi, ...)
 
     local color_ansi = ""
 
-    if (isstring(bg_ansi) and bg_ansi != "") then
+    if (isstring(bg_ansi) and bg_ansi ~= "") then
         if (mode == 24) then color_ansi = "\27[38;2;"..fg_ansi.."m".."\27[48;2;"..bg_ansi.."m"
         elseif (mode == 8) then color_ansi = "\27[38;5;"..fg_ansi.."m".."\27[48;5;"..bg_ansi.."m" end
     else

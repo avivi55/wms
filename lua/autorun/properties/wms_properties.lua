@@ -191,7 +191,7 @@ local debugFun = {
             verboseWeapon = "OUI"
         }
 
-        WMS.utils.syncDmgTbl(ply, table.Copy(ply.damagesTable))
+        WMS.utils.syncDamageTable(ply, table.Copy(ply.damagesTable))
 
     end,
 }

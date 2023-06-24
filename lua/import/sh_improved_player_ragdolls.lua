@@ -58,7 +58,7 @@ if (SERVER) then
 		ent = ents_Create(self:GetBoneCount() > 1 and 'prop_ragdoll' or 'prop_physics')
 
 
-		if !IsValid(ent) then return end
+		if not IsValid(ent) then return end
 
 		ent:SetCreator(self)
 
@@ -152,7 +152,7 @@ if (SERVER) then
 			local model = hook_Run('PlayerRagdollModel', self, ent)
 			if isstring(model) and util_IsValidModel(model) then
 				ent:SetModel(model)
-			elseif (model != false) then
+			elseif (model ~= false) then
 				ent:SetModel(self:GetModel())
 			else
 				return
@@ -162,7 +162,7 @@ if (SERVER) then
 			local modelSkin = hook_Run('PlayerRagdollSkin', self, ent)
 			if isnumber(modelSkin) then
 				ent:SetSkin(modelSkin)
-			elseif (modelSkin != false) then
+			elseif (modelSkin ~= false) then
 				ent:SetSkin(self:GetSkin())
 			end
 
@@ -172,7 +172,7 @@ if (SERVER) then
 				for _, bodygroup in ipairs(modelBodygroups) do
 					ent:SetBodygroup(bodygroup.id, bodygroup.value)
 				end
-			elseif (modelBodygroups != false) then
+			elseif (modelBodygroups ~= false) then
 				for _, bodygroup in ipairs(self:GetBodyGroups()) do
 					ent:SetBodygroup(bodygroup.id, self:GetBodygroup(bodygroup.id))
 				end
@@ -213,7 +213,7 @@ if (SERVER) then
 			if ent:IsRagdoll() then
 				for physNum = 0, ent:GetPhysicsObjectCount() - 1 do
 					local phys = ent:GetPhysicsObjectNum(physNum)
-					if !IsValid(phys) then continue end
+					if not IsValid(phys) then continue end
 
 
 					local bone = ent:TranslatePhysBoneToBone(physNum)

@@ -116,7 +116,7 @@ do -- MedicChoise
     local PANEL = {}
     AccessorFunc(PANEL, "name", "Name", FORCE_STRING)
     function PANEL:Init()
-        if (! self:GetParent()) then return  end
+        if (not self:GetParent()) then return  end
         timer.Simple(0.1, function() self:SetTooltip(self:GetName()) end)
     end
 
@@ -219,7 +219,7 @@ do -- MedicPlayerPrint TODO
     function PANEL:Paint(w, h)
         --print(self.name:GetText())
         draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 150))
-        if (self.background:GetSize() != w) then
+        if (self.background:GetSize() ~= w) then
             self.background:SetSize(w, h)
             self.head:SetSize(w, h)
             self.torso:SetSize(w, h)
@@ -365,7 +365,7 @@ do -- MedicInfoCard
         local grandParent = self:GetParent():GetParent()
 
         local ply = grandParent:GetPlayer()
-        if (!ply) then return end
+        if (not ply) then return end
 
 
         draw.RoundedBox(0, 0, 0, w, h, Color(68,68,68,150))
@@ -420,7 +420,7 @@ do
             if (ply) then
                 if (test) then
                     test = false
-                    if (#ply.damagesTable != 0) then
+                    if (#ply.damagesTable ~= 0) then
                         local dmg_list = vgui.Create("MedicDiagnostics", main)
                         dmg_list:SetPos(w - w / 4, 0)
                         dmg_list:SetSize(w / 4, h)

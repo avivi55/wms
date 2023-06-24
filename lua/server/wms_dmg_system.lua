@@ -2,6 +2,13 @@
 -- how it works :
 -- The point is to parse the information given by the EntityTakeDamage hook and only get the generated
 -- amount of damage depending on the weapon and the area and luck.
+--
+-- Known issue : 
+-- In particular situations the player keeps spectating the corps even if the player re-spawned
+-- and the corps disappeared.
+-- The cause is **probably** due to the coma system.
+-- this problem is difficult to replicate and occurs at "random" times (it seems)
+
 
 
 WMS = WMS or {}
@@ -9,30 +16,30 @@ WMS.DamageSystem = WMS.DamageSystem or {}
 WMS.DamageSystem.Hooks = {}
 
 -- Checks if a parsed damage table is bleeding damage
--- @param damage: table The parsed damage table
--- @returns boolean Whether the damage is bleeding damage
+-- @tparam table damage The parsed damage table
+-- @treturn boolean Whether the damage is bleeding damage
 WMS.DamageSystem.isBleedingDmg = function(damage)
     return damage.type == WMS.config.DMG_BLEEDING / 2
 end
 
 -- Checks if a parsed damage table is explosion damage
--- @param damage: table The parsed damage table
--- @param damageInfo: CTakeDamageInfo The original damage info
--- @returns boolean Whether the damage is explosion damage
+-- @tparam table damage The parsed damage table
+-- @tparam CTakeDamageInfo damageInfo The original damage info
+-- @treturn boolean Whether the damage is explosion damage
 WMS.DamageSystem.isExplosionDamage = function(damage, damageInfo)
     return damageInfo:isExplosionDamage() or damage.inflictor:GetClass() == "base_shell"
 end
 
 -- Checks if a parsed damage table is vehicle damage
--- @param damage: table The parsed damage table
--- @returns boolean Whether the damage is vehicle damage
+-- @tparam table damage The parsed damage table
+-- @treturn boolean Whether the damage is vehicle damage
 WMS.DamageSystem.isVehicleDamage = function(damage)
     return damage.inflictor:IsVehicle() or damage.inflictor:GetClass() == "worldspawn"
 end
 
 -- Gets the predefined weapon type with the parsed damage table
--- @param damage: table The parsed damage table 
--- @returns number The custom weapon type
+-- @tparam table damage The parsed damage table 
+-- @treturn number The custom weapon type
 WMS.DamageSystem.getWeaponType = function(damage)
     
     if (WMS.weapons.cut[damage.weaponClass] or WMS.weapons.cut[damage.inflictor:GetClass()]) then
@@ -43,7 +50,7 @@ WMS.DamageSystem.getWeaponType = function(damage)
 
         return WMS.config.enums.weaponTypes.PISTOL
 
-    elseif (WMS.weapons.rifle[damage.weaponClass] or !IsValid(damage.weapon)) then
+    elseif (WMS.weapons.rifle[damage.weaponClass] or not IsValid(damage.weapon)) then
 
         return WMS.config.enums.weaponTypes.RIFLE
 
@@ -51,10 +58,10 @@ WMS.DamageSystem.getWeaponType = function(damage)
 
         return WMS.config.enums.weaponTypes.VEHICLE
 
-    elseif (!WMS.weapons.rifle[damage.weaponClass]
+    elseif (not WMS.weapons.rifle[damage.weaponClass]
             and IsValid(damage.weapon) 
             and damage.inflictor:IsPlayer() 
-            and !damage.inflictor:InVehicle()) then
+            and not damage.inflictor:InVehicle()) then
 
         return WMS.config.enums.weaponTypes.UNRECOGNIZED
 
@@ -65,9 +72,9 @@ WMS.DamageSystem.getWeaponType = function(damage)
 end
 
 -- Gets the predefined damage type of a parsed damage table
--- @param damage: table The parsed damage table
--- @param damageInfo: CTakeDamageInfo The original damage info
--- @returns number The custom damage type detected
+-- @tparam table damage The parsed damage table
+-- @tparam CTakeDamageInfo damageInfo The original damage info
+-- @treturn number The custom damage type detected
 WMS.DamageSystem.getCustomDamageType = function(damage, damageInfo)
 
     if (WMS.DamageSystem.isBleedingDmg(damage)) then
@@ -96,7 +103,7 @@ WMS.DamageSystem.getCustomDamageType = function(damage, damageInfo)
 
     if (IsValid(damage.weapon)) then
 
-        if (!WMS.weapons[damage.weaponClass]) then
+        if (not WMS.weapons[damage.weaponClass]) then
             return WMS.config.enums.damageTypes.NO_DAMAGE
         end
 
@@ -107,16 +114,16 @@ WMS.DamageSystem.getCustomDamageType = function(damage, damageInfo)
 end
 
 -- Gets the predefined damage area with the parsed damage table
--- @param damage: table The parsed damage table 
--- @returns number The custom damage area
+-- @tparam table damage The parsed damage table 
+-- @treturn number The custom damage area
 WMS.DamageSystem.getDamageArea = function(damage)
 
     local chance = math.random(100)
 
     if ((damage.hitGroup == HITGROUP_CHEST 
         or damage.customDamageType == WMS.config.enums.damageTypes.VEHICLE 
-        or !IsValid(damage.weapon))
-        and (!WMS.weapons.cut[damage.inflictor:GetClass()])) then
+        or not IsValid(damage.weapon))
+        and (not WMS.weapons.cut[damage.inflictor:GetClass()])) then
 
         if (chance <= WMS.config.chances[WMS.config.enums.damageArea.TORSO].chance) then
             return WMS.config.enums.damageArea.TORSO
@@ -202,93 +209,93 @@ end
 
 -- Calculates the chances of different types of deaths and gives a table containing 
 -- the necessary information
--- @param damage: table The parsed damage table
--- @returns table The final damage table
+-- @tparam table damage The parsed damage table
+-- @treturn table The final damage table
 WMS.DamageSystem.getDamageTable = function(damage)
 
-    local finalDamages = {}
+    local finalDamage = {}
 
-    finalDamages.totalDeath = false
-    finalDamages.partialDeath = false
-    finalDamages.hemorrhage = false
+    finalDamage.totalDeath = false
+    finalDamage.partialDeath = false
+    finalDamage.hemorrhage = false
 
-    finalDamages.damageAmount = 0
+    finalDamage.damageAmount = 0
 
     if (damage.area > 0 and damage.weaponType > 0) then
-        finalDamages.totalDeath = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].total
-        finalDamages.partialDeath = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].partial
-        finalDamages.hemorrhage = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].hemorrhage
+        finalDamage.totalDeath = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].total
+        finalDamage.partialDeath = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].partial
+        finalDamage.hemorrhage = math.random(100) <= WMS.config.chances[damage.area][damage.weaponType].hemorrhage
 
         local range = WMS.config.chances[damage.area][damage.weaponType].dmgRange
-        finalDamages.damageAmount = math.random(range[1], range[2])
+        finalDamage.damageAmount = math.random(range[1], range[2])
     end
 
     if (damage.customDamageType == WMS.config.enums.damageTypes.FALL) then
-        finalDamages.totalDeath = false
+        finalDamage.totalDeath = false
     end
 
-    if (damage.victim:Health() - finalDamages.damageAmount <= 0) then
-        finalDamages.totalDeath = true
-        finalDamages.partialDeath = true
+    if (damage.victim:Health() - finalDamage.damageAmount <= 0) then
+        finalDamage.totalDeath = true
+        finalDamage.partialDeath = true
     end
 
-    if (damage.victim:Health() - finalDamages.damageAmount <= 30) then
-        finalDamages.limp = true
+    if (damage.victim:Health() - finalDamage.damageAmount <= 30) then
+        finalDamage.limp = true
     end
 
     if (damage.customDamageType == WMS.config.enums.damageTypes.VEHICLE 
         or damage.customDamageType == WMS.config.enums.damageTypes.FALL) then
 
-        finalDamages.hemorrhage = false 
+        finalDamage.hemorrhage = false 
 
     end
 
     local explosionByDeathCondition = damage.customDamageType == WMS.config.enums.damageTypes.EXPLOSION and damage.damageAmount >= 70
 
     if (explosionByDeathCondition) then 
-        finalDamages.totalDeath = true 
+        finalDamage.totalDeath = true 
     end
 
-    finalDamages.customDamageType = damage.customDamageType
-    finalDamages.verboseWeapon = damage.verboseWeapon
-    finalDamages.hitGroup = damage.hitGroup
+    finalDamage.customDamageType = damage.customDamageType
+    finalDamage.verboseWeapon = damage.verboseWeapon
+    finalDamage.hitGroup = damage.hitGroup
 
 
     if (damage.area == WMS.config.enums.damageArea.LEG 
         or damage.customDamageType == WMS.config.enums.damageTypes.VEHICLE
         or damage.customDamageType == WMS.config.enums.damageTypes.FALL
-        or finalDamages.damageAmount >= 70) then
+        or finalDamage.damageAmount >= 70) then
 
-        finalDamages.limp = true
+        finalDamage.limp = true
 
     end
 
-    finalDamages.brokenRightArm = false
-    finalDamages.brokenLeftArm = false
+    finalDamage.brokenRightArm = false
+    finalDamage.brokenLeftArm = false
 
     if (damage.area == WMS.config.enums.damageArea.ARM) then
 
         if (damage.hitGroup == HITGROUP_RIGHTARM) then
-            finalDamages.brokenRightArm = true
+            finalDamage.brokenRightArm = true
         else
-            finalDamages.brokenLeftArm = true
+            finalDamage.brokenLeftArm = true
         end
 
     end
 
     if (damage.customDamageType == WMS.config.enums.damageTypes.FALL) then
-        finalDamages.verboseWeapon = nil
+        finalDamage.verboseWeapon = nil
     end
 
     if (damage.victim == damage.inflictor) then
-        finalDamages.customDamageType = WMS.config.enums.damageTypes.NO_DAMAGE
+        finalDamage.customDamageType = WMS.config.enums.damageTypes.NO_DAMAGE
     end
 
-    finalDamages.area = damage.area
+    finalDamage.area = damage.area
 
     if (WMS.DEBUG) then
 
-        PrintC(finalDamages, 8, 27)
+        PrintC(finalDamage, 8, 27)
         PrintC(damage, 8, 33)
 
         PrintTable(damage)
@@ -296,13 +303,13 @@ WMS.DamageSystem.getDamageTable = function(damage)
 
     end
     
-    return finalDamages
+    return finalDamage
 end
 
 -- The main parsing function
--- @param player: Player The victim
--- @param damageInfo: CTakeDamageInfo The original damage info
--- @returns table The final damage table
+-- @tparam Player player The victim
+-- @tparam CTakeDamageInfo damageInfo The original damage info
+-- @treturn table The final damage table
 WMS.DamageSystem.parseDamage = function(player, damageInfo)
 
     local damage = {}
@@ -312,7 +319,7 @@ WMS.DamageSystem.parseDamage = function(player, damageInfo)
     damage.attacker = damageInfo:GetAttacker()
     damage.inflictor = damageInfo:GetInflictor()
 
-    if (!IsValid(damage.inflictor)) then 
+    if (not IsValid(damage.inflictor)) then 
         damage.inflictor = damage.attacker 
     end
 
@@ -365,27 +372,32 @@ WMS.DamageSystem.parseDamage = function(player, damageInfo)
 end
 
 -- The main registering function
--- @param player: Player The victim
--- @param damageInfo: CTakeDamageInfo The original damage info
--- @returns table The final damage table
+-- @tparam Player player The victim
+-- @tparam CTakeDamageInfo damageInfo The original damage info
+-- @treturn table The final damage table
 WMS.DamageSystem.registerDamage = function(player, damageInfo)
 
     local damage = WMS.DamageSystem.parseDamage(player, damageInfo)
 
-    local finalDamages = WMS.DamageSystem.getDamageTable(damage)
+    local finalDamage = WMS.DamageSystem.getDamageTable(damage)
 
-    return finalDamages
+    return finalDamage
 
 end
 
-WMS.DamageSystem.damageApplier = function(player, damage)
+-- Takes the final damage table and applies the deaths or yields the amount
+-- of hp to take from the player
+-- @tparam Player player The victim
+-- @tparam table damage The parsed damage table
+-- @treturn number The amount of damage that should be applied
+WMS.DamageSystem.damageCalculator = function(player, damage)
 
-    if (!player:Alive()) then return end
+    if (not player:Alive()) then return end
 
     if (damage.customDamageType == WMS.config.enums.damageTypes.NO_DAMAGE) then
 
         player.damagesTable[#player.damagesTable + 1] = table.Copy(damage)
-        WMS.utils.syncDmgTbl(player, table.Copy(player.damagesTable))
+        WMS.utils.syncDamageTable(player, table.Copy(player.damagesTable))
 
         return 0
 
@@ -397,7 +409,7 @@ WMS.DamageSystem.damageApplier = function(player, damage)
             PrintC("FINITO PIPO", 8, 1) 
         end
 
-        if (!WMS.config.NO_DMG) then
+        if (not WMS.config.NO_DMG) then
             player:Kill()
         end
 
@@ -411,22 +423,22 @@ WMS.DamageSystem.damageApplier = function(player, damage)
             PrintC("FINITO", 8, 202) 
         end
 
-        if (!WMS.config.NO_DMG) then
+        if (not WMS.config.NO_DMG) then
             player:PartialDeath()
         end
 
         player.damagesTable[#player.damagesTable + 1] = table.Copy(damage)
-        WMS.utils.syncDmgTbl(player, table.Copy(player.damagesTable))
+        WMS.utils.syncDamageTable(player, table.Copy(player.damagesTable))
 
         return 0
 
     end
 
-    if (damage.hemorrhage and !player:GetNWBool("isBleeding")) then
+    if (damage.hemorrhage and not player:GetNWBool("isBleeding")) then
 
         if (WMS.DEBUG) then PrintC("\tOOF Bleeds", 8, 9) end
 
-        if (!WMS.config.NO_DMG) then
+        if (not WMS.config.NO_DMG) then
             player:SetBleeding(true, WMS.config.bleedingSpeed, WMS.config.bleedingImportance)
         end
 
@@ -443,25 +455,28 @@ WMS.DamageSystem.damageApplier = function(player, damage)
 
     player.damagesTable[#player.damagesTable + 1] = table.Copy(damage)
 
-    WMS.utils.syncDmgTbl(player, table.Copy(player.damagesTable))
+    WMS.utils.syncDamageTable(player, table.Copy(player.damagesTable))
 
     return damage.damageAmount
 
 end
---util.ScreenShake(Vector(0, 0, 0), 300, 0.1, 30, 50000)
 
-
+-- This section deals with the methods added to the Player meta
 do -- PLAYER FUNCTIONS
     --BLEEDING
     local PLAYER = FindMetaTable("Player")
-
+    
+    -- Starts the bleeding process and send a damage signal
+    -- @tparam number speed The rate which the player should bleed
+    -- @tparam number importance The amount of hp taken per bleed
+    -- @treturn nil
     function PLAYER:StartHemorrhage(speed, importance)
 
-        if (!self:GetNWBool("isBleeding")) then return end
+        if (not self:GetNWBool("isBleeding")) then return end
 
         timer.Create("Hemo_"..self:EntIndex(), speed, 0, function()
 
-            if (!IsValid(self) or !self:Alive()) then return end
+            if (not IsValid(self) or not self:Alive()) then return end
 
             local d = DamageInfo()
             d:SetDamage(importance)
@@ -471,9 +486,9 @@ do -- PLAYER FUNCTIONS
             local bone = self:GetBonePosition(math.random(1, self:GetBoneCount() - 1))
             if bone then
 
-                local ef = EffectData()
-                ef:SetOrigin(bone)
-                util.Effect("BloodImpact", ef, true, true)
+                local effect = EffectData()
+                effect:SetOrigin(bone)
+                util.Effect("BloodImpact", effect, true, true)
 
             end
 
@@ -495,194 +510,230 @@ do -- PLAYER FUNCTIONS
 
     end
 
-    function PLAYER:SetBleeding(isBleeding, ...)
+    -- Calls the latter method and acts as a switch
+    -- @tparam boolean isBleeding Whether the player should bleed or not
+    -- @tparam number speed The rate which the player should bleed
+    -- @tparam number importance The amount of hp taken per bleed
+    -- @treturn nil
+    function PLAYER:SetBleeding(isBleeding, speed, importance)
 
         self:SetNWBool("isBleeding", isBleeding)
 
         if (isBleeding) then
-            local args = {...}
-            self:StartHemorrhage(args[1], args[2])
-            --                   speed    importrance
-        else
-            timer.Remove("Hemo_"..self:EntIndex())
+            self:StartHemorrhage(speed, importance)
+            return
         end
+        
+        timer.Remove("Hemo_"..self:EntIndex())
 
     end
 
-    do -- Partial Death
-        function PLAYER:PartialDeath()
+    -- Partial Death
+    -- Makes the player partially dead (in a coma)
+    -- @treturn nil
+    function PLAYER:PartialDeath()
 
-            if (self:GetNWBool("isPartiallyDead")) then return end
+        if (self:GetNWBool("isPartiallyDead")) then return end
 
-            self:SetNWBool("isPartiallyDead", true)
-            self:SetNWBool("isDragged", false)
+        self:SetNWBool("isPartiallyDead", true)
+        self:SetNWBool("isDragged", false)
 
-            self:CreateRagdoll()
+        self:CreateRagdoll()
 
-            self:StripWeapons()
+        self:StripWeapons()
 
-            self:SetNWInt("pulse", math.random(3, 20))
-            self:SetNWInt("partialDeathTimer", CurTime())
+        self:SetNWInt("pulse", math.random(3, 20))
+        self:SetNWInt("partialDeathTimer", CurTime())
 
-            timer.Simple(WMS.config.partialDeathTime, function()
-                if (!self:GetCreator():GetNWBool("isPartiallyDead")) then return end
-                self:Kill()
-            end)
-
-        end
-
-        function PLAYER:Revive()
-
-            if (!self:GetNWBool("isPartiallyDead")) then return end
-            self:SetNWBool("isPartiallyDead", false)
-
-            self:UnSpectate()
-            self:Spawn()
-
-            local rag = self:GetRagdollEntity()
-            self:SetPos(rag:GetPos())
-
-            prone.Enter(self)
-            self:SetHealth(math.random(7, 16))
-            self:RemoveRagdoll()
-
-            for k,v in pairs(rag.Weapons) do
-                self:Give(v)
-            end
-
-            for k,v in pairs(rag.ammo) do
-                self:GiveAmmo(k, v)
-            end
-
-            self:SelectWeapon(rag.ActiveWeapon)
-
-            self.damagesTable = table.Copy(rag.damagesTable)
-
-        end
-
-        hook.Add("PlayerSpawnObject", "WMS::PreventPropSpawnOnDeath", function(player)
-            if (player:GetNWBool("isPartiallyDead")) then return false end
+        timer.Simple(WMS.config.partialDeathTime, function()
+            if (not self:GetCreator():GetNWBool("isPartiallyDead")) then return end
+            self:Kill()
         end)
 
-        hook.Add("CanPlayerSuicide", "WMS::PreventSuicide", function(player)
-            if (player:GetNWBool("isPartiallyDead")) then return false end
-        end)
     end
 
-    do -- Limb Damage (handicaps)
-        function PLAYER:LegFracture()
+    -- Wakes the player up after being partially dead
+    -- @treturn nil
+    function PLAYER:Revive()
 
-            if (self:GetNWBool("isLimp")) then return end
-            self:SetNWBool("isLimp", true)
+        if (not self:GetNWBool("isPartiallyDead")) then return end
 
-            self:SetRunSpeed(WMS.config.fractureRunSpeed)
-            self:SetWalkSpeed(WMS.config.fractureWalkSpeed)
+        self:SetNWBool("isPartiallyDead", false)
 
-            prone.Enter(self)
+        self:UnSpectate()
+        self:Spawn()
 
+        local rag = self:GetRagdollEntity()
+        self:SetPos(rag:GetPos())
+
+        prone.Enter(self)
+        self:SetHealth(math.random(7, 16))
+        self:RemoveRagdoll()
+
+        for k,v in pairs(rag.Weapons) do
+            self:Give(v)
         end
 
-        function PLAYER:HealLegFracture()
-
-            if (!self:GetNWBool("isLimp")) then return end
-            self:SetNWBool("isLimp", false)
-
-            self:SetRunSpeed(WMS.config.defaultRunSpeed)
-            self:SetWalkSpeed(WMS.config.defaultWalkSpeed)
-
+        for k,v in pairs(rag.ammo) do
+            self:GiveAmmo(k, v)
         end
 
-        WMS.DamageSystem.Hooks.LegHit = function(player)
-            return !player:GetNWBool("isLimp")
-        end
+        self:SelectWeapon(rag.ActiveWeapon)
 
-        hook.Add("prone.CanExit", "WMS::PreventGettingUpOnLimp", WMS.DamageSystem.Hooks.LegHit)
+        self.damagesTable = table.Copy(rag.damagesTable)
 
-
-        -- ARMS
-        function PLAYER:RightArmFracture()
-
-            if (self:GetNWBool("rightArmFracture")) then return end
-            
-            self:SetNWBool("rightArmFracture", true)
-
-            local weapon = self:GetActiveWeapon()
-
-            if (!IsValid(weapon)) then return end
-
-            if (WMS.weapons.rifle[weapon:GetClass()] or
-
-                WMS.weapons.pistol[weapon:GetClass()] or
-                WMS.weapons.cut[weapon:GetClass()]) then
-                self:DropWeapon(weapon)
-
-            end
-
-        end
-
-        function PLAYER:LeftArmFracture()
-            
-            if (self:GetNWBool("leftArmFracture")) then return end
-            self:SetNWBool("leftArmFracture", true)
-
-            local weapon = self:GetActiveWeapon()
-            if (WMS.weapons.rifle[weapon:GetClass()] 
-                or WMS.weapons.pistol[weapon:GetClass()] 
-                or WMS.weapons.cut[weapon:GetClass()]
-                and !WMS.weapons.oneArm[weapon:GetClass()]) then
-
-                self:DropWeapon(weapon)
-
-            end
-
-        end
-
-        function PLAYER:HealRightArmFracture()
-            if (!self:GetNWBool("rightArmFracture")) then return end
-
-            self:SetNWBool("rightArmFracture", false)
-        end
-
-        function PLAYER:HealLeftArmFracture()
-            if (!self:GetNWBool("leftArmFracture")) then return end
-
-            self:SetNWBool("leftArmFracture", false)
-        end
-
-        WMS.DamageSystem.Hooks.ArmDamage = function(player, oldWep, newWep)
-
-            if (player:Alive() and player:Health() <= 30) then
-                player:SetActiveWeapon(player:Give("re_hands"))
-                return true
-            end
-
-            if (player:GetNWBool("rightArmFracture")) then return true end
-            if (!player:GetNWBool("leftArmFracture")) then return false end
-
-            if (WMS.weapons.oneArm[weapon:GetClass()]) then
-                return false
-            end
-
-        end
-
-        hook.Add("PlayerSwitchWeapon", "WMS::LeftArmBroke", WMS.DamageSystem.Hooks.ArmDamage)
     end
+
+    -- 🥰 verbose 🥰
+    -- Prevents prop spawning when in coma 
+    hook.Add("PlayerSpawnObject", "WMS::PreventPropSpawnOnDeath", function(player)
+        if (player:GetNWBool("isPartiallyDead")) then return false end
+    end)
+
+    -- Prevents suicide when in coma 
+    hook.Add("CanPlayerSuicide", "WMS::PreventSuicide", function(player)
+        if (player:GetNWBool("isPartiallyDead")) then return false end
+    end)
+
+
+    -- Limb Damage (handicaps)
+
+    -- Applies a leg fracture (limp)
+    -- @treturn nil
+    function PLAYER:LegFracture()
+
+        if (self:GetNWBool("isLimp")) then return end
+        self:SetNWBool("isLimp", true)
+
+        self:SetRunSpeed(WMS.config.fractureRunSpeed)
+        self:SetWalkSpeed(WMS.config.fractureWalkSpeed)
+
+        prone.Enter(self)
+
+    end
+
+    -- Heals a leg fracture (limp)
+    -- @treturn nil 
+    function PLAYER:HealLegFracture()
+
+        if (not self:GetNWBool("isLimp")) then return end
+        self:SetNWBool("isLimp", false)
+
+        self:SetRunSpeed(WMS.config.defaultRunSpeed)
+        self:SetWalkSpeed(WMS.config.defaultWalkSpeed)
+
+    end
+
+    -- Prevents getting up when limp 
+    hook.Add("prone.CanExit", "WMS::PreventGettingUpOnLimp", function(player)
+        return not player:GetNWBool("isLimp")
+    end)
+
+
+    -- ARMS
+    -- code repeating because I'm a lazy fucker 🙃
+
+    -- Deals a right arm fracture.
+    -- Drops the weapon either way
+    -- @treturn nil 
+    function PLAYER:RightArmFracture()
+
+        if (self:GetNWBool("rightArmFracture")) then return end
+        
+        self:SetNWBool("rightArmFracture", true)
+
+        local weapon = self:GetActiveWeapon()
+
+        if (not IsValid(weapon)) then return end
+
+        if (WMS.weapons.rifle[weapon:GetClass()] or
+            WMS.weapons.pistol[weapon:GetClass()] or
+            WMS.weapons.cut[weapon:GetClass()]) then
+
+            self:DropWeapon(weapon)
+
+        end
+
+    end
+
+    -- Deals a left arm fracture.
+    -- Drops the weapon if it it a two handheld weapon (we assume everybody is right handed)
+    -- @treturn nil 
+    function PLAYER:LeftArmFracture()
+        
+        if (self:GetNWBool("leftArmFracture")) then return end
+
+        self:SetNWBool("leftArmFracture", true)
+
+        local weapon = self:GetActiveWeapon()
+
+        if (not IsValid(weapon)) then return end
+
+        if (WMS.weapons.rifle[weapon:GetClass()] 
+            or WMS.weapons.pistol[weapon:GetClass()] 
+            or WMS.weapons.cut[weapon:GetClass()]
+            and not WMS.weapons.oneArm[weapon:GetClass()]) then
+
+            self:DropWeapon(weapon)
+
+        end
+
+    end
+
+    -- Heals a right arm fracture.
+    -- @treturn nil 
+    function PLAYER:HealRightArmFracture()
+        if (not self:GetNWBool("rightArmFracture")) then return end
+
+        self:SetNWBool("rightArmFracture", false)
+    end
+
+    -- Heals a left arm fracture.
+    -- @treturn nil 
+    function PLAYER:HealLeftArmFracture()
+        if (not self:GetNWBool("leftArmFracture")) then return end
+
+        self:SetNWBool("leftArmFracture", false)
+    end
+
+    -- Prevents switching weapons when the player has a broken arm
+    hook.Add("PlayerSwitchWeapon", "WMS::PreventSwitchingWeaponArmBroke", function(player, oldWeapon, newWeapon)
+        -- return true to block switching
+
+        if (player:Health() <= 30) then 
+            player:SetActiveWeapon(player:Give("re_hands"))
+            return true 
+        end
+
+        if (player:GetNWBool("rightArmFracture")) then return true end
+
+        if (not player:GetNWBool("leftArmFracture")) then return false end
+
+        if (WMS.weapons.oneArm[weapon:GetClass()]) then return false end
+
+    end)
 end
 
 
 -- HOOKS
-WMS.DamageSystem.Hooks.Init = function(player, trans)
 
-    hook.Call("CalcView")
+-- This function is basically used to initialize most of the networking variables 
+-- and the player's damage table.
+-- Hook utilization : Used when the player spawns the first time they connect.
+-- @tparam Player player The player that should get initialized
+-- @treturn nil
+WMS.DamageSystem.Hooks.Init = function(player, transition)
+
+    hook.Call("CalcView") -- I am desperate
     player:UnSpectate()
 
-    PrintC(player:SteamID().."[WMS] Player Damage table initialized !", 8, "112")
+    PrintC(player:SteamID().."[WMS] Player Damage table initialized !", 8, 112)
     
     player.damagesTable = {}
 
-    WMS.utils.syncDmgTbl(player, player.damagesTable)
+    WMS.utils.syncDamageTable(player, player.damagesTable)
 
-    player:SetNWInt("pulse", math.random(70, 90))
+    -- player:SetNWInt("pulse", math.random(70, 90))
 
     player:SetNWInt("partialDeathTimer", -1)
     player:SetNWBool("isPartiallyDead", false)
@@ -694,6 +745,12 @@ WMS.DamageSystem.Hooks.Init = function(player, trans)
 
 end
 
+-- This function removes any remainders of the victim
+-- Hook utilization : Used when the player dies.
+-- @tparam Player victim The player who died
+-- @tparam Entity inflictor Item used to kill the victim
+-- @tparam Entity attacker Player or entity that killed the victim
+-- @treturn nil
 WMS.DamageSystem.Hooks.Death = function(victim, inflictor, attacker)
 
     if (victim:Alive()) then return end
@@ -707,25 +764,33 @@ WMS.DamageSystem.Hooks.Death = function(victim, inflictor, attacker)
         victim:SetBleeding(false)
     end
 
-    local rag = victim:Create_Untied_Ragdoll()
+    local ragdoll = victim:Create_Untied_Ragdoll()
 
     timer.Simple(WMS.config.corpsDeleteTime, function()
-        if (IsValid(rag)) then 
-            rag:Remove() 
+
+        if (IsValid(ragdoll)) then 
+            ragdoll:Remove() 
         end
+
     end)
 
 
-    PrintC("[WMS] Player Damage table Deleted !", 8, "1")
+    PrintC("[WMS] Player Damage table Deleted not ", 8, "1")
     WMS.DamageSystem.Hooks.Init(victim, false)
     -- hook.Call("CalcView") -- not sure about that
 end
 
+-- This function uses the above functions to get the amount of damage the 
+-- player should take.
+-- Hook utilization : Used when the player takes damage.
+-- @tparam Entity target The entity that took the damage 
+-- @tparam CTakeDamageInfo damageInfo The original damage info
+-- @treturn boolean Whether to block the damage
 WMS.DamageSystem.Hooks.damageAmount = function(target, damageInfo)
     
     if (target:IsPlayerRagdoll() and target:GetCreator():GetNWBool("isPartiallyDead")) then
         
-        if (damageInfo:GetDamage() > 10) then
+        if (damageInfo:GetDamage() > WMS.config.amountOfDamageToKillCorps) then
             target:GetCreator():Kill()
         end
 
@@ -733,11 +798,11 @@ WMS.DamageSystem.Hooks.damageAmount = function(target, damageInfo)
 
     end
 
-    if (!target:IsPlayer()) then return end
+    if (not target:IsPlayer()) then return end
     if (target:HasGodMode()) then return true end
 
     local damage = WMS.DamageSystem.registerDamage(target, damageInfo)
-    damageInfo:SetDamage(WMS.DamageSystem.damageApplier(target, damage) or 0)
+    damageInfo:SetDamage(WMS.DamageSystem.damageCalculator(target, damage) or 0)
 
     if (WMS.config.NO_DMG) then
         damageInfo:SetDamage(0)
@@ -745,6 +810,7 @@ WMS.DamageSystem.Hooks.damageAmount = function(target, damageInfo)
 
 end
 
+-- Erases the player's damage table on disconnect
 WMS.DamageSystem.Hooks.Disconnect = function(player)
     player.damagesTable = nil
 end
