@@ -1,11 +1,12 @@
 AddCSLuaFile()
 
 WMS = WMS or {}
--- if you want to add specific weapons to this list follow the exemple
+-- if you want to add specific weapons to this list follow the example
 
 -- ["weapon_class"] = true,
 
--- this works  :   ["cw_kk_ins2_doi_stg44"] = true,
+-- example  :   
+-- ["cw_kk_ins2_doi_stg44"] = true,
 
 
 WMS.weapons = {
@@ -53,36 +54,52 @@ WMS.weapons = {
 
 
 
--- /!\ This part is NOT to be changed /!\ 
+-- /!\ This part is NOT to be changed by muggles /!\ 
 
 -- if you know what you are doing then good luck, I T   I S   M E S S Y
-for _, w in pairs(weapons.GetList()) do
-    if (w.Category == "CW 2.0 KK INS2 DOI") then
-        if (w.Base == "cw_kk_ins2_base_melee") then
-            WMS.weapons.cut[w.ClassName] = true
+-- + it is filled with magic constants
 
-        elseif (w.magType) then
-            local m = w.magType
+for _, weapon in pairs(weapons.GetList()) do
 
-            if (m == "arMag" or m == "m1Clip" or m == "brMag") then
-               WMS.weapons.rifle[w.ClassName] = true
+    if (weapon.Category == "CW 2.0 KK INS2 DOI") then
 
-            elseif (m == "smgMag" or m == "pistolMag") then
-               WMS.weapons.pistol[w.ClassName] = true
+        if (weapon.Base == "cw_kk_ins2_base_melee") then
+
+            WMS.weapons.cut[weapon.ClassName] = true
+
+        elseif (weapon.magType) then
+
+            local magazine = weapon.magType
+
+            if (magazine == "arMag" or magazine == "m1Clip" or magazine == "brMag") then
+
+               WMS.weapons.rifle[weapon.ClassName] = true
+
+            elseif (magazine == "smgMag" or magazine == "pistolMag") then
+
+               WMS.weapons.pistol[weapon.ClassName] = true
+
             end
 
         else
-            if (w.NormalHoldType == "pistol" or (w.ShotgunReload and w.Shots > 1)) then
-                WMS.weapons.pistol[w.ClassName] = true
 
-            elseif (w.NormalHoldType == "ar2") then
-                WMS.weapons.rifle[w.ClassName] = true
+            if (weapon.NormalHoldType == "pistol" or (weapon.ShotgunReload and weapon.Shots > 1)) then
+
+                WMS.weapons.pistol[weapon.ClassName] = true
+
+            elseif (weapon.NormalHoldType == "ar2") then
+
+                WMS.weapons.rifle[weapon.ClassName] = true
+
             end
+
         end
+
     end
+
 end
 
-PrintTable(WMS.weapons)
+-- PrintTable(WMS.weapons)
 
 -- save
 

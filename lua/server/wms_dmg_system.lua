@@ -295,8 +295,8 @@ WMS.DamageSystem.getDamageTable = function(damage)
 
     if (WMS.DEBUG) then
 
-        PrintC(finalDamage, 8, 27)
-        PrintC(damage, 8, 33)
+        print(finalDamage)
+        print(damage)
 
         PrintTable(damage)
         table.Empty(damage)
@@ -406,7 +406,7 @@ WMS.DamageSystem.damageCalculator = function(player, damage)
     if (damage.totalDeath) then
 
         if (WMS.DEBUG) then 
-            PrintC("FINITO PIPO", 8, 1) 
+            print("FINITO PIPO") 
         end
 
         if (not WMS.config.NO_DMG) then
@@ -420,7 +420,7 @@ WMS.DamageSystem.damageCalculator = function(player, damage)
     if (damage.partialDeath) then
 
         if (WMS.DEBUG) then 
-            PrintC("FINITO", 8, 202) 
+            print("FINITO", 8, 202) 
         end
 
         if (not WMS.config.NO_DMG) then
@@ -436,7 +436,7 @@ WMS.DamageSystem.damageCalculator = function(player, damage)
 
     if (damage.hemorrhage and not player:GetNWBool("isBleeding")) then
 
-        if (WMS.DEBUG) then PrintC("\tOOF Bleeds", 8, 9) end
+        if (WMS.DEBUG) then print("\tOOF Bleeds") end
 
         if (not WMS.config.NO_DMG) then
             player:SetBleeding(true, WMS.config.bleedingSpeed, WMS.config.bleedingImportance)
@@ -727,7 +727,7 @@ WMS.DamageSystem.Hooks.Init = function(player, transition)
     hook.Call("CalcView") -- I am desperate
     player:UnSpectate()
 
-    PrintC(player:SteamID().."[WMS] Player Damage table initialized !", 8, 112)
+    print(player:SteamID().."[WMS] Player Damage table initialized !")
     
     player.damagesTable = {}
 
@@ -775,7 +775,7 @@ WMS.DamageSystem.Hooks.Death = function(victim, inflictor, attacker)
     end)
 
 
-    PrintC("[WMS] Player Damage table Deleted not ", 8, "1")
+    print("[WMS] Player Damage table Deleted not ")
     WMS.DamageSystem.Hooks.Init(victim, false)
     -- hook.Call("CalcView") -- not sure about that
 end

@@ -8,6 +8,7 @@ WMS.config.enums = {}
 -- This part is the ones you should be modifying to please your taste
 WMS.DEBUG = true
 WMS.config.NO_DMG = true
+
 WMS.config.bleedingSpeed = 5
 WMS.config.bleedingImportance = 1 --hp
 
@@ -30,6 +31,7 @@ WMS.config.amountOfDamageToKillCorps = 10
 -- /!\ This part is NOT to be changed /!\ 
 
 -- if you know what you are doing then good luck, I T   I S   M E S S Y
+
 WMS.config.DMG_BLEEDING = 4294967296
 
 WMS.config.enums.damageTypes = {
