@@ -71,7 +71,7 @@ end
 
 
 -- Syncs the damage table of a player to all clients
--- Ameliorations :
+-- Possible upgrades :
 -- The Broadcast is probably inefficient. The point here is to give the information to medics, who 
 -- should be the only ones to access the damage table of a given player.
 -- @tparam Player player The player 
@@ -84,4 +84,115 @@ WMS.utils.syncDamageTable = function(player, damageTable)
         net.WriteTable(damageTable)
     net.Broadcast()
 
+end
+
+-- Nice printing for the damage table while debugging
+-- @tparam table damageTable The player's damage table 
+-- @treturn nil
+WMS.utils.__debugPrintDamageTable = function(damagesTable)
+
+    for i, damageTable in pairs(damagesTable) do
+        print("╭──────────────────╮")
+        Msg("│" .. "\27[1;4;37m")
+        Msg("Damage n°" .. i)
+        Msg("\27[0m        │\n")
+        
+        local s = "  "
+        local ss = "    "
+
+        Msg("│" .. s .. "\27[4;90m")
+        Msg("État")
+        Msg("\27[0m")
+        if(damageTable.totalDeath)then
+
+            Msg("\27[91m")
+            print(s .. "MORT\27[0m      │")
+
+        elseif(damageTable.partialDeath)then
+
+            Msg("\27[38;5;166m")
+            print(s .. "COMA\27[0m      │")
+
+        else
+
+            Msg("\27[32m")
+            print(s .. "EN VIE\27[0m    │")
+
+        end
+        Msg("\27[0m")
+
+        Msg("│" .. "\27[90m")
+        Msg("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+        Msg("\27[0m" .. "│\n")
+
+        if(damageTable.verboseDamageArea)then
+
+            Msg("│" .. s .. "\27[4;90m")
+            Msg("Area")
+            Msg("\27[0m")
+
+            Msg("\27[38;5;111m")
+            print(s .. damageTable.verboseDamageArea .. "\27[0m" .. (string.rep(" ", 19 - (string.len(damageTable.verboseDamageArea) + 9))) .. "│")
+            Msg("\27[0m")
+
+        end
+
+        if(damageTable.damageAmount and isnumber(damageTable.damageAmount))then
+
+            Msg("│" .. s .. "\27[4;90m")
+            Msg("Damage")
+            Msg("\27[0m")
+
+            Msg("\27[38;5;64m")
+            print(s .. damageTable.damageAmount .. "\27[0m" .. (string.rep(" ", 19 - (string.len(tostring(damageTable.damageAmount)) + 11))) .. "│" )
+            Msg("\27[0m")
+
+        end
+
+        if(damageTable.customDamageType)then
+
+            Msg("│" .. s .. "\27[4;90m")
+            Msg("Type")
+            Msg("\27[0m")
+
+            Msg("\27[38;5;6m")
+            Msg(s .. damageTable.verboseType .. (string.rep(" ", 19 - (string.len(damageTable.verboseType) + 8))))
+            Msg("\27[0m│\n")
+
+        end
+
+        Msg("│" .. "\27[90m")
+        Msg("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+        Msg("\27[0m" .. "│\n")
+
+        Msg("│" .. s .. "\27[4;90m")
+        Msg("Misc")
+        Msg("\27[0m            │")
+
+        if(damageTable.brokenRightArm)then
+
+            Msg("\n│" .. "\27[38;5;124m")
+            Msg(ss .. "Bras Droit")
+            Msg("\27[0m    │")
+
+        end
+        if(damageTable.brokenLeftArm)then
+
+            Msg("\n│" .. "\27[38;5;124m")
+            Msg(ss .. "Bras Gauche")
+            Msg("\27[0m   │")
+
+        end
+        if(damageTable.hemorrhage)then
+
+            Msg("\n│" .. "\27[38;5;124m")
+            Msg(ss .. "Hemorrhage")
+            Msg("\27[0m    │")
+
+        end
+
+        print("\n╰──────────────────╯")
+
+    end
+    
 end

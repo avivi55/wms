@@ -2,12 +2,12 @@ AddCSLuaFile()
 
 WMS = WMS or {}
 WMS.config = {}
-WMS.config.human = {}
+WMS.config.verbose = {}
 WMS.config.enums = {}
 
 -- This part is the ones you should be modifying to please your taste
 WMS.DEBUG = true
-WMS.config.NO_DMG = true
+WMS.config.NO_DMG = false
 
 WMS.config.bleedingSpeed = 5
 WMS.config.bleedingImportance = 1 --hp
@@ -44,14 +44,16 @@ WMS.config.enums.damageTypes = {
     ["NORMAL"]    = 7
 }
 WMS.config.enums.weaponTypes = {
-    ["VEHICLE"]      = 0,
+    ["UNRECOGNIZED"] = 0,
+
+    ["VEHICLE"]      = 4,
     ["CUT"]          = 1,
     ["PISTOL"]       = 2,
     ["RIFLE"]        = 3,
-    ["UNRECOGNIZED"] = 4,
 }
 WMS.config.enums.damageArea = {
     ["UNRECOGNIZED"] = 0,
+
     ["SKULL"]   = 1,
     ["NECK"]    = 2,
     ["FACE"]    = 3,
@@ -70,15 +72,16 @@ WMS.config.enums.damageArea = {
     ["FOOT"]    = 12,
 }
 
-WMS.config.human.weaponTypes = {
+WMS.config.verbose.weaponTypes = {
+    [WMS.config.enums.weaponTypes.UNRECOGNIZED] = "UNRECOGNIZED",
+
     [WMS.config.enums.weaponTypes.VEHICLE]      = "vehicle",
     [WMS.config.enums.weaponTypes.CUT]          = "cut",
     [WMS.config.enums.weaponTypes.PISTOL]       = "pistol",
     [WMS.config.enums.weaponTypes.RIFLE]        = "rifle",
-    [WMS.config.enums.weaponTypes.UNRECOGNIZED] = "UNRECOGNIZED",
 }
 
-WMS.config.human.damageTypes = {
+WMS.config.verbose.damageTypes = {
     [WMS.config.enums.damageTypes.BLEED]     = "Saignement",
     [WMS.config.enums.damageTypes.PROP]      = "Objet",
     [WMS.config.enums.damageTypes.FALL]      = "Chute",
@@ -88,7 +91,7 @@ WMS.config.human.damageTypes = {
     [WMS.config.enums.damageTypes.NORMAL]    = "Arme à feu"
 }
 
-WMS.config.human.damageArea = {
+WMS.config.verbose.damageArea = {
     [WMS.config.enums.damageArea.SKULL]   = "Crâne",
     [WMS.config.enums.damageArea.NECK]    = "Cou",
     [WMS.config.enums.damageArea.FACE]    = "Visage",

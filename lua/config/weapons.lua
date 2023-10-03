@@ -11,6 +11,7 @@ WMS = WMS or {}
 
 WMS.weapons = {
     rifle = {
+        ["cw_kk_ins2_doi_mg42"] = true 
     },
 
     pistol = {
@@ -48,6 +49,7 @@ WMS.weapons = {
 }
 
 
+
 -- ############################################################################
 -- ############################################################################
 -- ############################################################################
@@ -62,7 +64,6 @@ WMS.weapons = {
 for _, weapon in pairs(weapons.GetList()) do
 
     if (weapon.Category == "CW 2.0 KK INS2 DOI") then
-
         if (weapon.Base == "cw_kk_ins2_base_melee") then
 
             WMS.weapons.cut[weapon.ClassName] = true

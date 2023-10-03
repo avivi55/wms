@@ -1,6 +1,7 @@
 WMS.utils.addFileToClient()
 util.AddNetworkString("send_damage_table_to_client")
-include("server/wms_dmg_system.lua")
+
+include("./damage_system/main.lua")
 
 
 hook.Add("SetupMove", "WMS::DragSystem", function(ply, mv, cmd)
@@ -15,9 +16,9 @@ hook.Add("SetupMove", "WMS::DragSystem", function(ply, mv, cmd)
 	
 	mv:SetMaxClientSpeed(mv:GetMaxClientSpeed() * 0.6)
 
-	local targetPoint = kidnapper:IsPlayer() and kidnapper:GetShootPosition() or kidnapper:GetPos()
+	local targetPoint = kidnapper:IsPlayer() and kidnapper:GetShootPos() or kidnapper:GetPos()
 	local moveDirection = (targetPoint - ply:GetPos()):GetNormal()
-	local shootPosition = ply:GetShootPosition() + (Vector(0,0, ply:Crouching() and 0))
+	local shootPosition = ply:GetShootPos() + (Vector(0,0, ply:Crouching() and 0))
 	local distance = 30
 
 	local distanceFromTarget = shootPosition:distance(targetPoint)
