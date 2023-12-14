@@ -42,7 +42,7 @@ hook.Add("SetupMove", "WMS::DragSystem", function(ply, mv, cmd)
 	local zDif = math.abs(shootPosition[3] - targetPosition[3])
 
 	local speedMultiplier = 3 + ((xDif + yDif) * 0.5)
-	local verticalMultiplier = math.max((math.Max(300-(xDif + yDif), -10) * 0.08) + (zDif / 2),0)
+	local verticalMultiplier = math.max((math.max(300-(xDif + yDif), -10) * 0.08) + (zDif / 2),0)
 
 	if (kidnapper:GetGroundEntity() == ply) then 
 		verticalMultiplier = -verticalMultiplier 

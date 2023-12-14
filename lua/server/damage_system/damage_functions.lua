@@ -100,8 +100,6 @@ WMS.DamageSystem.getCustomDamageType = function(damage, damageInfo)
 
 end
 
-
-
 -- Gets the predefined damage area with the parsed damage table
 -- @tparam table damage The parsed damage table
 -- @treturn number The custom damage area

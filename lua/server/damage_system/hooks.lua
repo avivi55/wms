@@ -105,7 +105,7 @@ WMS.DamageSystem.Hooks.damageAmount = function(target, damageInfo)
 
     end
 
-    if (not target:IsPlayer()) then return end
+    if (not target:IsPlayer()) then return true end
     if (target:HasGodMode()) then return true end
 
     local damage = WMS.DamageSystem.registerDamage(target, damageInfo)
@@ -114,6 +114,8 @@ WMS.DamageSystem.Hooks.damageAmount = function(target, damageInfo)
     if (WMS.config.NO_DMG) then
         damageInfo:SetDamage(0)
     end
+
+    return false
 
 end
 
