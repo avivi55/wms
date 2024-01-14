@@ -8,8 +8,10 @@ public class Couple
     _get second
 
     constructor(first, second)
+
         self.first = first
         self.second = second
+        
     end
 
     __eq(other: Couple)

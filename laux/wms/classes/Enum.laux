@@ -1,7 +1,6 @@
 local Tabular = include("wms/libs/tabular.lua")
 
 
--- Enum class
 public class Enum
 
     -- constructor

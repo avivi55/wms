@@ -1,44 +1,34 @@
 # WNS/WMS (WIP)
 
-The WNS (War Nursing System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing.
+> [!WARNING]
+> The addon is being rewriten in the laux language to use a more object oriented design.
 
-- high chance of death upon being hit
-- hemorrhage
-- limp
-- grabbing your mate when he is limp
+The WNS (War Nursing System or Winnies Medical System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing.
+
+I was inspired by Arma III's [ACE3](https://github.com/acemod/ACE3) mod.
+A lot of visuals are based on it.
+
+This mod adds :
+- Better hit areas
+- More realistic damage types
+- Contraints when injured (no more rules to enforced by staff)
 - [ACE3](https://github.com/acemod/ACE3) like diagnostic sheet
-- Death screen
-- low health effects
-- pulse
-- morphine
-- antibiotics
-- infections
-- coma
-- Somewhat compatible with simfphys armed
+- A [HLL](https://www.hellletloose.com/) like death screen
+- Visuals when injured
+- An advanced medical system for medics
+
 ### **THE ADDON IS UNFINISHED**
 
 and it's use is still buggy but I am working on it ~~daily~~ 
 
 
-### TODO
-- [x] Damage System
-- [ ] Healing System
-- [ ] CLEANING CODE
+### Roadmap
+- [ ] Damage System
+- [ ] Medical System
 - [ ] Automatic weapons registration
----
-
-## Dependencies
-
-- [~~Entity Position Kit~~](https://github.com/Pika-Software/plib_entity_position_kit)
-- [~~Plib~~](https://github.com/Pika-Software/gmod_plib)
-- [~~G-Core lib~~](https://github.com/SlownLS-Gmod/gcore-lib)
-
-### Integrated in the addon
-- [gmod_improved_player_ragdolls](https://github.com/Pika-Software/gmod_improved_player_ragdolls)
-- [Low Health Effect](https://steamcommunity.com/sharedfiles/filedetails/?id=652896605)
 
 ---
-## CONFIG and Install
+## Installation & configuration
 
 ### Install
 
@@ -51,15 +41,14 @@ Installing the addon is a bit technical.
 
 or 
 
-When it is finished I will probably upload the pre-transpiled source code in the release section.
+When it is finished I will probably upload the pre-transpiled source code in the `release` section.
 
-So Download it in the `addons/` folder and it is finished.
-
+So just download it in the `addons/` folder.
 
 ### Config
 
 
-the config files are in `wms/lua/config/` . Most of it is developer side and isn't meant to be tampered with.
+the config files are in `wms/laux/wms/config/` . Most of it is developer side and isn't meant to be tampered with.
 
 <br>
 <br>
@@ -131,6 +120,17 @@ for _, w in pairs(weapons.GetList()) do
     end
 end
 ```
+
+---
+# Contributing
+
+> [!IMPORTANT]
+> This addon is made for a server, so it can have weird hard-coded things.
+> I'll try to minimize the occurence of this kind of code.
+
+If you want to contribute you must know about the [laux compiler](https://github.com/8char/laux-compiler)
+
+For any pull request to be accepted you must follow the [style guide](./STYLE_GUIDELINE.md).
 
 
 ---
