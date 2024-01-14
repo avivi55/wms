@@ -1,0 +1,204 @@
+-- local Tabular = include("wms/libs/tabular.lua")
+
+public class Damage
+
+    originalCTDI = nil -- CTakeDamageInfo
+
+    _get victim -- Player
+    attacker = nil -- Player | nil
+    inflictor = nil -- Player | Entity
+
+    weapon = nil -- Weapon | Entity
+
+    _get damage -- number
+    _get type -- WMS.enums.damageTypes    
+    _get area -- WMS.enums.artificialDamageAreas
+    
+    _get postVictimState -- WMS.enums.lifeStates
+    _get initiatesBleeding -- boolean
+
+    constructor(damage: CTakeDamageInfo, victim: Player)
+
+        self.originalCTDI = damage
+
+        self.victim = victim
+        local hitgroup = self.victim:LastHitGroup()
+        
+
+        self.attacker = damage:GetAttacker()
+
+        self.inflictor = damage:GetInflictor()
+
+        if (IsValid(self.attacker) && self.attacker:IsPlayer()) then
+            self.weapon = self.attacker:GetActiveWeapon()
+        end
+
+        self.type = self:getDamageType()
+
+        print(self:getType())
+        print(WMS.config.chances[hitgroup]:getResult(self:getType()))
+
+    end
+
+    getDamageType()
+
+        local damageTypes = WMS.enums.damageTypes
+
+        if (self:isFromBleeding())          then return damageTypes.BLEED 
+        elseif (self:isFromVehicle())       then return damageTypes.VEHICLE 
+        elseif (self:isFromFalling())       then return damageTypes.FALL 
+        elseif (self:isFromProp())          then return damageTypes.PROP 
+        elseif (self:isFromExplosion())     then return damageTypes.EXPLOSION 
+        elseif (self:isFromFire())          then return damageTypes.FIRE 
+        elseif (self:isFromOverdose())      then return damageTypes.OVERDOSE 
+        elseif (self:isFromOrganFailure())  then return damageTypes.ORGAN_FAILURE 
+        elseif (self:isFromPistol())        then return damageTypes.PISTOL 
+        elseif (self:isFromRifle())         then return damageTypes.RIFLE 
+        elseif (self:isFromMelee())         then return damageTypes.MELEE 
+        end
+
+        return self.originalCTDI:GetDamageType()
+
+    end
+
+    isFromVehicle()
+
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_CRUSH) != DMG_CRUSH) then return false end
+        
+        if (!IsValid(self.attacker)) then return false end
+        if (!self.attacker:IsPlayer()) then return false end
+        
+        if (!self.attacker:InVehicle()) then return false end
+
+        return true
+
+    end
+
+    isFromFalling()
+
+        -- Don't know if they're the same. It's just for making sure.
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_FALL) != DMG_FALL) then return false end
+        if (!self.originalCTDI:IsFallDamage()) then return false end
+
+        if (self.attacker:GetClass() != "worldspawn") then return false end
+
+        return true
+
+    end
+
+    isFromProp()
+
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_CRUSH) != DMG_CRUSH) then return false end
+        
+        if (self.inflictor:GetClass() != "prop_physics") then return false end
+
+        return true
+
+    end
+
+    isFromExplosion()
+
+        if (!self.originalCTDI:IsExplosionDamage()) then return false end
+        if (self.inflictor:GetClass() != "base_shell") then return false end
+        
+        return true
+        
+    end
+
+    isFromBleeding() 
+
+        local DMG_BLEED = WMS.enums.newDamages.DMG_BLEED
+
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BLEED) != DMG_BLEED) then return false end
+
+        return true
+
+    end
+
+    isFromFire()
+
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BURN) != DMG_BURN) then return false end
+
+        return true
+
+    end
+
+    isFromOverdose()
+
+        local DMG_OVERDOSE = WMS.enums.newDamages.DMG_OVERDOSE
+
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_OVERDOSE) != DMG_OVERDOSE) then return false end
+
+        return true
+
+    end
+
+    isFromOrganFailure() 
+
+        local DMG_ORGAN_FAILURE = WMS.enums.newDamages.DMG_ORGAN_FAILURE
+
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_ORGAN_FAILURE) != DMG_ORGAN_FAILURE) then return false end
+
+        return true
+
+    end
+
+    isFromWeapon()
+
+        if (!self.weapon) then return false end
+        if (!IsValid(self.weapon)) then return false end
+        if (!self.weapon:IsWeapon()) then return false end
+        
+        if (!self.inflictor) then return false end
+        if (!IsValid(self.inflictor)) then return false end
+
+        return true
+
+    end
+
+    isFromEntityRifle()
+
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BULLET) != DMG_BULLET) then return false end
+    
+        print(self.inflictor)
+        
+        if (IsValid(self.inflictor)) then return false end
+        print(self.inflictor)
+
+        return true
+
+    end
+
+    isFromMelee() 
+
+        if (!self:isFromWeapon()) then return false end
+
+        if (!WMS.weapons[WMS.enums.damageTypes.MELEE][self.weapon:GetClass()]) then return false end
+
+        return true
+
+    end
+
+    isFromPistol() 
+
+        if (!self:isFromWeapon()) then return false end
+
+        if (!WMS.weapons[WMS.enums.damageTypes.PISTOL][self.weapon:GetClass()]) then return false end
+
+        return true
+
+    end
+    
+    isFromRifle()
+
+        if (self:isFromEntityRifle()) then return true end
+
+        if (!self:isFromWeapon()) then return false end
+
+        if (!WMS.weapons[WMS.enums.damageTypes.RIFLE][self.weapon:GetClass()]) then return false end
+
+        return true
+
+    end
+
+end

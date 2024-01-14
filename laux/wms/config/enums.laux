@@ -1,0 +1,52 @@
+WMS ||= {}
+WMS.enums = {}
+
+WMS.enums.newDamages = {
+    DMG_BLEED = 4294967296,
+    DMG_OVERDOSE = 8589934592,
+    DMG_ORGAN_FAILURE = 17179869184
+}
+
+WMS.enums.damageTypes = Enum({
+    "MELEE",
+    "PISTOL",
+    "RIFLE",
+
+    "BLEED",
+    "OVERDOSE",
+    "ORGAN_FAILURE",
+
+    "FALL",
+    "PROP",
+    "EXPLOSION",
+    "VEHICLE",
+    "FIRE",
+
+    "NO_DAMAGE",
+    "UNRECOGNIZED",
+})
+
+WMS.enums.artificialDamageAreas = Enum({
+    "SKULL",
+    "NECK",
+    "FACE",
+
+    "TORSO",
+    "HEART",
+    "LUNGS",
+
+    "STOMACH",
+    "LIVER",
+
+    "ARM",
+    "HAND",
+
+    "LEG",
+    "FOOT",
+})
+
+WMS.enums.lifeStates = Enum({
+    "TOTAL_DEATH",
+    "PARTIAL_DEATH",
+    "ALIVE"
+})

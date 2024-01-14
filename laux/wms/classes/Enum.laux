@@ -1,0 +1,86 @@
+local Tabular = include("wms/libs/tabular.lua")
+
+
+-- Enum class
+public class Enum
+
+    -- constructor
+    --
+    -- When creating an Enum we take in a table of strings. The string will be our identifiers.
+    -- Then the ordinal of each elements will be the numberical key.
+    --
+    -- I use the fact that every object is a table under the hood to store an EnumField object
+    -- in the value associated with the identifier.
+    -- 
+    -- @param {table} fields The table input.
+    constructor(fields: table)
+
+        for number, name of fields do
+            if(type(number) != "number" && type(name) != "string")then 
+                error("Enum class takes a list table of strings") 
+            end
+
+            self[name] = EnumField(name, number)
+        end
+        
+    end
+
+    __tostring()
+    
+        local out = {}
+
+        for k, v of self do
+            if (v.__type && v:__type() == "EnumField") then
+                out[#out + 1] = tostring(v)
+            end
+        end
+
+        return Tabular(out)
+
+    end
+
+    __eq(other: Enum)
+    
+        for k, v of self do
+            if (v.__type && v:__type() == "EnumField") then
+                if (other[v:getName()] != v) then
+                    return false
+                end
+            end
+        end
+
+        return true
+
+    end
+
+end
+
+-- EnumField class
+-- This would have been a nested class in Java.
+-- The private keyword is unrelliable so I make everything public.
+--
+-- I am simulating a kotlin Enum class.
+public class EnumField
+
+    -- {string} The identifier of the enum field.
+    _get _set name
+
+    -- {number} The number that is used to get its position in the Enum. 
+    _get _set ordinal
+
+    constructor(name: string, ordinal: number)
+
+        self:setName(name)
+        self:setOrdinal(ordinal)
+
+    end
+
+    __tostring()
+        return self:getName() .. '(' .. self:getOrdinal() .. ')'
+    end
+
+    __eq(other: EnumField)
+        return self:getName() == other:getName() && self:getOrdinal() == other:getOrdinal()
+    end
+
+end

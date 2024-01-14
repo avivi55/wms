@@ -1,0 +1,23 @@
+-- A simple implementation of a 2 item tuple
+public class Couple
+
+    -- {any} The first element of the couple.
+    _get first
+    
+    -- {any} The second element of the couple.
+    _get second
+
+    constructor(first, second)
+        self.first = first
+        self.second = second
+    end
+
+    __eq(other: Couple)
+        return self:getFirst() == other:getFirst() && self:getSecond() == other:getSecond()
+    end
+
+    __tostring()
+        return `(${self:getFirst()}, ${self:getSecond()})`
+    end
+
+end

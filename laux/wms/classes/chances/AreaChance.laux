@@ -1,0 +1,65 @@
+public class AreaChance
+
+    -- {table[ArtificialDamageAreaChance]} The table of ArtificialDamageAreaChance making a gmod damage area.
+    chances = {}    
+
+    -- Just simple verifications (type and correct pourcentage total)
+    constructor(chances: table)
+
+        local hundred = 0
+
+        for area, chance of chances do
+            
+            if (chance:__type() != "ArtificialDamageAreaChance") then
+                error(`incorrect table syntax, expected ArtificialDamageAreaChance got ${type(chance)}`)
+            end
+
+            hundred += chance:getPourcentageOfHappening()
+        end
+        
+        if (hundred != 100) then
+            error(`Total of chance must be 100, got ${hundred}`)
+        end
+
+        self.chances = chances 
+    end
+
+    -- Yields a random ArtificialDamageAreaChance in the given table
+    --
+    -- @returns area {number} The constant used by GMod for the hitgroup.
+    -- @returns chance {ArtificialDamageAreaChance} The random area.
+    getRandomArea()
+
+        local rn = math.random(100)
+
+        local chancesSum = 0
+
+        for area, chance in ipairs(self.chances) do
+            
+            chancesSum += chance:getPourcentageOfHappening()
+            
+            if (rn <= chancesSum) then
+                return area, chance
+            end
+            
+        end 
+
+        error("could not resolve pourcentages, unrecovarable situation !")
+    
+    end
+
+    -- Generates a random area and gets the resulting life state and damage. 
+    --
+    -- @returns {table} the result table.
+    --      @field state {WMS.enums.lifeStates} The life state.
+    --      @field damage {number} The damage.
+    getResult(weaponType: EnumField)
+        local area, chance = self:getRandomArea()
+
+        return {
+            state = chance:getDeath(weaponType),
+            damage = chance:getDamage(weaponType)
+        }
+    end
+
+end

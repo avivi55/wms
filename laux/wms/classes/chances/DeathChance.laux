@@ -1,0 +1,59 @@
+-- This class represents a basic wrapper to output a random result depending on the probabilities given.
+public class DeathChance
+
+    -- {number} The pourcentage of chance of a total death.
+    total = 0
+    
+    -- {number} The pourcentage of chance of a partial death (coma).
+    partial = 0
+    
+    -- {number} The pourcentage of chance of the start of a hemorrhage.
+    bleeding = 0
+    
+    -- {Couple} The range of possible damage.
+    range = nil
+
+    -- constructor
+    -- the parameters are the same as the fields.
+    constructor(chanceTotalDeath: number, chancePartialDeath: number, chanceBleeding: number, damageRange: Couple)
+        
+        self.total = chanceTotalDeath
+        self.partial = chancePartialDeath
+        self.bleeding = chanceBleeding
+        self.range = damageRange
+
+    end
+
+    -- Yields a life state after the probabilities are applied
+    --
+    -- @returns {WMS.enums.lifeStates} The life state.
+    getDeath()
+
+        local rn = math.random(100)
+
+        if (rn <= self.total) then
+            return WMS.enums.lifeStates.TOTAL_DEATH
+        end
+
+        rn = math.random(100)
+
+        if (rn <= self.partial) then
+            return WMS.enums.lifeStates.PARTIAL_DEATH
+        end
+
+        return WMS.enums.lifeStates.ALIVE
+
+    end
+
+    -- Yields a random number in the given range
+    --
+    -- @returns {number} The random number.
+    getDamage()
+        return math.random(self.range:getFirst(), self.range:getSecond())
+    end
+
+    __tostring()
+        return `Chance of:\n\tTotal Death: ${self.total}%\n\tPartial Death: ${self.partial}%\n\tBleeding: ${self.bleeding}%\nDamage Range: ${self.range}`
+    end
+
+end

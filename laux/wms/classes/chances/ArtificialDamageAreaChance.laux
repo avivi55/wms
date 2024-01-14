@@ -1,0 +1,67 @@
+-- This is just a collection of 3 DeathChance objects and a chance of happening. 
+public class ArtificialDamageAreaChance
+
+    -- {number} The pourcentage of this area being chosen among others in a AreaChance object. 
+    _get pourcentageOfHappening
+
+    -- {DeathChance} The chance associated with a rifle damage.
+    rifleChance = nil
+    
+    -- {DeathChance} The chance associated with a pistol damage.
+    pistolChance = nil
+    
+    -- {DeathChance} The chance associated with a welee weapon damage.
+    meleeChance = nil
+
+    constructor(pourcentage: number, rifle: DeathChance, pistol: DeathChance, melee: DeathChance)
+
+        self.pourcentageOfHappening = pourcentage
+        self.rifleChance = rifle
+        self.pistolChance = pistol
+        self.meleeChance = melee
+    
+    end
+
+    -- Yields a life state according to the given weapon type.
+    --
+    -- @returns {WMS.enums.lifeStates} The life state.
+    getDeath(weaponType: EnumField)
+
+        if (weaponType == WMS.enums.damageTypes.RIFLE) then
+            return self.rifleChance:getDeath()
+        end
+
+        if (weaponType == WMS.enums.damageTypes.PISTOL) then
+            return self.pistolChance:getDeath()
+        end
+
+        if (weaponType == WMS.enums.damageTypes.MELEE) then
+            return self.meleeChance:getDeath()
+        end
+
+        return WMS.enums.lifeStates.ALIVE
+
+    end
+
+    -- Yields a random damage according to the given weapon type.
+    --
+    -- @returns {number} The random number.
+    getDamage(weaponType: EnumField)
+
+        if (weaponType == WMS.enums.damageTypes.RIFLE) then
+            return self.rifleChance:getDamage()
+        end
+
+        if (weaponType == WMS.enums.damageTypes.PISTOL) then
+            return self.pistolChance:getDamage()
+        end
+
+        if (weaponType == WMS.enums.damageTypes.MELEE) then
+            return self.meleeChance:getDamage()
+        end
+
+        return 0
+
+    end
+
+end

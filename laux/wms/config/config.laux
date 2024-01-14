@@ -1,0 +1,223 @@
+
+WMS ||= {}
+WMS.config = {}
+WMS.config.verbose = {}
+
+-- This part is the ones you should be modifying to please your taste
+WMS.DEBUG = true
+WMS.config.NO_DMG = false
+
+WMS.config.bleedingSpeed = 5
+WMS.config.bleedingImportance = 1 --hp
+
+WMS.config.partialDeathTime = 3
+WMS.config.timeBeforeCorpsDisapear = 50
+
+WMS.config.defaultWalkSpeed = 400   -- 400
+WMS.config.defaultRunSpeed = 600    -- 600
+WMS.config.fractureWalkSpeed = 200  -- 400
+WMS.config.fractureRunSpeed = 400   -- 600
+
+WMS.config.damageToKillCorps = 10
+
+
+-- ############################################################################
+-- ############################################################################
+-- ############################################################################
+
+
+-- /!\ This part is NOT to be changed /!\ 
+
+-- if you know what you are doing then good luck, I T   I S   M E S S Y
+
+-- WMS.config.verbose.damageTypes = {
+--     [WMS.enums.damageTypes.BLEED]     = "Saignement",
+--     [WMS.enums.damageTypes.PROP]      = "Objet",
+--     [WMS.enums.damageTypes.FALL]      = "Chute",
+--     [WMS.enums.damageTypes.EXPLOSION] = "Explosion",
+--     [WMS.enums.damageTypes.VEHICLE]   = "Véhicule",
+--     [WMS.enums.damageTypes.NO_DAMAGE] = "NON",
+--     [WMS.enums.damageTypes.NORMAL]    = "Arme à feu"
+-- }
+
+-- WMS.config.verbose.artificialDamageArea = {
+--     [WMS.enums.artificialDamageAreas.SKULL]   = "Crâne",
+--     [WMS.enums.artificialDamageAreas.NECK]    = "Cou",
+--     [WMS.enums.artificialDamageAreas.FACE]    = "Visage",
+
+--     [WMS.enums.artificialDamageAreas.TORSO]   = "Torse",
+--     [WMS.enums.artificialDamageAreas.HEART]   = "Coeur",
+--     [WMS.enums.artificialDamageAreas.LUNGS]   = "Poumons",
+
+--     [WMS.enums.artificialDamageAreas.STOMACH] = "Estomac",
+--     [WMS.enums.artificialDamageAreas.LIVER]   = "Foie",
+
+--     [WMS.enums.artificialDamageAreas.ARM]     = "Bras",
+--     [WMS.enums.artificialDamageAreas.HAND]    = "Mains",
+
+--     [WMS.enums.artificialDamageAreas.LEG]     = "Jambe",
+--     [WMS.enums.artificialDamageAreas.FOOT]    = "Pied",
+-- }
+
+
+WMS.config.artificialDamageAreaToImage = {
+    [HITGROUP_HEAD]     = "head",
+
+    [HITGROUP_CHEST]    = "torso",
+    [HITGROUP_STOMACH]  = "torso",
+
+    [HITGROUP_LEFTARM]  = "arm_left",
+    [HITGROUP_RIGHTARM] = "arm_right",
+
+    [HITGROUP_RIGHTLEG] = "leg_right",
+    [HITGROUP_LEFTLEG]  = "leg_left",
+}
+-----------------------------------------------------------------------------
+
+
+-- This part is meant for tweaking specific things and is generally made for devs, but it won't 
+-- break if you touch it
+
+
+-- Here, we are dealing with man held damage (bullet & melee).
+
+WMS.config.chances = {
+    [HITGROUP_HEAD] = AreaChance({
+        [WMS.enums.artificialDamageAreas.SKULL] = ArtificialDamageAreaChance(
+            40,
+            DeathChance(99, 99, 0, Couple(90, 99)),
+            DeathChance(98, 97, 0, Couple(90, 99)),
+            DeathChance(89, 86, 90, Couple(90, 96))
+        ),
+        [WMS.enums.artificialDamageAreas.NECK] = ArtificialDamageAreaChance(
+            25,
+            DeathChance(85, 80, 66, Couple(80, 85)),
+            DeathChance(75, 70, 66, Couple(70, 75)),
+            DeathChance(70, 40, 90, Couple(70, 90))
+        ),
+        [WMS.enums.artificialDamageAreas.FACE] = ArtificialDamageAreaChance(
+            35,
+            DeathChance(78, 80, 20, Couple(40, 75)),
+            DeathChance(75, 70, 20, Couple(30, 55)),
+            DeathChance(30, 20, 30, Couple(40, 64))
+        ),
+    }),
+
+    [HITGROUP_CHEST] = AreaChance({
+        [WMS.enums.artificialDamageAreas.TORSO] = ArtificialDamageAreaChance(
+            70,
+            DeathChance(25, 40, 37, Couple(61, 80)),
+            DeathChance(15, 20, 35, Couple(54, 78)),
+            DeathChance(10, 5, 30, Couple(55, 70))
+        ),
+        [WMS.enums.artificialDamageAreas.HEART] = ArtificialDamageAreaChance(
+            10,
+            DeathChance(99, 99, 99, Couple(99, 99)),
+            DeathChance(98, 98, 98, Couple(99, 99)),
+            DeathChance(99, 99, 99, Couple(99, 99))
+        ),
+        [WMS.enums.artificialDamageAreas.LUNGS] = ArtificialDamageAreaChance(
+            20,
+            DeathChance(80, 70, 90, Couple(90, 96)),
+            DeathChance(70, 60, 90, Couple(91, 95)),
+            DeathChance(50, 30, 99, Couple(95, 99))
+        ),
+    }),
+
+    [HITGROUP_STOMACH] = AreaChance({
+        [WMS.enums.artificialDamageAreas.STOMACH] = ArtificialDamageAreaChance(
+            60,
+            DeathChance(20, 40, 50, Couple(54, 73)),
+            DeathChance(15, 32, 35, Couple(45, 69)),
+            DeathChance(35, 30, 80, Couple(50, 64))
+        ),
+        [WMS.enums.artificialDamageAreas.LIVER] = ArtificialDamageAreaChance(
+            40,
+            DeathChance(30, 45, 60, Couple(60, 78)),
+            DeathChance(20, 39, 42, Couple(55, 70)),
+            DeathChance(20, 30, 80, Couple(56, 80))
+        ),
+    }),
+
+    [HITGROUP_LEFTARM] = AreaChance({
+        [WMS.enums.artificialDamageAreas.ARM] = ArtificialDamageAreaChance(
+            90,
+            DeathChance(20, 25, 10, Couple(24, 39)),
+            DeathChance(15, 20, 9, Couple(21, 35)),
+            DeathChance(5, 7, 15, Couple(20, 30))
+        ),
+        [WMS.enums.artificialDamageAreas.HAND] = ArtificialDamageAreaChance(
+            10,
+            DeathChance(5, 7, 4, Couple(10, 25)),
+            DeathChance(3, 5, 2, Couple(7, 23)),
+            DeathChance(3, 4, 5, Couple(4, 20))
+        ),
+    }),
+
+    [HITGROUP_RIGHTARM] = AreaChance({
+        [WMS.enums.artificialDamageAreas.ARM] = ArtificialDamageAreaChance(
+            90,
+            DeathChance(20, 25, 10, Couple(24, 39)),
+            DeathChance(15, 20, 9, Couple(21, 35)),
+            DeathChance(5, 7, 15, Couple(20, 30))
+        ),
+        [WMS.enums.artificialDamageAreas.HAND] = ArtificialDamageAreaChance(
+            10,
+            DeathChance(5, 7, 4, Couple(10, 25)),
+            DeathChance(3, 5, 2, Couple(7, 23)),
+            DeathChance(3, 4, 5, Couple(4, 20))
+        ),
+    }),
+
+    [HITGROUP_LEFTLEG] = AreaChance({
+        [WMS.enums.artificialDamageAreas.LEG] = ArtificialDamageAreaChance(
+            92,
+            DeathChance(15, 20, 35, Couple(38, 63)),
+            DeathChance(13, 15, 30, Couple(35, 59)),
+            DeathChance(10, 14, 40, Couple(30, 55))
+        ),
+        [WMS.enums.artificialDamageAreas.FOOT] = ArtificialDamageAreaChance(
+            8,
+            DeathChance(5, 7, 4, Couple(10, 25)),
+            DeathChance(3, 5, 2, Couple(7, 23)),
+            DeathChance(3, 4, 5, Couple(4, 20))
+        ),
+    }),
+
+    [HITGROUP_RIGHTLEG] = AreaChance({
+        [WMS.enums.artificialDamageAreas.LEG] = ArtificialDamageAreaChance(
+            92,
+            DeathChance(15, 20, 35, Couple(38, 63)),
+            DeathChance(13, 15, 30, Couple(35, 59)),
+            DeathChance(10, 14, 40, Couple(30, 55))
+        ),
+        [WMS.enums.artificialDamageAreas.FOOT] = ArtificialDamageAreaChance(
+            8,
+            DeathChance(5, 7, 4, Couple(10, 25)),
+            DeathChance(3, 5, 2, Couple(7, 23)),
+            DeathChance(3, 4, 5, Couple(4, 20))
+        ),
+    })
+}
+
+WMS.config.chances.melee = {
+
+    -- % of hit because melee damage does not register as area (it is its own hit group)
+    [WMS.enums.artificialDamageAreas.SKULL]    = 5,
+    [WMS.enums.artificialDamageAreas.NECK]     = 2,
+    [WMS.enums.artificialDamageAreas.FACE]     = 3,
+
+    [WMS.enums.artificialDamageAreas.TORSO]    = 28,
+    [WMS.enums.artificialDamageAreas.HEART]    = 4,
+    [WMS.enums.artificialDamageAreas.LUNGS]    = 8,
+
+    [WMS.enums.artificialDamageAreas.STOMACH]  = 6,
+    [WMS.enums.artificialDamageAreas.LIVER]    = 4,
+
+    [WMS.enums.artificialDamageAreas.ARM]      = 8,
+    [WMS.enums.artificialDamageAreas.HAND]     = 2,
+
+    [WMS.enums.artificialDamageAreas.LEG]      = 28,
+    [WMS.enums.artificialDamageAreas.FOOT]     = 2,
+}
+

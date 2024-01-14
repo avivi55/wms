@@ -1,4 +1,4 @@
-# WNS/WMS
+# WNS/WMS (WIP)
 
 The WNS (War Nursing System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing.
 
@@ -42,7 +42,19 @@ and it's use is still buggy but I am working on it ~~daily~~
 
 ### Install
 
-Installing the addon is the basic put `wms/` in `garrysmod/addons/`
+Installing the addon is a bit technical.
+
+1. Download the [laux compiler](https://github.com/8char/laux-compiler)
+2. Clone the repo on in the servers `addons/` folder.
+3. If your are sane, use GNU make. Or transpile the `laux/` directory to a new `lua/` directory 
+4. It should be installed 🎊
+
+or 
+
+When it is finished I will probably upload the pre-transpiled source code in the release section.
+
+So Download it in the `addons/` folder and it is finished.
+
 
 ### Config
 
@@ -52,34 +64,34 @@ the config files are in `wms/lua/config/` . Most of it is developer side and isn
 <br>
 <br>
 
-**Note concerning the weapon detection system**
-
-On release the addon will have a limited scope of the weapons mode systems.
+> [!NOTE]
+> #### Concerning the weapon detection system
+> On release the addon will have a limited scope of the weapons mode systems.
 This addon is based on 3 different *types* of weapons dealing damage : 
-* rifle
-* pistol
-* melee
-
-They simulate the caliber of the weapon used, and it deals the damage accordingly.
-Following that path we must distinguish which weapon fires which caliber. Here relies the source of the problem. Not all popular weapon modes make it easy to identify and discriminate between weapons. Here the CW 2.0 KK INS2 DOI is the basis.
-
-So if the weapon mode (or any rework of any weapon base) that you're using isn't automatically detected you can manually put your weapon classes in [the weapon list](./lua/config/weapons.lua#L14-L50)
+>* rifle
+>* pistol
+>* melee
+>
+>They simulate the caliber of the weapon used, and it deals the damage accordingly.
+Following that path we must distinguish which weapon fires which caliber. Here relies the source of the problem. Not all popular weapon modes make it easy to identify and discriminate between weapons. Here the CW 2.0 KK INS2 DOI is the base.
+>
+>So if the weapon mode (or any rework of any weapon base) that you're using isn't automatically detected you can manually put your weapon classes in [the weapon list](.laux/wms/config/weapons.laux#L10-L30)
 
 ```lua
  ...
 WMS.weapons = {
-    rifle = {
+    [WMS.enums.damageTypes.RIFLE] = {
         ["any_class"] = true,
         ["any_other_class"] = true
     },
 
-    pistol = {
+    [WMS.enums.damageTypes.PISTOL] = {
         ["another_class"] = true,
         ["yet_another_class"] = true,
         ["and_the_last_pistol"] = true
     },
 
-    cut = {
+    [WMS.enums.damageTypes.MELEE] = {
         ["i_think_you_understand_by_now"] = true,
         ["why_do_you_even_bother"] = true
     },

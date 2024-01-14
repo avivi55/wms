@@ -1,0 +1,27 @@
+
+WMS ||= {}
+WMS._VERSION = "0.1.2-laux"
+
+AtlasUI.Loader()
+    :setName("Winnie's Mediacal System")
+    :setAcronym("WMS")
+    :setDirectory("wms")
+    :setColor(AtlasUI.Theme.BLUE)
+    :load("libs", ATLASUI_SHARED)
+    :load("utils", ATLASUI_SHARED)
+    :load("classes", ATLASUI_SHARED)
+    :loadFile("config/enums", ATLASUI_SHARED)
+    :loadFile("config/weapons", ATLASUI_SHARED)
+    :loadFile("config/config", ATLASUI_SHARED)
+    
+:done()
+
+
+import print from WMS.utils
+
+
+hook.Add("EntityTakeDamage", "testWMS", function(ply, dmg)
+    if (! ply?:IsPlayer())then return true end
+    print(Damage(dmg, ply))
+    return true
+end)

@@ -1,0 +1,34 @@
+local Tabular = include("wms/libs/tabular.lua")
+WMS ||= {}
+
+WMS.utils = {}
+
+WMS.utils.welcomeMessage = () =>
+    MsgC(Color(255, 10, 10), "[WMS] INIT")
+end
+
+WMS.utils.print = (...) =>
+
+    for _, value of table.Pack(...) do
+
+        if (type(value) == "table" && value.__tostring) then
+            print(value)
+
+            continue
+        end
+
+
+        if (type(value) == "table") then
+            
+            for _, v in ipairs(string.Split(Tabular(value), "\n")) do
+                print(v)
+            end
+
+            continue
+        end
+
+        print(value)
+        
+    end
+
+end
