@@ -1,3 +1,5 @@
+#!/bin/bash
+
 lauxc watch $1 $2 &
 
 transpiler_pid=$!
