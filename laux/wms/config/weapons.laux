@@ -1,3 +1,10 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
 WMS ||= {}
 -- if you want to add specific weapons to this list follow the example
 
@@ -59,44 +66,49 @@ WMS.weapons = {
 -- if you know what you are doing then good luck, I T   I S   M E S S Y
 -- + it is filled with magic constants
 
-for _, weapon in pairs(weapons.GetList()) do
+function populateWeaponList() 
+    for _, weapon in pairs(weapons.GetList()) do
 
-    if (weapon.Category == "CW 2.0 KK INS2 DOI") then
-        if (weapon.Base == "cw_kk_ins2_base_melee") then
+        if (weapon.Category == "CW 2.0 KK INS2 DOI") then
+            if (weapon.Base == "cw_kk_ins2_base_melee") then
 
-            WMS.weapons[WMS.enums.damageTypes.MELEE][weapon.ClassName] = true
+                WMS.weapons[WMS.enums.damageTypes.MELEE][weapon.ClassName] = true
 
-        elseif (weapon.magType) then
+            elseif (weapon.magType) then
 
-            local magazine = weapon.magType
+                local magazine = weapon.magType
 
-            if (magazine == "arMag" or magazine == "m1Clip" or magazine == "brMag") then
+                if (magazine == "arMag" or magazine == "m1Clip" or magazine == "brMag") then
 
-               WMS.weapons[WMS.enums.damageTypes.RIFLE][weapon.ClassName] = true
+                WMS.weapons[WMS.enums.damageTypes.RIFLE][weapon.ClassName] = true
 
-            elseif (magazine == "smgMag" or magazine == "pistolMag") then
-
-               WMS.weapons[WMS.enums.damageTypes.PISTOL][weapon.ClassName] = true
-
-            end
-
-        else
-
-            if (weapon.NormalHoldType == "pistol" or (weapon.ShotgunReload and weapon.Shots > 1)) then
+                elseif (magazine == "smgMag" or magazine == "pistolMag") then
 
                 WMS.weapons[WMS.enums.damageTypes.PISTOL][weapon.ClassName] = true
 
-            elseif (weapon.NormalHoldType == "ar2") then
+                end
 
-                WMS.weapons[WMS.enums.damageTypes.RIFLE][weapon.ClassName] = true
+            else
+
+                if (weapon.NormalHoldType == "pistol" or (weapon.ShotgunReload and weapon.Shots > 1)) then
+
+                    WMS.weapons[WMS.enums.damageTypes.PISTOL][weapon.ClassName] = true
+
+                elseif (weapon.NormalHoldType == "ar2") then
+
+                    WMS.weapons[WMS.enums.damageTypes.RIFLE][weapon.ClassName] = true
+
+                end
 
             end
 
         end
 
     end
-
 end
+
+-- just works, don't ask to many questions 
+timer.Simple(1, populateWeaponList)
 
 -- PrintTable(WMS.weapons)
 

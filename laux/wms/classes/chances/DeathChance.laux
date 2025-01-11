@@ -1,3 +1,12 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
+WMS ||= {}
+
 -- This class represents a basic wrapper to output a random result depending on the probabilities given.
 public class DeathChance
 
@@ -42,6 +51,21 @@ public class DeathChance
         end
 
         return WMS.enums.lifeStates.ALIVE
+
+    end
+
+    -- Yields wether the damage initiates bleeding
+    --
+    -- @returns {boolean} If the damage initiates bleeding.
+    getBleeding()
+
+        local rn = math.random(100)
+
+        if (rn <= self.bleeding) then
+            return true
+        end
+
+        return false
 
     end
 

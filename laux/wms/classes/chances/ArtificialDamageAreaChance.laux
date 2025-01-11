@@ -1,3 +1,10 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
 -- This is just a collection of 3 DeathChance objects and a chance of happening. 
 public class ArtificialDamageAreaChance
 
@@ -22,20 +29,20 @@ public class ArtificialDamageAreaChance
     
     end
 
-    -- Yields a life state according to the given weapon type.
+    -- Yields a life state according to the given damage type.
     --
     -- @returns {WMS.enums.lifeStates} The life state.
-    getDeath(weaponType: EnumField)
+    getDeath(damageType: EnumField)
 
-        if (weaponType == WMS.enums.damageTypes.RIFLE) then
+        if (damageType == WMS.enums.damageTypes.RIFLE) then
             return self.rifleChance:getDeath()
         end
 
-        if (weaponType == WMS.enums.damageTypes.PISTOL) then
+        if (damageType == WMS.enums.damageTypes.PISTOL) then
             return self.pistolChance:getDeath()
         end
 
-        if (weaponType == WMS.enums.damageTypes.MELEE) then
+        if (damageType == WMS.enums.damageTypes.MELEE) then
             return self.meleeChance:getDeath()
         end
 
@@ -43,20 +50,41 @@ public class ArtificialDamageAreaChance
 
     end
 
-    -- Yields a random damage according to the given weapon type.
+    -- Yields wether the damage initiates bleeding according to the given damage type.
+    --
+    -- @returns {bool} The life state.
+    getBleeding(damageType: EnumField)
+
+        if (damageType == WMS.enums.damageTypes.RIFLE) then
+            return self.rifleChance:getBleeding()
+        end
+
+        if (damageType == WMS.enums.damageTypes.PISTOL) then
+            return self.pistolChance:getBleeding()
+        end
+
+        if (damageType == WMS.enums.damageTypes.MELEE) then
+            return self.meleeChance:getBleeding()
+        end
+
+        return false
+
+    end
+
+    -- Yields a random damage according to the given damage type.
     --
     -- @returns {number} The random number.
-    getDamage(weaponType: EnumField)
+    getDamage(damageType: EnumField)
 
-        if (weaponType == WMS.enums.damageTypes.RIFLE) then
+        if (damageType == WMS.enums.damageTypes.RIFLE) then
             return self.rifleChance:getDamage()
         end
 
-        if (weaponType == WMS.enums.damageTypes.PISTOL) then
+        if (damageType == WMS.enums.damageTypes.PISTOL) then
             return self.pistolChance:getDamage()
         end
 
-        if (weaponType == WMS.enums.damageTypes.MELEE) then
+        if (damageType == WMS.enums.damageTypes.MELEE) then
             return self.meleeChance:getDamage()
         end
 

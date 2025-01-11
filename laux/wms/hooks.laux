@@ -1,0 +1,44 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
+
+WMS ||= {}
+
+import print from WMS.utils
+
+
+hook.Add("PlayerSpawn", "WMS::Init", function(player, transition)
+
+    print(`[WMS] Player Damage table initialized (${player:SteamID()})`)
+
+    player:wmsSetup()
+    player:wmsSyncDamages()
+
+end)
+
+hook.Add("EntityTakeDamage", "WMS::RegisterDamage", function(ply, dmg)
+
+    if (! ply?:IsPlayer())then return true end
+
+    local damage = Damage(dmg, ply)
+
+    DamageApplier(damage):apply()
+    ply.damages[#ply.damages] = damage
+    
+    ply:wmsSyncDamages()
+
+    if WMS.DEBUG then
+        print(ply.damages)
+    end
+    return true
+
+end)
+
+
+hook.Add("PlayerDisconnected", "WMS::ResetOnDisconnect", function(player)
+    player.damages = nil
+end)

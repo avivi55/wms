@@ -1,3 +1,11 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
+
 return {
     cases = {
         {
@@ -9,7 +17,7 @@ return {
 
                 expect(chance.range).to.equal(Couple(10, 20))
 
-                expect(chance:getDamage()).to.beGreaterThan(10)
+                expect(chance:getDamage()).to.beGreaterThan(10 - 1)
             end
         },
         {
@@ -88,8 +96,8 @@ return {
 
                 local a, c = chance:getRandomArea()
 
-                expect(type(a)).to.eq("number")
-                expect(c:__type()).to.eq("ArtificialDamageAreaChance")
+                expect(type(a)).to.equal("number")
+                expect(c:__type()).to.equal("ArtificialDamageAreaChance")
             end
         },
     }

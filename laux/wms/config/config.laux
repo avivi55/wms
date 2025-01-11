@@ -1,3 +1,9 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
 
 WMS ||= {}
 WMS.config = {}
@@ -10,7 +16,7 @@ WMS.config.NO_DMG = false
 WMS.config.bleedingSpeed = 5
 WMS.config.bleedingImportance = 1 --hp
 
-WMS.config.partialDeathTime = 3
+WMS.config.partialDeathTime = 3 * 60
 WMS.config.timeBeforeCorpsDisapear = 50
 
 WMS.config.defaultWalkSpeed = 400   -- 400
@@ -18,15 +24,21 @@ WMS.config.defaultRunSpeed = 600    -- 600
 WMS.config.fractureWalkSpeed = 200  -- 400
 WMS.config.fractureRunSpeed = 400   -- 600
 
-WMS.config.damageToKillCorps = 10
+WMS.config.damageToKillComa = 10
+
+WMS.config.fractureChanceWeapon = 20
+WMS.config.fractureChanceFall = 50
+
+WMS.config.deathScreenText = "VOUS ÊTES MORT"
+WMS.config.comaScreenText = "Mais un médecin peut encore vous sauver"
+WMS.config.deathScreenTextColor = Color(133, 6, 6)
+WMS.config.deathScreenColor = Color(0, 0, 0, 252)
+
 
 
 -- ############################################################################
 -- ############################################################################
 -- ############################################################################
-
-
--- /!\ This part is NOT to be changed /!\ 
 
 -- if you know what you are doing then good luck, I T   I S   M E S S Y
 
@@ -203,21 +215,17 @@ WMS.config.chances = {
 WMS.config.chances.melee = {
 
     -- % of hit because melee damage does not register as area (it is its own hit group)
-    [WMS.enums.artificialDamageAreas.SKULL]    = 5,
-    [WMS.enums.artificialDamageAreas.NECK]     = 2,
-    [WMS.enums.artificialDamageAreas.FACE]     = 3,
+    [HITGROUP_HEAD]      = 10,
 
-    [WMS.enums.artificialDamageAreas.TORSO]    = 28,
-    [WMS.enums.artificialDamageAreas.HEART]    = 4,
-    [WMS.enums.artificialDamageAreas.LUNGS]    = 8,
+    [HITGROUP_CHEST]     = 30,
 
-    [WMS.enums.artificialDamageAreas.STOMACH]  = 6,
-    [WMS.enums.artificialDamageAreas.LIVER]    = 4,
+    [HITGROUP_STOMACH]   = 30,
 
-    [WMS.enums.artificialDamageAreas.ARM]      = 8,
-    [WMS.enums.artificialDamageAreas.HAND]     = 2,
+    [HITGROUP_RIGHTARM]  = 10,
+    [HITGROUP_LEFTARM]   = 10,
 
-    [WMS.enums.artificialDamageAreas.LEG]      = 28,
-    [WMS.enums.artificialDamageAreas.FOOT]     = 2,
+    [HITGROUP_RIGHTLEG]  = 5,
+    [HITGROUP_LEFTLEG]   = 5,
+    
 }
 

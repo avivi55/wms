@@ -1,0 +1,17 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
+
+surface.CreateFont("DEATH_SCREEN", {
+    font = "DefaultBold",
+    size = 130,
+})
+
+surface.CreateFont("DEATH_SCREEN_LITTLE", {
+    font = "DefaultBold",
+    size = 50,
+})

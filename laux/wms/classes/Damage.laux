@@ -1,42 +1,78 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
+
 -- local Tabular = include("wms/libs/tabular.lua")
 
 public class Damage
 
-    originalCTDI = nil -- CTakeDamageInfo
+    -- {CTakeDamageInfo} The data given by gmod each time an entity takes damage.
+    originalCTDI = nil
 
-    _get victim -- Player
-    attacker = nil -- Player | nil
-    inflictor = nil -- Player | Entity
+    -- {Player} The victim of the damage.
+    _get victim
+    -- {Player | nil} The player which the damage originates.
+    attacker = nil
+    -- {Player | Entity} The entity that gave the damage or the attacker.
+    inflictor = nil
+    -- {Weapon | Entity} The weapon handled by the attacker at the moment of the damage.
+    weapon = nil
 
-    weapon = nil -- Weapon | Entity
+    -- {number} The amount of damage
+    _get damage
 
-    _get damage -- number
-    _get type -- WMS.enums.damageTypes    
-    _get area -- WMS.enums.artificialDamageAreas
+    -- {WMS.enums.damageTypes} The damage type.
+    _get type  
+    -- {WMS.enums.artificialDamageAreas} The custom area.
+    _get area
     
-    _get postVictimState -- WMS.enums.lifeStates
-    _get initiatesBleeding -- boolean
+    -- {WMS.enums.lifeStates} The state of the victim after the damage.
+    _get postVictimState
+
+    -- {boolean} Should the damage initiate bleeding.
+    _get initiatesBleeding
+
+    -- {boolean} Should the damage break the concerned limb.
+    _get breakLimb
 
     constructor(damage: CTakeDamageInfo, victim: Player)
 
         self.originalCTDI = damage
 
         self.victim = victim
-        local hitgroup = self.victim:LastHitGroup()
-        
+        self.hitgroup = self.victim:LastHitGroup()
 
         self.attacker = damage:GetAttacker()
-
         self.inflictor = damage:GetInflictor()
 
         if (IsValid(self.attacker) && self.attacker:IsPlayer()) then
             self.weapon = self.attacker:GetActiveWeapon()
         end
 
+        self.damage = self.originalCTDI:GetDamage()
+        self.postVictimState = WMS.enums.lifeStates.ALIVE
+        self.initiatesBleeding = false
+
         self.type = self:getDamageType()
 
-        print(self:getType())
-        print(WMS.config.chances[hitgroup]:getResult(self:getType()))
+        self:handleWeapons()
+        self:handleBleeding()
+        self:handleOverdose()
+        self:handleOrganFailure()
+
+        self.breakLimb = self:shouldBreakLimb()
+
+        if (self.hitgroup == HITGROUP_GENERIC) then 
+            self.hitgroup = HITGROUP_CHEST
+        end
+
+        if (self.victim:Health() - self.damage <= 0) then 
+            self.postVictimState = WMS.enums.lifeStates.PARTIAL_DEATH
+        end
 
     end
 
@@ -44,6 +80,7 @@ public class Damage
 
         local damageTypes = WMS.enums.damageTypes
 
+        -- it's ugly, blame lua for not having switch statements
         if (self:isFromBleeding())          then return damageTypes.BLEED 
         elseif (self:isFromVehicle())       then return damageTypes.VEHICLE 
         elseif (self:isFromFalling())       then return damageTypes.FALL 
@@ -57,7 +94,7 @@ public class Damage
         elseif (self:isFromMelee())         then return damageTypes.MELEE 
         end
 
-        return self.originalCTDI:GetDamageType()
+        return damageTypes.UNRECOGNIZED
 
     end
 
@@ -99,7 +136,8 @@ public class Damage
     isFromExplosion()
 
         if (!self.originalCTDI:IsExplosionDamage()) then return false end
-        if (self.inflictor:GetClass() != "base_shell") then return false end
+        if (self.inflictor:GetClass() == "base_shell") then return true end
+        if (string.StartsWith(self.inflictor:GetClass(), "cw_kk_ins2_projectile")) then return true end
         
         return true
         
@@ -156,19 +194,6 @@ public class Damage
 
     end
 
-    isFromEntityRifle()
-
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BULLET) != DMG_BULLET) then return false end
-    
-        print(self.inflictor)
-        
-        if (IsValid(self.inflictor)) then return false end
-        print(self.inflictor)
-
-        return true
-
-    end
-
     isFromMelee() 
 
         if (!self:isFromWeapon()) then return false end
@@ -188,16 +213,86 @@ public class Damage
         return true
 
     end
+
+    isFromGredwitchEntity()
+
+        if (self:isFromWeapon()) then return false end
+        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BULLET) != DMG_BULLET) then return false end
+        if (!self.attacker:IsPlayer()) then return false end
+        if (IsValid(self.inflictor)) then return false end
+
+        return true
+
+    end
     
     isFromRifle()
 
-        if (self:isFromEntityRifle()) then return true end
-
+        if (self:isFromGredwitchEntity()) then return true end
         if (!self:isFromWeapon()) then return false end
-
         if (!WMS.weapons[WMS.enums.damageTypes.RIFLE][self.weapon:GetClass()]) then return false end
 
         return true
+
+    end
+
+    handleWeapons()
+
+        if (self.type != WMS.enums.damageTypes.PISTOL
+            && self.type != WMS.enums.damageTypes.RIFLE
+            && self.type != WMS.enums.damageTypes.MELEE) 
+        then
+            return 
+        end
+
+        if (self.type == WMS.enums.damageTypes.MELEE) then self.hitgroup = WMS.utils.getRandomMelee() end
+
+        local results = WMS.config.chances[self.hitgroup]:getResult(self:getDamageType())
+        self.postVictimState = results.state
+        self.damage = results.damage
+        self.initiatesBleeding = results.bleeding
+
+        if (results.area) then self.area = results.area end
+
+    end
+
+    handleBleeding()
+
+        if (self.type != WMS.enums.damageTypes.BLEED) then return end
+
+        self.damage = WMS.config.bleedingImportance
+
+    end
+
+    handleOverdose()
+
+        if (self.type != WMS.enums.damageTypes.OVERDOSE) then return end
+
+        self.damage = 0
+        self.postVictimState = WMS.enums.lifeStates.PARTIAL_DEATH
+
+    end
+
+    handleOrganFailure()
+
+        if (self.type != WMS.enums.damageTypes.ORGAN_FAILURE) then return end
+
+        self.damage = 0
+        self.postVictimState = WMS.enums.lifeStates.PARTIAL_DEATH
+
+    end
+
+    shouldBreakLimb()
+
+        if (self.type == WMS.enums.damageTypes.PISTOL
+            || self.type == WMS.enums.damageTypes.RIFLE
+            || self.type == WMS.enums.damageTypes.MELEE) 
+        then
+            return WMS.utils.pourcentageCheck(WMS.config.fractureChanceWeapon)
+        end
+        
+        if (self.type == WMS.enums.damageTypes.FALL) then
+            return WMS.utils.pourcentageCheck(WMS.config.fractureChanceFall)
+        end
 
     end
 

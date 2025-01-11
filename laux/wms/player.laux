@@ -1,0 +1,363 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
+
+WMS ||= {}
+
+local PLAYER = FindMetaTable("Player")
+
+function PLAYER:wmsSetup() 
+
+    self.damages = {}
+
+    if CLIENT then
+
+        self:wmsRemoveComaScreen()
+        self:wmsRemoveDeathScreen()
+
+    end
+
+end
+
+function PLAYER:wmsSyncDamages()
+
+    if table.IsEmpty(self.damages) then return end
+
+    if (SERVER) then
+        express.Send("WMSSyncDamages", self.damages, self)
+    end
+
+end
+
+if (CLIENT) then
+    
+    function PLAYER:wmsPrintDeathScreen(data)
+
+        hook.Add( "HUDPaint", "WMS::DEATH_SCREEN", function()
+            
+            local W, H = ScrW(), ScrH()
+
+            local death_text = ""
+            
+            surface.SetDrawColor(WMS.config.deathScreenColor)
+            surface.DrawRect(0, 0, W, H)
+            
+            surface.SetTextColor(WMS.config.deathScreenTextColor)
+            surface.SetFont("DEATH_SCREEN")
+            local textWidth = surface.GetTextSize(WMS.config.deathScreenText)
+            
+            surface.SetTextPos((W / 2) - (textWidth / 2), H / 3)
+            surface.DrawText(WMS.config.deathScreenText)
+
+        end)
+
+    end
+
+    function PLAYER:wmsPrintComaScreen(data)
+
+        hook.Add( "HUDPaint", "WMS::COMA_SCREEN", function()
+
+            local W, H = ScrW(), ScrH()
+
+            self:wmsPrintDeathScreen()
+
+            surface.SetTextColor(WMS.config.deathScreenTextColor)
+            surface.SetFont("DEATH_SCREEN_LITTLE")
+            local textWidth = surface.GetTextSize(WMS.config.comaScreenText)
+
+            surface.SetTextPos((W / 2) - (s1 / 2), H / 1.5)
+            surface.DrawText(WMS.config.comaScreenText)
+
+        end)
+
+    end
+
+    function PLAYER:wmsRemoveComaScreen()
+        hook.Remove("HUDPaint", "WMS::COMA_SCREEN")
+    end
+
+    function PLAYER:wmsRemoveDeathScreen()
+        hook.Remove("HUDPaint", "WMS::DEATH_SCREEN")
+    end
+
+    express.Receive("WMSSyncDamages", function(data) 
+        LocalPlayer().damages = data 
+        end)
+    
+    express.Receive("WMSPrintComaScreen", function(data)
+        LocalPlayer():wmsPrintComaScreen(data) 
+    end)
+
+    express.Receive("WMSPrintDeathScreen", function(data)
+        LocalPlayer():wmsPrintDeathScreen(data) 
+    end)
+
+end
+
+function PLAYER:wmsIsInComa()
+
+    for _, damage of self.damages do
+    
+        if (damage:getPostVictimState() == WMS.enums.lifeStates.PARTIAL_DEATH) then
+            return true
+        end
+
+    end
+
+    return false
+
+end
+
+function PLAYER:wmsIsBleeding()
+
+    return timer.Exists("bleed" .. self:GetEntIndex())
+
+    -- for _, damage of self.damages do
+    
+    --     if (damage:getInitiatesBleeding()) then
+    --         return true
+    --     end
+
+    -- end
+
+    -- return false
+
+end
+
+function PLAYER:wmsGetBrokenLimbs()
+
+    local result = {}
+
+    for _, damage of self.damages do
+        result[damage.hitgroup] = damage:getBreakLimb()
+    end
+
+    return result
+
+end
+
+function PLAYER:wmsStartBleeding()
+
+    if self:wmsIsBleeding() then return end
+
+    timer.Create("bleed" .. self:EntIndex(), WMS.config.bleedingSpeed, 0, function()
+    
+        if !IsValid(self) or !self:Alive() then
+            return
+        end
+
+        -- bleeding decal on player model
+        local bone = self:GetBonePosition(math.random(1, self:GetBoneCount() - 1))
+        if bone then
+        
+            local effect = EffectData()
+            effect:SetOrigin(bone)
+            util.Effect("BloodImpact", effect, true, true)
+        
+        end
+
+        -- bleeding decals on the world
+        local src = self:LocalToWorld(self:OBBCenter())
+        for _ = 1, 12 do
+        
+            local dir = VectorRand() * self:GetModelRadius() * 1.4
+            util.Decal("Blood", src - dir, src + dir)
+        
+        end
+
+        -- we give the damage to the palyer
+        local bleedingDamage = DamageInfo()
+        bleedingDamage:SetDamageType(WMS.enums.newDamages.DMG_BLEED)
+        self:TakeDamageInfo(bleedingDamage)
+        
+    end)
+
+end
+
+function PLAYER:wmsStopBleeding()
+
+    timer.Remove("bleed" .. self:EntIndex())
+
+end
+
+
+function PLAYER:breakLeg()
+
+    self:SetRunSpeed(WMS.config.fractureRunSpeed)
+    self:SetWalkSpeed(WMS.config.fractureWalkSpeed)
+
+    hook.Add("prone.CanExit", "WMS::PreventGettingUp", function(player)
+        return false
+    end)
+
+end
+
+function PLAYER:healLeg()
+
+    self:SetRunSpeed(WMS.config.defaultRunSpeed)
+    self:SetWalkSpeed(WMS.config.defaultWalkSpeed)
+
+    hook.Remove("prone.CanExit", "WMS::PreventGettingUp")
+
+end
+
+function PLAYER:breakArm()
+
+    local weapon = self:GetActiveWeapon()
+
+    if !WMS.utils.isInAcceptedWeapons(weapon) then return end
+
+    hook.Add("PlayerSwitchWeapon", "WMS::BrokenArm", function(player, oldWeapon, newWeapon)
+
+        return !WMS.weapons.oneArm[newWeapon:GetClass()]
+
+    end)
+
+    self:DropWeapon(weapon)
+
+end
+
+function PLAYER:healArm()
+
+    hook.Remove("PlayerSwitchWeapon", "WMS::BrokenArm")
+
+end
+
+function PLAYER:breakBone(area: EnumField)
+
+    if area == WMS.enums.artificialDamageAreas.LEG
+    || area == WMS.enums.artificialDamageAreas.FOOT then
+
+        self:breakLeg()
+        return
+
+    end
+
+    if area == WMS.enums.artificialDamageAreas.HAND
+    || area == WMS.enums.artificialDamageAreas.ARM then
+
+
+        self:breakArm()
+        return
+
+    end
+
+end
+
+function PLAYER:healBone(area: EnumField)
+
+    if area == WMS.enums.artificialDamageAreas.LEG
+    || area == WMS.enums.artificialDamageAreas.FOOT then
+
+        self:healLeg()
+        return
+
+    end
+
+    if area == WMS.enums.artificialDamageAreas.HAND
+    || area == WMS.enums.artificialDamageAreas.ARM then
+
+
+        self:healArm()
+        return
+
+    end
+
+end
+
+
+function PLAYER:wmsStartComa()
+    
+    if self:wmsIsInComa() then return end
+
+    -- express can't send empy tables
+    local lastDamage = self.damages[#self.damages - 1]
+
+    local data
+
+    if lastDamage then 
+
+        data = {
+            lastDamage.attacker,
+            lastDamage:getType(),
+            lastDamage:getArea()
+        }
+
+    else 
+        data = {""}
+    end
+
+    express.Send("WMSPrintComaScreen", data, self)
+
+    self:CreateRagdoll()
+    self:StripWeapons()
+
+    timer.Simple(WMS.config.partialDeathTime, function()
+        
+        if !self:wmsIsInComa() then
+            return
+        end
+
+        self:wmsKill()
+
+    end)
+
+end
+
+function PLAYER:wmsStopComa()
+
+    if !self:wmsIsInComa() then return end
+
+    if CLIENT then
+        self:wmsRemoveComaScreen()
+    end
+
+    self:UnSpectate()
+
+    local rag = self:GetRagdollEntity()
+    self:SetPos(rag:GetPos())
+
+    prone.Enter(self)
+
+    self:RemoveRagdoll()
+
+    for _, weapon in pairs(rag.Weapons) do
+        self:Give(weapon)
+    end
+
+    for k, v in pairs(rag.ammo) do
+        self:GiveAmmo(k, v)
+    end
+
+    self:SelectWeapon(rag.ActiveWeapon)
+
+end
+
+function PLAYER:wmsKill()
+    
+    -- express can't send empy tables
+    local lastDamage = self.damages[#self.damages - 1]
+
+    local data
+
+    if lastDamage then
+
+        data = {
+            lastDamage.attacker,
+            lastDamage:getType(),
+            lastDamage:getArea()
+        }
+
+    else 
+        data = {""}
+    end
+
+    express.Send("WMSPrintDeathScreen", data, self)
+
+    self:Kill()
+
+end

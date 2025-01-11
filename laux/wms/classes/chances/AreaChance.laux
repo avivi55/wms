@@ -1,3 +1,10 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
 public class AreaChance
 
     -- {table[ArtificialDamageAreaChance]} The table of ArtificialDamageAreaChance making a gmod damage area.
@@ -34,10 +41,10 @@ public class AreaChance
 
         local chancesSum = 0
 
-        for area, chance in ipairs(self.chances) do
+        for area, chance in pairs(self.chances) do
             
             chancesSum += chance:getPourcentageOfHappening()
-            
+
             if (rn <= chancesSum) then
                 return area, chance
             end
@@ -53,12 +60,27 @@ public class AreaChance
     -- @returns {table} the result table.
     --      @field state {WMS.enums.lifeStates} The life state.
     --      @field damage {number} The damage.
-    getResult(weaponType: EnumField)
+    getResult(damageType: EnumField)
         local area, chance = self:getRandomArea()
 
+        if (damageType == WMS.enums.damageTypes.NO_DAMAGE
+            || damageType == WMS.enums.damageTypes.UNRECOGNIZED)
+        then
+
+            return {
+                area = {},
+                state = WMS.enums.lifeStates.ALIVE,
+                bleedingChance = 0,
+                damage = 0
+            }
+
+        end
+
         return {
-            state = chance:getDeath(weaponType),
-            damage = chance:getDamage(weaponType)
+            area = area,
+            state = chance:getDeath(damageType),
+            bleeding = chance:getBleeding(damageType),
+            damage = chance:getDamage(damageType)
         }
     end
 

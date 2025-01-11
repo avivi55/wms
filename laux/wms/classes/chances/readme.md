@@ -25,4 +25,4 @@ This class bundles:
 
 <br>
 
-Finally, the `AreaChance` class takes in a table of the `ArtificialDamageAreaChance` and is able to select one randomly and give the resulting damage, death ...
+Finally, the `AreaChance` class takes in a table of the `ArtificialDamageAreaChance` and is able to select one randomly and give the resulting damage, death ect. 

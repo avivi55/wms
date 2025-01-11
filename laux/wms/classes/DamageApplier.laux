@@ -1,0 +1,73 @@
+-- Copyright © 2025 Jacques Soghomonyan <jsoghomonyan164@gmail.com>
+-- This work is free. 
+-- It comes without any warranty, to the extent permitted by applicable law.
+-- You can redistribute it and/or modify it under the terms of the 
+-- Do What The Fuck You Want To Public License, Version 2,
+-- as published by Sam Hocevar. See the LICENSE file for more details.
+
+public class DamageApplier
+
+    constructor(damage: Damage)
+        self.damage = damage
+    end
+
+    apply()
+
+        if WMS.config.NO_DMG then return end
+
+        handleDeath()
+        handleComa()
+        handleDamage()
+        handleBleeding()
+        handleBrokenLimb()
+
+    end
+
+
+    handleComa()
+
+        if self.damage.postVictimState != WMS.enums.lifeStates.PARTIAL_DEATH then 
+            return 
+        end
+
+        self.damage.victim:wmsStartComa()
+
+    end
+
+    handleDeath()
+
+        if self.damage.postVictimState != WMS.enums.lifeStates.TOTAL_DEATH then 
+            return 
+        end
+
+        self.damage.victim:wmsKill()
+
+    end
+
+    handleDamage()
+
+        if self.damage.postVictimState != WMS.enums.lifeStates.ALIVE then 
+            return 
+        end
+
+        self.damage.victim:SetHealth(self.victim:Health() - self.damage)
+    
+    end
+
+    handleBrokenLimb()
+
+        if !self.damage:getBreakLimb() then return end
+
+        self.damage.victim:breakBone(self.damage:getArea())
+
+    end
+
+    handleBleeding()
+
+        if !self.damage:getInitiatesBleeding() then return end
+
+        self.damage.victim:wmsStartBleeding()
+
+    end
+
+end
