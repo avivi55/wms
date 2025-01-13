@@ -10,16 +10,10 @@ WMS ||= {}
 
 local PLAYER = FindMetaTable("Player")
 
-function PLAYER:wmsSetup() 
+function PLAYER:wmsInitTable()
 
     self.damages = {}
-
-    if CLIENT then
-
-        self:wmsRemoveComaScreen()
-        self:wmsRemoveDeathScreen()
-
-    end
+    self:wmsSyncDamages()
 
 end
 
@@ -34,18 +28,97 @@ function PLAYER:wmsSyncDamages()
 end
 
 if (CLIENT) then
+
+    function PLAYER:wmsExplosionBlur()
+
+        -- Explosion Ring
+        LocalPlayer():SetDSP(32, false)
+        
+        -- Shock Muffle
+        LocalPlayer():SetDSP(35, false)
+
+        local startTime = SysTime()
+        local time = 0
+
+        local gaussian = (t, bl_time, peak) => 
+            local mu = bl_time / 2
+            local sigma = bl_time / 7.43
+            return peak * math.exp(-((t - mu)^2) / (2 * sigma^2))
+        end
+
+        local polynomial = (t, bl_time, peak, coef) => 
+            local p = bl_time / 2
+            return peak * (1 - (((t - p)^(2*coef)) / (p^(2*coef))))
+        end
+
+        local combo = (bl_time, peak) => 
+
+            local half_time = bl_time / 2
+
+            -- lets dabble in functionnal programing :^) 
+            return function(t)
+
+                if t <= 0 then return 0 end
+
+                if t < half_time then
+                    return polynomial(t, bl_time, peak, 100)
+                else
+                    return gaussian(t, bl_time, peak)
+                end
+
+            end 
+
+        end
+
+        local brightness = combo(WMS.config.explosionBlurTime, -0.8)
+        local redness = combo(WMS.config.explosionBlurTime, 5)
+        local blur_delay = combo(WMS.config.explosionBlurTime, 0.1)
+
+        hook.Add("RenderScreenspaceEffects", "WMS::ExplosionBlur", function()
+            
+            if !LocalPlayer():Alive() or startTime + WMS.config.explosionBlurTime <= SysTime() then return end
+
+            local t = -startTime + time
+
+            DrawColorModify({
+                ["$pp_colour_addr"]         = 0,--(startTime - time + WMS.config.explosionBlurTime) / 5,
+                ["$pp_colour_addg"]         = 0,
+                ["$pp_colour_addb"]         = 0,
+                ["$pp_colour_brightness"]   = brightness(t),
+                ["$pp_colour_contrast"]     = 1,
+                ["$pp_colour_colour"]       = 1,
+                ["$pp_colour_mulr"]         = redness(t),
+                ["$pp_colour_mulg"]         = 0,
+                ["$pp_colour_mulb"]         = 0
+            })
+
+            DrawMotionBlur(0.7, 0.8, blur_delay(t)) 
+            
+            time = SysTime()
+        end)
+
+        timer.Simple(WMS.config.explosionBlurTime, function()
+            hook.Remove("RenderScreenspaceEffects", "WMS::ExplosionBlur")
+        end)
+
+    end
+
+    function PLAYER:wmsClearScreen() 
+
+        self:wmsRemoveComaScreen()
+        self:wmsRemoveDeathScreen()
+
+    end
     
-    function PLAYER:wmsPrintDeathScreen(data)
+    function PLAYER:wmsPrintDeathScreen()
 
         hook.Add( "HUDPaint", "WMS::DEATH_SCREEN", function()
             
             local W, H = ScrW(), ScrH()
-
-            local death_text = ""
             
             surface.SetDrawColor(WMS.config.deathScreenColor)
             surface.DrawRect(0, 0, W, H)
-            
+
             surface.SetTextColor(WMS.config.deathScreenTextColor)
             surface.SetFont("DEATH_SCREEN")
             local textWidth = surface.GetTextSize(WMS.config.deathScreenText)
@@ -57,7 +130,7 @@ if (CLIENT) then
 
     end
 
-    function PLAYER:wmsPrintComaScreen(data)
+    function PLAYER:wmsPrintComaScreen()
 
         hook.Add( "HUDPaint", "WMS::COMA_SCREEN", function()
 
@@ -69,7 +142,7 @@ if (CLIENT) then
             surface.SetFont("DEATH_SCREEN_LITTLE")
             local textWidth = surface.GetTextSize(WMS.config.comaScreenText)
 
-            surface.SetTextPos((W / 2) - (s1 / 2), H / 1.5)
+            surface.SetTextPos((W / 2) - (textWidth / 2), H / 1.5)
             surface.DrawText(WMS.config.comaScreenText)
 
         end)
@@ -78,6 +151,7 @@ if (CLIENT) then
 
     function PLAYER:wmsRemoveComaScreen()
         hook.Remove("HUDPaint", "WMS::COMA_SCREEN")
+        self:wmsRemoveDeathScreen()
     end
 
     function PLAYER:wmsRemoveDeathScreen()
@@ -86,35 +160,45 @@ if (CLIENT) then
 
     express.Receive("WMSSyncDamages", function(data) 
         LocalPlayer().damages = data 
-        end)
+    end)
     
     express.Receive("WMSPrintComaScreen", function(data)
-        LocalPlayer():wmsPrintComaScreen(data) 
+        LocalPlayer():wmsPrintComaScreen() 
     end)
 
     express.Receive("WMSPrintDeathScreen", function(data)
-        LocalPlayer():wmsPrintDeathScreen(data) 
+        LocalPlayer():wmsPrintDeathScreen() 
+    end)
+
+    express.Receive("WMSClearScreen", function(data)
+        LocalPlayer():wmsClearScreen() 
+    end)
+
+    express.Receive("WMSExplosionBlur", function(data)
+        LocalPlayer():wmsExplosionBlur() 
     end)
 
 end
 
 function PLAYER:wmsIsInComa()
 
-    for _, damage of self.damages do
+    return timer.Exists("coma" .. self:EntIndex())
+
+    -- for _, damage of self.damages do
     
-        if (damage:getPostVictimState() == WMS.enums.lifeStates.PARTIAL_DEATH) then
-            return true
-        end
+    --     if (damage:getPostVictimState() == WMS.enums.lifeStates.PARTIAL_DEATH) then
+    --         return true
+    --     end
 
-    end
+    -- end
 
-    return false
+    -- return false
 
 end
 
 function PLAYER:wmsIsBleeding()
 
-    return timer.Exists("bleed" .. self:GetEntIndex())
+    return timer.Exists("bleed" .. self:EntIndex())
 
     -- for _, damage of self.damages do
     
@@ -173,7 +257,6 @@ function PLAYER:wmsStartBleeding()
         local bleedingDamage = DamageInfo()
         bleedingDamage:SetDamageType(WMS.enums.newDamages.DMG_BLEED)
         self:TakeDamageInfo(bleedingDamage)
-        
     end)
 
 end
@@ -184,55 +267,61 @@ function PLAYER:wmsStopBleeding()
 
 end
 
-
-function PLAYER:breakLeg()
+function PLAYER:wmsBreakLeg()
 
     self:SetRunSpeed(WMS.config.fractureRunSpeed)
     self:SetWalkSpeed(WMS.config.fractureWalkSpeed)
 
-    hook.Add("prone.CanExit", "WMS::PreventGettingUp", function(player)
+    hook.Add("prone.CanExit", "WMS::PreventGettingUpBrokenLeg", function(player)
         return false
     end)
 
 end
 
-function PLAYER:healLeg()
+function PLAYER:wmsHealLeg()
 
     self:SetRunSpeed(WMS.config.defaultRunSpeed)
     self:SetWalkSpeed(WMS.config.defaultWalkSpeed)
 
-    hook.Remove("prone.CanExit", "WMS::PreventGettingUp")
+    hook.Remove("prone.CanExit", "WMS::PreventGettingUpBrokenLeg")
 
 end
 
-function PLAYER:breakArm()
-
-    local weapon = self:GetActiveWeapon()
-
-    if !WMS.utils.isInAcceptedWeapons(weapon) then return end
+function PLAYER:wmsBreakArm()
 
     hook.Add("PlayerSwitchWeapon", "WMS::BrokenArm", function(player, oldWeapon, newWeapon)
 
-        return !WMS.weapons.oneArm[newWeapon:GetClass()]
+
+        if WMS.utils.shouldDrop(newWeapon) then
+            self:DropWeapon(newWeapon)
+            self:SwitchToDefaultWeapon()
+            return true
+        end
+
+        return false
 
     end)
 
-    self:DropWeapon(weapon)
+    local weapon = self:GetActiveWeapon()
+    if WMS.utils.shouldDrop(weapon) then 
+        self:DropWeapon(weapon)
+        self:SwitchToDefaultWeapon()
+    end
 
 end
 
-function PLAYER:healArm()
+function PLAYER:wmsHealArm()
 
     hook.Remove("PlayerSwitchWeapon", "WMS::BrokenArm")
 
 end
 
-function PLAYER:breakBone(area: EnumField)
+function PLAYER:wmsBreakBone(area: EnumField)
 
     if area == WMS.enums.artificialDamageAreas.LEG
     || area == WMS.enums.artificialDamageAreas.FOOT then
 
-        self:breakLeg()
+        self:wmsBreakLeg()
         return
 
     end
@@ -241,19 +330,19 @@ function PLAYER:breakBone(area: EnumField)
     || area == WMS.enums.artificialDamageAreas.ARM then
 
 
-        self:breakArm()
+        self:wmsBreakArm()
         return
 
     end
 
 end
 
-function PLAYER:healBone(area: EnumField)
+function PLAYER:wmsHealBone(area: EnumField)
 
     if area == WMS.enums.artificialDamageAreas.LEG
     || area == WMS.enums.artificialDamageAreas.FOOT then
 
-        self:healLeg()
+        self:wmsHealLeg()
         return
 
     end
@@ -261,49 +350,24 @@ function PLAYER:healBone(area: EnumField)
     if area == WMS.enums.artificialDamageAreas.HAND
     || area == WMS.enums.artificialDamageAreas.ARM then
 
-
-        self:healArm()
+        self:wmsHealArm()
         return
 
     end
 
 end
-
 
 function PLAYER:wmsStartComa()
     
     if self:wmsIsInComa() then return end
 
-    -- express can't send empy tables
-    local lastDamage = self.damages[#self.damages - 1]
-
-    local data
-
-    if lastDamage then 
-
-        data = {
-            lastDamage.attacker,
-            lastDamage:getType(),
-            lastDamage:getArea()
-        }
-
-    else 
-        data = {""}
-    end
-
-    express.Send("WMSPrintComaScreen", data, self)
+    express.Send("WMSPrintComaScreen", {""}, self)
 
     self:CreateRagdoll()
     self:StripWeapons()
 
-    timer.Simple(WMS.config.partialDeathTime, function()
-        
-        if !self:wmsIsInComa() then
-            return
-        end
-
+    timer.Create("coma" .. self:EntIndex(), WMS.config.partialDeathTime, 1, function()
         self:wmsKill()
-
     end)
 
 end
@@ -312,18 +376,16 @@ function PLAYER:wmsStopComa()
 
     if !self:wmsIsInComa() then return end
 
-    if CLIENT then
-        self:wmsRemoveComaScreen()
-    end
+    timer.Remove("coma" .. self:EntIndex())
 
-    self:UnSpectate()
+    express.Send("WMSClearScreen", {""}, self)
+
+    self:Spawn()
 
     local rag = self:GetRagdollEntity()
-    self:SetPos(rag:GetPos())
-
-    prone.Enter(self)
-
-    self:RemoveRagdoll()
+    if IsValid(rag) then
+        self:SetPos(rag?:GetPos())
+    end
 
     for _, weapon in pairs(rag.Weapons) do
         self:Give(weapon)
@@ -335,29 +397,36 @@ function PLAYER:wmsStopComa()
 
     self:SelectWeapon(rag.ActiveWeapon)
 
+    self:SetHealth(15)
+
+    hook.Add("prone.CanExit", "WMS::PreventGettingUpComa", function(player)
+
+        if player:Health() >= WMS.config.unpronePostComaThreshold then
+
+            -- the fact that this does not break anything is cazy
+            hook.Remove("prone.CanExit", "WMS::PreventGettingUpComa")
+            return true
+
+        end
+
+        return false
+
+    end)
+
+    prone.Enter(self)
+
 end
 
 function PLAYER:wmsKill()
     
-    -- express can't send empy tables
-    local lastDamage = self.damages[#self.damages - 1]
-
-    local data
-
-    if lastDamage then
-
-        data = {
-            lastDamage.attacker,
-            lastDamage:getType(),
-            lastDamage:getArea()
-        }
-
-    else 
-        data = {""}
-    end
-
-    express.Send("WMSPrintDeathScreen", data, self)
+    express.Send("WMSPrintDeathScreen", {""}, self)
+    
+    timer.Remove("coma"..self:EntIndex())
+    
+    self:wmsStopBleeding()
 
     self:Kill()
+
+    self:wmsInitTable()
 
 end
