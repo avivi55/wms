@@ -15,14 +15,14 @@ public class DamageApplier
 
         if WMS.config.NO_DMG then return end
 
-        handleDeath()
-        handleComa()
-        handleDamage()
-        handleBleeding()
-        handleBrokenLimb()
+        self:handleDeath()
+        self:handleComa()
+        self:handleDamage()
+        self:handleBleeding()
+        self:handleBrokenLimb()
+        self:handleExplosion()
 
     end
-
 
     handleComa()
 
@@ -50,7 +50,7 @@ public class DamageApplier
             return 
         end
 
-        self.damage.victim:SetHealth(self.victim:Health() - self.damage)
+        self.damage.victim:SetHealth(self.damage.victim:Health() - self.damage.damage)
     
     end
 
@@ -58,7 +58,7 @@ public class DamageApplier
 
         if !self.damage:getBreakLimb() then return end
 
-        self.damage.victim:breakBone(self.damage:getArea())
+        self.damage.victim:wmsBreakBone(self.damage:getArea())
 
     end
 
@@ -67,6 +67,14 @@ public class DamageApplier
         if !self.damage:getInitiatesBleeding() then return end
 
         self.damage.victim:wmsStartBleeding()
+
+    end
+
+    handleExplosion()
+
+        if self.damage.type != WMS.enums.damageTypes.EXPLOSION then return end
+
+        express.Send("WMSExplosionBlur", {""}, self.damage.victim)
 
     end
 
