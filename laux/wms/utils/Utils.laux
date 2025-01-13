@@ -17,13 +17,14 @@ WMS.utils.welcomeMessage = () =>
     MsgC(Color(255, 10, 10), "[WMS] INIT")
 end
 
-WMS.utils.isInAcceptedWeapons = (weapon) =>
+WMS.utils.shouldDrop = (weapon) =>
 
     local weapon_class = weapon:GetClass()
 
-    if (WMS.weapons[WMS.enums.damageTypes.MELEE][self.weapon:GetClass()]) then return true end
-    if (WMS.weapons[WMS.enums.damageTypes.PISTOL][self.weapon:GetClass()]) then return true end
-    if (WMS.weapons[WMS.enums.damageTypes.RIFLE][self.weapon:GetClass()]) then return true end
+    if WMS.weapons[WMS.enums.damageTypes.RIFLE][weapon_class] then return true end
+    if WMS.weapons[WMS.enums.damageTypes.PISTOL][weapon_class] && !WMS.weapons.oneArm[weapon_class] then
+        return true
+    end
 
     return false
 
