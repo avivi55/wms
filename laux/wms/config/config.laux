@@ -19,10 +19,10 @@ WMS.config.bleedingImportance = 1 --hp
 WMS.config.partialDeathTime = 3 * 60
 WMS.config.timeBeforeCorpsDisapear = 50
 
-WMS.config.defaultWalkSpeed = 400   -- 400
-WMS.config.defaultRunSpeed = 600    -- 600
-WMS.config.fractureWalkSpeed = 200  -- 400
-WMS.config.fractureRunSpeed = 400   -- 600
+WMS.config.defaultWalkSpeed = 160   -- 400
+WMS.config.defaultRunSpeed = 240    -- 600
+WMS.config.fractureWalkSpeed = 60  -- 400
+WMS.config.fractureRunSpeed = 140   -- 600
 
 WMS.config.damageToKillComa = 10
 
@@ -34,6 +34,9 @@ WMS.config.comaScreenText = "Mais un médecin peut encore vous sauver"
 WMS.config.deathScreenTextColor = Color(133, 6, 6)
 WMS.config.deathScreenColor = Color(0, 0, 0, 252)
 
+WMS.config.explosionBlurTime = 5
+
+WMS.config.unpronePostComaThreshold = 30 -- hp
 
 
 -- ############################################################################
