@@ -3,17 +3,14 @@
 > [!WARNING]
 > The addon is being rewriten in the laux language to use a more object oriented design.
 
-The WNS (War Nursing System or Winnies Medical System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing.
+The WNS (War Nursing System or Winnies Medical System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing and field medical aid.
 
 I was inspired by Arma III's [ACE3](https://github.com/acemod/ACE3) mod.
-A lot of visuals are based on it.
 
 This mod adds :
-- Better hit areas
+- More realistic hit areas
 - More realistic damage types
-- Contraints when injured (no more rules to enforced by staff)
-- [ACE3](https://github.com/acemod/ACE3) like diagnostic sheet
-- A [HLL](https://www.hellletloose.com/) like death screen
+- Contraints when injured (no more rules need to be enforced by staff)
 - Visuals when injured
 - An advanced medical system for medics
 
@@ -23,9 +20,9 @@ and it's use is still buggy but I am working on it ~~daily~~
 
 
 ### Roadmap
-- [ ] Damage System
+- [X] Damage System
 - [ ] Medical System
-- [ ] Automatic weapons registration
+- [X] Automatic weapons registration
 
 ---
 ## Installation & configuration

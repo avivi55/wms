@@ -15,3 +15,8 @@ surface.CreateFont("DEATH_SCREEN_LITTLE", {
     font = "DefaultBold",
     size = 50,
 })
+
+surface.CreateFont("DEATH_SCREEN_VERYLITTLE", {
+    font = "DefaultBold",
+    size = 20,
+})
