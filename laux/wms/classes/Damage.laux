@@ -63,6 +63,7 @@ public class Damage
         self:handleBleeding()
         self:handleOverdose()
         self:handleOrganFailure()
+        self:handleFalling()
 
         self.breakLimb = self:shouldBreakLimb()
 
@@ -73,6 +74,9 @@ public class Damage
         if (self.victim:Health() - self.damage <= 0) then 
             self.postVictimState = WMS.enums.lifeStates.PARTIAL_DEATH
         end
+        
+        -- for stoping a warning for it's encoding
+        self.originalCTDI = nil
 
     end
 
@@ -100,7 +104,7 @@ public class Damage
 
     isFromVehicle()
 
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_CRUSH) != DMG_CRUSH) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_CRUSH)) then return false end
         
         if (!IsValid(self.attacker)) then return false end
         if (!self.attacker:IsPlayer()) then return false end
@@ -114,7 +118,7 @@ public class Damage
     isFromFalling()
 
         -- Don't know if they're the same. It's just for making sure.
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_FALL) != DMG_FALL) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_FALL)) then return false end
         if (!self.originalCTDI:IsFallDamage()) then return false end
 
         if (self.attacker:GetClass() != "worldspawn") then return false end
@@ -125,7 +129,7 @@ public class Damage
 
     isFromProp()
 
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_CRUSH) != DMG_CRUSH) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_CRUSH)) then return false end
         
         if (self.inflictor:GetClass() != "prop_physics") then return false end
 
@@ -147,7 +151,7 @@ public class Damage
 
         local DMG_BLEED = WMS.enums.newDamages.DMG_BLEED
 
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BLEED) != DMG_BLEED) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_BLEED)) then return false end
 
         return true
 
@@ -155,7 +159,7 @@ public class Damage
 
     isFromFire()
 
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BURN) != DMG_BURN) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_BURN)) then return false end
 
         return true
 
@@ -165,7 +169,7 @@ public class Damage
 
         local DMG_OVERDOSE = WMS.enums.newDamages.DMG_OVERDOSE
 
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_OVERDOSE) != DMG_OVERDOSE) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_OVERDOSE)) then return false end
 
         return true
 
@@ -175,7 +179,7 @@ public class Damage
 
         local DMG_ORGAN_FAILURE = WMS.enums.newDamages.DMG_ORGAN_FAILURE
 
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_ORGAN_FAILURE) != DMG_ORGAN_FAILURE) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_ORGAN_FAILURE)) then return false end
 
         return true
 
@@ -217,7 +221,7 @@ public class Damage
     isFromGredwitchEntity()
 
         if (self:isFromWeapon()) then return false end
-        if (bit.band(self.originalCTDI:GetDamageType(), DMG_BULLET) != DMG_BULLET) then return false end
+        if (!self.originalCTDI:IsDamageType(DMG_BULLET)) then return false end
         if (!self.attacker:IsPlayer()) then return false end
         if (IsValid(self.inflictor)) then return false end
 
@@ -232,6 +236,13 @@ public class Damage
         if (!WMS.weapons[WMS.enums.damageTypes.RIFLE][self.weapon:GetClass()]) then return false end
 
         return true
+
+    end
+
+    handleFalling()
+
+        if (self.type != WMS.enums.damageTypes.FALL) then return end
+        self.area = WMS.enums.artificialDamageAreas.LEG
 
     end
 
@@ -267,7 +278,7 @@ public class Damage
 
         if (self.type != WMS.enums.damageTypes.OVERDOSE) then return end
 
-        self.damage = 0
+        self.damage = 100
         self.postVictimState = WMS.enums.lifeStates.PARTIAL_DEATH
 
     end
@@ -276,7 +287,7 @@ public class Damage
 
         if (self.type != WMS.enums.damageTypes.ORGAN_FAILURE) then return end
 
-        self.damage = 0
+        self.damage = 100
         self.postVictimState = WMS.enums.lifeStates.PARTIAL_DEATH
 
     end
