@@ -11,29 +11,48 @@ WMS ||= {}
 import print from WMS.utils
 
 
-hook.Add("PlayerSpawn", "WMS::Init", function(player, transition)
+hook.Add("PlayerInitialSpawn", "WMS::Init", function(player, transition)
 
     print(`[WMS] Player Damage table initialized (${player:SteamID()})`)
 
-    player:wmsSetup()
-    player:wmsSyncDamages()
+    player:wmsInitTable()
+
+end)
+
+hook.Add("PlayerSpawn", "WMS::Spawm", function(player, transition)
+
+    express.Send("WMSClearScreen", {""}, player)
 
 end)
 
 hook.Add("EntityTakeDamage", "WMS::RegisterDamage", function(ply, dmg)
+    
+    -- if the player is in a coma
+    if (ply:IsPlayerRagdoll() and ply:GetCreator():wmsIsInComa()) then
 
-    if (! ply?:IsPlayer())then return true end
+        local damage = Damage(dmg, ply:GetCreator())
 
+        if (damage.damage > WMS.config.damageToKillComa) then
+            ply:GetCreator():wmsKill()
+        end
+
+        return true
+
+    end
+
+    if (! ply:IsPlayer()) then return true end
+    
     local damage = Damage(dmg, ply)
 
+    if WMS.DEBUG then 
+        print(damage)
+    end
+
     DamageApplier(damage):apply()
-    ply.damages[#ply.damages] = damage
+    ply.damages[#ply.damages+1] = damage
     
     ply:wmsSyncDamages()
 
-    if WMS.DEBUG then
-        print(ply.damages)
-    end
     return true
 
 end)
