@@ -10,7 +10,7 @@ WMS ||= {}
 
 -- ["weapon_class"] = true,
 
--- example  :   
+-- example :   
 -- ["cw_kk_ins2_doi_stg44"] = true,
 
 
@@ -110,7 +110,9 @@ end
 -- just works, don't ask to many questions 
 timer.Simple(1, populateWeaponList)
 
--- PrintTable(WMS.weapons)
+
+
+
 
 -- save
 
