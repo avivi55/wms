@@ -5,7 +5,13 @@
 
 The WNS (War Nursing System or Winnies Medical System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing and field medical aid.
 
-I was inspired by Arma III's [ACE3](https://github.com/acemod/ACE3) mod.
+I was inspired by Arma III's [KAT](https://github.com/KAT-Advanced-Medical/KAM) mod.
+
+
+> [!NOTE]
+> I would also like to mention that I use the assets from this mod.
+> As they are licensed under GLP v3.0, the images are licensed under the same [license](./IMAGES_LICENSE).
+> I have not modified the images appart from their filenames. 
 
 This mod adds :
 - More realistic hit areas
@@ -16,7 +22,12 @@ This mod adds :
 
 ### **THE ADDON IS UNFINISHED**
 
-and it's use is still buggy but I am working on it ~~daily~~ 
+and it's use is still buggy but I am working on it from time to time.
+
+My code is probably dogwater. It isn't optimised. I hope one day I can make use of binary modules to abstract most of the heavy logic away.
+
+> [!NOTE]
+> This addon was made on a server with DarkRP (so I can't garentee that it just works, it should, but you never know).
 
 
 ### Roadmap
@@ -31,9 +42,10 @@ and it's use is still buggy but I am working on it ~~daily~~
 
 Installing the addon is a bit technical.
 
-1. Download the [laux compiler](https://github.com/8char/laux-compiler)
+1. Download the [laux compiler](https://github.com/8char/laux-compiler).
+2. Install the [AtlasFramework](https://github.com/8char/AtlasFramework).
 2. Clone the repo on in the servers `addons/` folder.
-3. If your are sane, use GNU make. Or transpile the `laux/` directory to a new `lua/` directory 
+3. If your are sane, use the makefile. Or transpile the `laux/` directory to a new `lua/` directory, with the `lauxc` command.  
 4. It should be installed 🎊
 
 or 
@@ -127,7 +139,7 @@ end
 
 If you want to contribute you must know about the [laux compiler](https://github.com/8char/laux-compiler)
 
-For any pull request to be accepted you must follow the [style guide](./STYLE_GUIDELINE.md).
+<!-- For any pull request to be accepted you must follow the [style guide](./STYLE_GUIDELINE.md). -->
 
 
 ---
