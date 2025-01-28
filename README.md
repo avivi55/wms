@@ -5,12 +5,11 @@
 
 The WNS (War Nursing System or Winnies Medical System) is a addon with the intent to bring a little bit of realism into garry's mod (especially for roleplay). It is meant to replicate a WW2 perspective of nursing and field medical aid.
 
-I was inspired by Arma III's [KAT](https://github.com/KAT-Advanced-Medical/KAM) mod.
-
+This mod is inspired by Arma III's [KAT](https://github.com/KAT-Advanced-Medical/KAM) mod.
 
 > [!NOTE]
-> I would also like to mention that I use the assets from this mod.
-> As they are licensed under GLP v3.0, the images are licensed under the same [license](./IMAGES_LICENSE).
+> I would also like to mention that I use some of the assets from this mod and [ACE3](https://github.com/acemod/ACE3).
+> As they are licensed under GLP v3.0 and GPL V2.0, the images are licensed under the same [license](./IMAGES_LICENSE), per license requirements.
 > I have not modified the images appart from their filenames. 
 
 This mod adds :
